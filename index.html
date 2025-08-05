@@ -219,13 +219,20 @@
             font-weight: 600;
         }
 
+        /* --- STYLE CHANGE 1: Enhanced the logo's appearance --- */
         .google-sheet-icon {
             position: absolute;
             bottom: 12px;
             right: 12px;
-            width: 24px;
-            height: 24px;
-            opacity: 0.8;
+            width: 32px;  /* Increased size */
+            height: 32px; /* Increased size */
+            opacity: 1;   /* Made fully visible */
+            transition: transform 0.3s ease; /* Added smooth transition */
+        }
+        
+        /* --- STYLE CHANGE 2: Added a nice hover effect --- */
+        .report-button:hover .google-sheet-icon {
+            transform: scale(1.15); /* Zoom in on hover */
         }
 
         /* Specific text color for light backgrounds */
@@ -359,7 +366,7 @@
                                 <i class="fas fa-book-open text-4xl"></i>
                                 <span class="report-button-title">Question Repository</span>
                             </div>
-                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/google-sheets-logo.png" alt="Google Sheets" class="google-sheet-icon">
+                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
 
                         <a href="https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #4285F4;" onmouseover="this.style.backgroundColor='#3573d9'" onmouseout="this.style.backgroundColor='#4285F4'">
@@ -367,7 +374,7 @@
                                 <i class="fas fa-clipboard-check text-4xl"></i>
                                 <span class="report-button-title">Course Checks</span>
                             </div>
-                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/google-sheets-logo.png" alt="Google Sheets" class="google-sheet-icon">
+                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
 
                         <a href="https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button text-dark" style="background-color: #FBBC05;" onmouseover="this.style.backgroundColor='#e4a804'" onmouseout="this.style.backgroundColor='#FBBC05'">
@@ -375,7 +382,7 @@
                                 <i class="fas fa-ticket-alt text-4xl"></i>
                                 <span class="report-button-title">Ask a Doubt + Tickets</span>
                             </div>
-                           <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/google-sheets-logo.png" alt="Google Sheets" class="google-sheet-icon">
+                           <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
 
                         <a href="https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #EA4335;" onmouseover="this.style.backgroundColor='#d93527'" onmouseout="this.style.backgroundColor='#EA4335'">
@@ -383,7 +390,7 @@
                                 <i class="fas fa-chart-pie text-4xl"></i>
                                 <span class="report-button-title">Weekly Batch Reports</span>
                             </div>
-                           <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/google-sheets-logo.png" alt="Google Sheets" class="google-sheet-icon">
+                           <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
                     </div>
                 </div>
