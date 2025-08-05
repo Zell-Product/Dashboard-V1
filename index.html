@@ -10,13 +10,6 @@
     
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- React Libraries -->
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    
-    <!-- Babel for JSX Transpilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -55,298 +48,274 @@
             border: 2px solid transparent;
             background-clip: content-box;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="h-screen flex flex-col">
+    <header class="w-full z-50 p-4 flex-shrink-0">
+        <nav id="navigation-bar" class="bg-black/20 backdrop-blur-lg border border-white/10 rounded-full p-2 max-w-md mx-auto flex justify-center items-center space-x-2">
+            <button data-tab="overview" class="nav-item px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 bg-white/10 text-white shadow-lg">Overview</button>
+            <button data-tab="daily" class="nav-item px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 text-white/60 hover:text-white hover:bg-white/5">Daily Metrics</button>
+            <button data-tab="reports" class="nav-item px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 text-white/60 hover:text-white hover:bg-white/5">Other Reports</button>
+        </nav>
+    </header>
+    
+    <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content">
+        <div id="overview-section" class="page-content"></div>
+        <div id="daily-section" class="page-content hidden"></div>
+        <div id="reports-section" class="page-content hidden"></div>
+    </main>
 
-    <script type="text/babel">
-        // --- Data URLs ---
-        const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
-        const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA URLS ---
+            const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
+            const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
 
-        // --- Helper Functions ---
-        const parseCSV = (csv) => {
-            if (!csv) return [];
-            const lines = csv.split('\n').filter(line => line.trim() !== '');
-            if (lines.length < 2) return [];
-            const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
-            const data = [];
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(value => value.trim().replace(/"/g, ''));
-                if (values.length === headers.length) {
-                    const obj = {};
-                    headers.forEach((header, index) => {
-                        obj[header] = values[index];
-                    });
-                    data.push(obj);
-                }
-            }
-            return data;
-        };
+            const dataCache = { overview: null, daily: null };
+            let activeTab = 'overview';
 
-        const fetchAndParseData = async (url) => {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();
-                if (text.includes("Sorry, the file you have requested does not exist.")) {
-                    throw new Error("Data source not found.");
-                }
-                return parseCSV(text);
-            } catch (error) {
-                console.error("Could not fetch or parse data:", error);
-                return null;
-            }
-        };
-
-        // --- Icon Mapping Function ---
-        const getIconForMetric = (label) => {
-            const lowerLabel = label.toLowerCase();
-            if (lowerLabel.includes('dau')) return 'fas fa-users';
-            if (lowerLabel.includes('mau')) return 'fas fa-calendar-week';
-            if (lowerLabel.includes('rating')) return 'fas fa-star';
-            if (lowerLabel.includes('doubts')) return 'fas fa-question-circle';
-            if (lowerLabel.includes('tickets')) return 'fas fa-ticket-alt';
-            if (lowerLabel.includes('batch')) return 'fas fa-layer-group';
-            if (lowerLabel.includes('user analytics')) return 'fas fa-chart-pie';
-            if (lowerLabel.includes('student support')) return 'fas fa-hands-helping';
-            if (lowerLabel.includes('web')) return 'fab fa-chrome';
-            if (lowerLabel.includes('android')) return 'fab fa-android';
-            if (lowerLabel.includes('ios')) return 'fab fa-apple';
-            return 'fas fa-chart-bar';
-        };
-
-        // --- Reusable UI Components ---
-        const LoadingSpinner = () => (
-            <div className="flex justify-center items-center h-64">
-                <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-            </div>
-        );
-
-        const ErrorMessage = ({ message }) => (
-            <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto">
-                <h3 className="font-bold text-lg mb-2">Error Loading Data</h3>
-                <p>{message}</p>
-            </div>
-        );
-
-        const IconMetricCard = ({ label, value, icon }) => (
-            <div className="bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/10 transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 flex flex-col items-center text-center space-y-3">
-                <div className="text-3xl text-purple-300">
-                    <i className={icon}></i>
-                </div>
-                <div className="text-4xl font-bold text-white tracking-tight">{value}</div>
-                <div className="text-sm text-white/60">{label}</div>
-            </div>
-        );
-
-        // --- Page Components ---
-        const OverviewPage = ({ data }) => {
-            if (!data) return <ErrorMessage message="Could not load overview data." />;
-            
-            const groupedData = data.reduce((acc, row) => {
-                const topLevel = row['Top-Level Box'];
-                const subHeader = row['Sub-Box Header'];
-                if (!acc[topLevel]) acc[topLevel] = {};
-                if (!acc[topLevel][subHeader]) acc[topLevel][subHeader] = [];
-                acc[topLevel][subHeader].push(row);
-                return acc;
-            }, {});
-
-            return (
-                <div className="space-y-12">
-                    {Object.entries(groupedData).map(([title, subBoxes]) => (
-                        <section key={title}>
-                            <div className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
-                                <h2 className="text-3xl font-bold text-white text-center flex justify-center items-center gap-4">
-                                    <i className={getIconForMetric(title)}></i>
-                                    <span>{title}</span>
-                                </h2>
-                            </div>
-                            <div className="space-y-8">
-                                {Object.entries(subBoxes).map(([subTitle, metrics]) => (
-                                    <div key={subTitle} className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
-                                        <h3 className="text-2xl font-bold text-white/90 mb-6 text-center">{subTitle}</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                            {metrics.sort((a, b) => a.Order - b.Order).map(metric => (
-                                                <IconMetricCard 
-                                                    key={metric['Data Header']} 
-                                                    label={metric['Data Header']} 
-                                                    value={metric['Value']}
-                                                    icon={getIconForMetric(metric['Data Header'])}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    ))}
-                </div>
-            );
-        };
-
-        const DailyMetricsPage = ({ data }) => {
-            if (!data) return <ErrorMessage message="Could not load daily metrics data." />;
-
-            const getLatestMetric = (metricName) => {
-                const entries = data.filter(d => d['Cumulative'] === metricName);
-                if (entries.length === 0) return { WEB: 'N/A', ANDROID: 'N/A', iOS: 'N/A' };
-                return entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0];
-            };
-
-            const dau = getLatestMetric('Daily Active Users (DAU)');
-            const mau = getLatestMetric('Monthly Active Users (MAU)');
-            const rating = getLatestMetric('Rating');
-            const numRatings = getLatestMetric('Number of Ratings');
-
-            return (
-                <div>
-                    <div className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
-                         <h2 className="text-3xl font-bold text-white text-center">Daily Metrics</h2>
-                    </div>
-                    <div className="space-y-8">
-                        <div className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
-                            <h3 className="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i className={getIconForMetric('dau')}></i>Daily Active Users (DAU)</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <IconMetricCard label="Web" value={dau.WEB} icon={getIconForMetric('web')} />
-                                <IconMetricCard label="Android" value={dau.ANDROID} icon={getIconForMetric('android')} />
-                                <IconMetricCard label="iOS" value={dau.iOS} icon={getIconForMetric('ios')} />
-                            </div>
-                        </div>
-                         <div className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
-                            <h3 className="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i className={getIconForMetric('mau')}></i>Monthly Active Users (MAU)</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <IconMetricCard label="Web" value={mau.WEB} icon={getIconForMetric('web')} />
-                                <IconMetricCard label="Android" value={mau.ANDROID} icon={getIconForMetric('android')} />
-                                <IconMetricCard label="iOS" value={mau.iOS} icon={getIconForMetric('ios')} />
-                            </div>
-                        </div>
-                        <div className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
-                            <h3 className="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i className={getIconForMetric('rating')}></i>Ratings</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <IconMetricCard label="Android Rating" value={rating.ANDROID} icon={getIconForMetric('android rating')} />
-                                <IconMetricCard label="iOS Rating" value={rating.iOS} icon={getIconForMetric('ios rating')} />
-                                <IconMetricCard label="Android # of Ratings" value={numRatings.ANDROID} icon={getIconForMetric('android')} />
-                                <IconMetricCard label="iOS # of Ratings" value={numRatings.iOS} icon={getIconForMetric('ios')} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const OtherReportsPage = () => {
-            const reports = [
-                { title: 'Question Repository', icon: 'fas fa-book-open', link: 'https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing' },
-                { title: 'Course Checks', icon: 'fas fa-clipboard-check', link: 'https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing' },
-                { title: 'Ask a Doubt + Tickets', icon: 'fas fa-ticket-alt', link: 'https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing' },
-                { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', link: 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing' },
-            ];
-
-            return (
-                <div>
-                    <div className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
-                        <h2 className="text-3xl font-bold text-white text-center flex justify-center items-center gap-4">
-                            <span>Other Reports</span>
-                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" className="h-12 w-auto" />
-                        </h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {reports.map(report => (
-                            <a
-                                key={report.title}
-                                href={report.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group bg-purple-900/40 backdrop-blur-md p-8 rounded-3xl border border-purple-500/30 text-white text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-purple-900/60 hover:border-purple-500/60 hover:scale-105"
-                            >
-                                <i className={`${report.icon} text-4xl mb-4 text-purple-300 transition-transform duration-300 group-hover:scale-110`}></i>
-                                <span className="text-lg font-semibold">{report.title}</span>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        // --- Main App Component ---
-        const App = () => {
-            const [activeTab, setActiveTab] = React.useState('overview');
-            const [loading, setLoading] = React.useState(true);
-            const [overviewData, setOverviewData] = React.useState(null);
-            const [dailyData, setDailyData] = React.useState(null);
-            const [error, setError] = React.useState(null);
-
-            React.useEffect(() => {
-                const loadData = async () => {
-                    setLoading(true);
-                    setError(null);
-                    try {
-                        const [overviewRes, dailyRes] = await Promise.all([
-                            fetchAndParseData(OVERVIEW_URL),
-                            fetchAndParseData(DAILY_METRICS_URL)
-                        ]);
-                        if (overviewRes) setOverviewData(overviewRes);
-                        else throw new Error("Failed to load Overview data.");
-                        if (dailyRes) setDailyData(dailyRes);
-                        else throw new Error("Failed to load Daily Metrics data.");
-                    } catch (err) {
-                        setError(err.message);
-                    } finally {
-                        setLoading(false);
+            // --- HELPER FUNCTIONS ---
+            const parseCSV = (csv) => {
+                if (!csv) return [];
+                const lines = csv.split('\n').filter(line => line.trim() !== '');
+                if (lines.length < 2) return [];
+                const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(value => value.trim().replace(/"/g, ''));
+                    if (values.length === headers.length) {
+                        const obj = {};
+                        headers.forEach((header, index) => obj[header] = values[index]);
+                        data.push(obj);
                     }
-                };
-                loadData();
-            }, []);
+                }
+                return data;
+            };
 
-            const NavItem = ({ id, children }) => (
-                <button
-                    onClick={() => setActiveTab(id)}
-                    className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
-                        activeTab === id
-                            ? 'bg-white/10 text-white shadow-lg'
-                            : 'text-white/60 hover:text-white hover:bg-white/5'
-                    }`}
-                >
-                    {children}
-                </button>
-            );
-
-            const renderContent = () => {
-                if (loading) return <LoadingSpinner />;
-                if (error) return <ErrorMessage message={error} />;
-                switch (activeTab) {
-                    case 'overview':
-                        return <OverviewPage data={overviewData} />;
-                    case 'daily':
-                        return <DailyMetricsPage data={dailyData} />;
-                    case 'reports':
-                        return <OtherReportsPage />;
-                    default:
-                        return null;
+            const fetchAndParseData = async (url) => {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const text = await response.text();
+                    if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
+                    return parseCSV(text);
+                } catch (error) {
+                    console.error("Could not fetch or parse data:", error);
+                    return null;
                 }
             };
 
-            return (
-                <div className="h-screen flex flex-col">
-                    <header className="w-full z-50 p-4 flex-shrink-0">
-                        <nav className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-full p-2 max-w-md mx-auto flex justify-center items-center space-x-2">
-                            <NavItem id="overview">Overview</NavItem>
-                            <NavItem id="daily">Daily Metrics</NavItem>
-                            <NavItem id="reports">Other Reports</NavItem>
-                        </nav>
-                    </header>
-                    
-                    <main className="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content">
-                        {renderContent()}
-                    </main>
-                </div>
-            );
-        }
+            const getIconForMetric = (label) => {
+                const lowerLabel = label.toLowerCase();
+                if (lowerLabel.includes('dau')) return 'fas fa-users';
+                if (lowerLabel.includes('mau')) return 'fas fa-calendar-week';
+                if (lowerLabel.includes('rating')) return 'fas fa-star';
+                if (lowerLabel.includes('doubts')) return 'fas fa-question-circle';
+                if (lowerLabel.includes('tickets')) return 'fas fa-ticket-alt';
+                if (lowerLabel.includes('batch')) return 'fas fa-layer-group';
+                if (lowerLabel.includes('user analytics')) return 'fas fa-chart-pie';
+                if (lowerLabel.includes('student support')) return 'fas fa-hands-helping';
+                if (lowerLabel.includes('web')) return 'fab fa-chrome';
+                if (lowerLabel.includes('android')) return 'fab fa-android';
+                if (lowerLabel.includes('ios')) return 'fab fa-apple';
+                return 'fas fa-chart-bar';
+            };
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+            // --- UI RENDERING FUNCTIONS ---
+            const showLoading = (container) => {
+                container.innerHTML = `<div class="flex justify-center items-center h-64"><div class="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div></div>`;
+            };
+
+            const showError = (container, message) => {
+                container.innerHTML = `<div class="bg-red-900/50 border border-red-500/50 text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto"><h3 class="font-bold text-lg mb-2">Error Loading Data</h3><p>${message}</p></div>`;
+            };
+
+            const renderOverviewPage = (container, data) => {
+                if (!data) {
+                    showError(container, "Could not load overview data.");
+                    return;
+                }
+                const groupedData = data.reduce((acc, row) => {
+                    const topLevel = row['Top-Level Box'];
+                    const subHeader = row['Sub-Box Header'];
+                    if (!acc[topLevel]) acc[topLevel] = {};
+                    if (!acc[topLevel][subHeader]) acc[topLevel][subHeader] = [];
+                    acc[topLevel][subHeader].push(row);
+                    return acc;
+                }, {});
+
+                container.innerHTML = `
+                    <div class="space-y-12">
+                        ${Object.entries(groupedData).map(([title, subBoxes]) => `
+                            <section>
+                                <div class="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
+                                    <h2 class="text-3xl font-bold text-white text-center flex justify-center items-center gap-4">
+                                        <i class="${getIconForMetric(title)}"></i>
+                                        <span>${title}</span>
+                                    </h2>
+                                </div>
+                                <div class="space-y-8">
+                                    ${Object.entries(subBoxes).map(([subTitle, metrics]) => `
+                                        <div class="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                                            <h3 class="text-2xl font-bold text-white/90 mb-6 text-center">${subTitle}</h3>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                                ${metrics.sort((a, b) => a.Order - b.Order).map(metric => `
+                                                    <div class="bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/10 transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 flex flex-col items-center text-center space-y-3">
+                                                        <div class="text-3xl text-purple-300"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                                        <div class="text-4xl font-bold text-white tracking-tight">${metric['Value']}</div>
+                                                        <div class="text-sm text-white/60">${metric['Data Header']}</div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </section>
+                        `).join('')}
+                    </div>
+                `;
+            };
+
+            const renderDailyMetricsPage = (container, data) => {
+                if (!data) {
+                    showError(container, "Could not load daily metrics data.");
+                    return;
+                }
+                const getLatestMetric = (metricName) => {
+                    const entries = data.filter(d => d['Cumulative'] === metricName);
+                    if (entries.length === 0) return { WEB: 'N/A', ANDROID: 'N/A', iOS: 'N/A' };
+                    return entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0];
+                };
+
+                const dau = getLatestMetric('Daily Active Users (DAU)');
+                const mau = getLatestMetric('Monthly Active Users (MAU)');
+                const rating = getLatestMetric('Rating');
+                const numRatings = getLatestMetric('Number of Ratings');
+
+                const createMetricCard = (label, value, icon) => `
+                    <div class="bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/10 transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 flex flex-col items-center text-center space-y-3">
+                        <div class="text-3xl text-purple-300"><i class="${icon}"></i></div>
+                        <div class="text-4xl font-bold text-white tracking-tight">${value}</div>
+                        <div class="text-sm text-white/60">${label}</div>
+                    </div>
+                `;
+
+                container.innerHTML = `
+                    <div>
+                        <div class="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
+                             <h2 class="text-3xl font-bold text-white text-center">Daily Metrics</h2>
+                        </div>
+                        <div class="space-y-8">
+                            <div class="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                                <h3 class="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('dau')}"></i>Daily Active Users (DAU)</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    ${createMetricCard('Web', dau.WEB, getIconForMetric('web'))}
+                                    ${createMetricCard('Android', dau.ANDROID, getIconForMetric('android'))}
+                                    ${createMetricCard('iOS', dau.iOS, getIconForMetric('ios'))}
+                                </div>
+                            </div>
+                            <div class="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                                <h3 class="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('mau')}"></i>Monthly Active Users (MAU)</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    ${createMetricCard('Web', mau.WEB, getIconForMetric('web'))}
+                                    ${createMetricCard('Android', mau.ANDROID, getIconForMetric('android'))}
+                                    ${createMetricCard('iOS', mau.iOS, getIconForMetric('ios'))}
+                                </div>
+                            </div>
+                            <div class="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                                <h3 class="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Ratings</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    ${createMetricCard('Android Rating', rating.ANDROID, getIconForMetric('android rating'))}
+                                    ${createMetricCard('iOS Rating', rating.iOS, getIconForMetric('ios rating'))}
+                                    ${createMetricCard('Android # of Ratings', numRatings.ANDROID, getIconForMetric('android'))}
+                                    ${createMetricCard('iOS # of Ratings', numRatings.iOS, getIconForMetric('ios'))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+            
+            const renderReportsPage = (container) => {
+                 const reports = [
+                    { title: 'Question Repository', icon: 'fas fa-book-open', link: 'https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing' },
+                    { title: 'Course Checks', icon: 'fas fa-clipboard-check', link: 'https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing' },
+                    { title: 'Ask a Doubt + Tickets', icon: 'fas fa-ticket-alt', link: 'https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing' },
+                    { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', link: 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing' },
+                ];
+                container.innerHTML = `
+                    <div>
+                        <div class="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
+                            <h2 class="text-3xl font-bold text-white text-center flex justify-center items-center gap-4">
+                                <span>Other Reports</span>
+                                <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="h-12 w-auto" />
+                            </h2>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            ${reports.map(report => `
+                                <a href="${report.link}" target="_blank" rel="noopener noreferrer" class="group bg-purple-900/40 backdrop-blur-md p-8 rounded-3xl border border-purple-500/30 text-white text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-purple-900/60 hover:border-purple-500/60 hover:scale-105">
+                                    <i class="${report.icon} text-4xl mb-4 text-purple-300 transition-transform duration-300 group-hover:scale-110"></i>
+                                    <span class="text-lg font-semibold">${report.title}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            };
+
+
+            // --- NAVIGATION LOGIC ---
+            const navButtons = document.querySelectorAll('.nav-item');
+            const pageContents = document.querySelectorAll('.page-content');
+
+            const switchTab = async (tabId) => {
+                activeTab = tabId;
+                navButtons.forEach(btn => {
+                    if (btn.dataset.tab === tabId) {
+                        btn.classList.add('bg-white/10', 'text-white', 'shadow-lg');
+                        btn.classList.remove('text-white/60', 'hover:text-white', 'hover:bg-white/5');
+                    } else {
+                        btn.classList.remove('bg-white/10', 'shadow-lg');
+                        btn.classList.add('text-white/60', 'hover:text-white', 'hover:bg-white/5');
+                    }
+                });
+
+                pageContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                const activeContent = document.getElementById(`${tabId}-section`);
+                activeContent.classList.remove('hidden');
+
+                if (tabId === 'overview' && !dataCache.overview) {
+                    showLoading(activeContent);
+                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
+                    renderOverviewPage(activeContent, dataCache.overview);
+                } else if (tabId === 'daily' && !dataCache.daily) {
+                    showLoading(activeContent);
+                    dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
+                    renderDailyMetricsPage(activeContent, dataCache.daily);
+                }
+            };
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+
+            // --- INITIAL LOAD ---
+            const initialLoad = async () => {
+                const overviewContainer = document.getElementById('overview-section');
+                showLoading(overviewContainer);
+                dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
+                renderOverviewPage(overviewContainer, dataCache.overview);
+                renderReportsPage(document.getElementById('reports-section')); // Pre-render reports page
+            };
+
+            initialLoad();
+        });
     </script>
 </body>
 </html>
