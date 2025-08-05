@@ -127,31 +127,32 @@
         /* --- FINAL HEADER REDESIGN --- */
         .top-level-box-title {
             display: flex;
-            justify-content: center; /* Center the content */
+            justify-content: center;
             align-items: center;
-            gap: 1.25rem; /* Space between text and logo */
-            font-size: 2rem;
+            gap: 1rem;
+            font-size: 2.5rem; /* Larger font size */
             font-weight: 800;
-            color: white; /* White text for contrast */
             margin-bottom: 2.5rem;
-            padding: 1.25rem 2rem;
-            background-color: rgba(108, 30, 116, 0.85); /* Zell Purple with translucency */
-            backdrop-filter: blur(12px);
-            border-radius: 1.25rem;
-            border: 1px solid rgba(108, 30, 116, 0.2);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 1rem;
+            text-align: center;
+            /* Glassy Font Effect */
+            background: linear-gradient(135deg, var(--primary-purple) 30%, #a83279 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
         }
         
         .header-logo {
-            height: 36px; /* Proportional size */
+            height: 40px; /* Proportional size */
             width: auto;
             border-radius: 6px;
         }
 
         .sub-box {
             padding: 2.5rem;
-            background-color: rgba(108, 30, 116, 0.05);
-            backdrop-filter: blur(20px);
+            background-color: rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px);
             border-radius: 1.5rem;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(108, 30, 116, 0.1);
@@ -159,40 +160,55 @@
         
         .sub-box-title {
             font-size: 1.75rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--heading-color);
             margin-bottom: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
         }
         
-        .metric-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(108, 30, 116, 0.15);
-            transition: transform 0.2s ease-in-out;
+        /* --- NEW: Grid layout for metrics --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
 
-        .metric-item:hover {
-            transform: translateX(8px);
+        /* --- NEW: Metric Card Design --- */
+        .metric-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(108, 30, 116, 0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: all 0.3s ease;
         }
-        
-        .metric-item:last-child {
-            border-bottom: none;
+
+        /* --- NEW: Hover Pop Effect --- */
+        .metric-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(108, 30, 116, 0.15);
         }
-        
+
         .metric-label {
             font-size: 1.1rem;
             color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            display: block; /* Ensure it takes its own line */
         }
         
         .metric-value {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 2.25rem;
+            font-weight: 800;
             color: var(--primary-purple);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover .metric-value {
+            transform: scale(1.1);
         }
         
         .chart-container {
@@ -323,6 +339,9 @@
             .header-logo {
                 margin-top: 1rem;
             }
+            .metrics-grid {
+                grid-template-columns: 1fr; /* Single column on mobile */
+            }
         }
     </style>
 </head>
@@ -358,7 +377,6 @@
                 <div class="top-level-box">
                     <h2 class="top-level-box-title">
                         <span>Other Reports</span>
-                        <!-- FINAL LOGO FIX: Embedded a reliable Base64 string for the green Sheets icon -->
                         <img class="header-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABJ0lEQVR4Ae3WwQnCQBCF4X9aBSvBKuysxAq0go6sQCuxE6wEC8EKsAIr0QrMhCAfCBt4yHsfFLi/p/vAh3s3h4eHh4eHh1cBsA3wYp5s4H/sYlqJmuWqVn2cMiyqYt1a1a58k6rVqgZgI+tWrfp+t0qrVjWAmYh1axUD0AnYWq0aQJqI1WpVg2gT8FqtGkCaiNVq1QCaRPyvVjWAJBEvVqsGkCQCM2s1gDQRC2s1gDQRC2s1gDQRC2s1gDQRC2s1gDRhY60GUBA21moABWFjrQZQEObXagAFea9WDSBFea9WDSBFea9WDSBFea9WDSBFea9WDSBFeWutBlAQVtZqAAVhY60GUBDmV2sABXmvVg0gRXmvVg0gRXmvVg0gRXmvVg0gRXmvVg0gRblrrbcHKw4ODg4ODg5+A74AR2w0gU2DDBcAAAAASUVORK5CYII=" alt="Google Sheets Icon">
                     </h2>
                     
@@ -481,42 +499,29 @@
             
             const groupedData = data.reduce((acc, row) => {
                 const topLevelBox = row['Top-Level Box'];
-                const subBoxHeader = row['Sub-Box Header'];
-                if (!acc[topLevelBox]) { acc[topLevelBox] = {}; }
-                if (!acc[topLevelBox][subBoxHeader]) { acc[topLevelBox][subBoxHeader] = []; }
-                acc[topLevelBox][subBoxHeader].push(row);
+                if (!acc[topLevelBox]) { acc[topLevelBox] = []; }
+                acc[topLevelBox].push(row);
                 return acc;
             }, {});
 
-            for (const [topLevelBox, subBoxes] of Object.entries(groupedData)) {
+            for (const [topLevelBox, metrics] of Object.entries(groupedData)) {
                 const topLevelBoxEl = document.createElement('div');
                 topLevelBoxEl.className = "top-level-box";
                 topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title"><span>${topLevelBox}</span></h2>`;
                 
-                const subBoxesContainer = document.createElement('div');
-                subBoxesContainer.className = "flex flex-col space-y-10"; 
-
-                for (const [subBoxHeader, metrics] of Object.entries(subBoxes)) {
-                    const subBoxEl = document.createElement('div');
-                    subBoxEl.className = "sub-box";
-                    subBoxEl.innerHTML = `<h3 class="sub-box-title">${subBoxHeader}</h3><div class="space-y-4"></div>`;
-                    const metricsContainer = subBoxEl.querySelector('div.space-y-4');
-                    
-                    metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).forEach(metric => {
-                        const metricEl = document.createElement('div');
-                        metricEl.className = "metric-item";
-                        metricEl.innerHTML = `
-                            <span class="metric-label">
-                                <i class="fas fa-database text-purple-500"></i>
-                                ${metric['Data Header']}
-                            </span>
-                            <span class="metric-value">${metric['Value']}</span>
-                        `;
-                        metricsContainer.appendChild(metricEl);
-                    });
-                    subBoxesContainer.appendChild(subBoxEl);
-                }
-                topLevelBoxEl.appendChild(subBoxesContainer);
+                const metricsGrid = document.createElement('div');
+                metricsGrid.className = "metrics-grid";
+                
+                metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).forEach(metric => {
+                    const metricCard = document.createElement('div');
+                    metricCard.className = "metric-card";
+                    metricCard.innerHTML = `
+                        <span class="metric-label">${metric['Data Header']}</span>
+                        <span class="metric-value">${metric['Value']}</span>
+                    `;
+                    metricsGrid.appendChild(metricCard);
+                });
+                topLevelBoxEl.appendChild(metricsGrid);
                 container.appendChild(topLevelBoxEl);
             }
         }
@@ -576,8 +581,8 @@
                 });
             }
             
-            const dailyMetricsContainer = document.createElement('div');
-            dailyMetricsContainer.className = "flex flex-col space-y-10";
+            const metricsGrid = document.createElement('div');
+            metricsGrid.className = "metrics-grid";
 
             const groupedMetrics = data.reduce((acc, row) => {
                 const metricName = row['Cumulative'];
@@ -589,29 +594,20 @@
             }, {});
 
             for (const [metricName, entries] of Object.entries(groupedMetrics)) {
-                const subBoxEl = document.createElement('div');
-                subBoxEl.className = "sub-box";
-                subBoxEl.innerHTML = `<h3 class="sub-box-title">${metricName}</h3><div class="space-y-4"></div>`;
-                const metricsContainer = subBoxEl.querySelector('div.space-y-4');
-                
-                entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
-
-                const latestEntry = entries[0];
+                const latestEntry = entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0];
                 ['WEB', 'ANDROID', 'iOS'].forEach(platform => {
                     if (latestEntry[platform] && latestEntry[platform] !== 'NA' && latestEntry[platform].trim() !== '') {
-                        const metricEl = document.createElement('div');
-                        metricEl.className = "metric-item";
-                        metricEl.innerHTML = `
-                            <span class="metric-label"><i class="fas fa-chart-bar text-purple-500"></i> ${platform}</span>
+                        const metricCard = document.createElement('div');
+                        metricCard.className = "metric-card";
+                        metricCard.innerHTML = `
+                            <span class="metric-label">${metricName} (${platform})</span>
                             <span class="metric-value">${latestEntry[platform]}</span>
                         `;
-                        metricsContainer.appendChild(metricEl);
+                        metricsGrid.appendChild(metricCard);
                     }
                 });
-                dailyMetricsContainer.appendChild(subBoxEl);
             }
-
-            topLevelBoxEl.appendChild(dailyMetricsContainer);
+            topLevelBoxEl.appendChild(metricsGrid);
         }
         
         async function handleNavigation(target) {
