@@ -1,698 +1,295 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Dashboard</title>
-    <!-- Favicon link -->
-    <link rel="icon" href="favicon.png" type="image/png">
-    <!-- If you have an .ico file, you can also add: -->
-    <!-- <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> -->
+import React, { useState, useEffect } from 'react';
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+// --- Data URLs ---
+const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
+const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+// --- Helper Functions ---
+const parseCSV = (csv) => {
+    if (!csv) return [];
+    const lines = csv.split('\n').filter(line => line.trim() !== '');
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(value => value.trim().replace(/"/g, ''));
+        if (values.length === headers.length) {
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header] = values[index];
+            });
+            data.push(obj);
+        }
+    }
+    return data;
+};
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        :root {
-            --primary-purple: #6c1e74;
-            --light-background: #f0f4f9;
-            --card-background: rgba(255, 255, 255, 0.85);
-            --border-color: rgba(108, 30, 116, 0.15);
-            --text-color: #374151;
-            --heading-color: #1f2937;
-            --sidebar-width: 280px;
+const fetchAndParseData = async (url) => {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const text = await response.text();
+        if (text.includes("Sorry, the file you have requested does not exist.")) {
+            throw new Error("Data source not found.");
         }
+        return parseCSV(text);
+    } catch (error) {
+        console.error("Could not fetch or parse data:", error);
+        return null;
+    }
+};
 
-        /* --- NEW: Vibrant, Animated Gradient Background --- */
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            color: var(--text-color);
-            min-height: 100vh;
-            overflow: hidden;
-            background: linear-gradient(315deg, #e0c3fc, #f0f4f9, #d3e8ff, #fbc2eb);
-            background-size: 400% 400%;
-            animation: gradientAnimation 25s ease infinite;
-        }
+// --- Icon Mapping Function ---
+const getIconForMetric = (label) => {
+    const lowerLabel = label.toLowerCase();
+    if (lowerLabel.includes('dau')) return 'fas fa-users';
+    if (lowerLabel.includes('mau')) return 'fas fa-calendar-week';
+    if (lowerLabel.includes('rating')) return 'fas fa-star';
+    if (lowerLabel.includes('doubts')) return 'fas fa-question-circle';
+    if (lowerLabel.includes('tickets')) return 'fas fa-ticket-alt';
+    if (lowerLabel.includes('batch')) return 'fas fa-layer-group';
+    if (lowerLabel.includes('user analytics')) return 'fas fa-chart-pie';
+    if (lowerLabel.includes('student support')) return 'fas fa-hands-helping';
+    if (lowerLabel.includes('web')) return 'fab fa-chrome';
+    if (lowerLabel.includes('android')) return 'fab fa-android';
+    if (lowerLabel.includes('ios')) return 'fab fa-apple';
+    return 'fas fa-chart-bar';
+};
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-            flex-grow: 1;
-        }
+// --- Reusable UI Components ---
 
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 2rem;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            z-index: 10;
-        }
-
-        .sidebar-logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--heading-color);
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-
-        .sidebar-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 0.75rem;
-            border-radius: 1.5rem;
-            color: var(--text-color);
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-
-        .sidebar-nav-item:hover {
-            background-color: rgba(108, 30, 116, 0.1);
-            color: var(--primary-purple);
-        }
-
-        .sidebar-nav-item.active {
-            background-color: var(--primary-purple);
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar-nav-item.active .nav-icon {
-            color: #ffffff;
-        }
-
-        .nav-icon {
-            font-size: 1.5rem;
-            color: var(--primary-purple);
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            flex-grow: 1;
-            padding: 2.5rem 4rem;
-            overflow-y: auto;
-            height: 100vh;
-        }
-        
-        .top-level-box {
-            padding: 0; /* Remove padding from outer box */
-            background-color: transparent;
-            border: none;
-            box-shadow: none;
-        }
-        
-        /* --- NEW: Premium Glass Header --- */
-        .top-level-box-title {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary-purple);
-            margin-bottom: 2.5rem;
-            padding: 1.25rem 2rem;
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(12px);
-            border-radius: 1.25rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        
-        .header-logo {
-            height: 40px;
-            width: auto;
-        }
-
-        .sub-box {
-            padding: 2.5rem;
-            margin-bottom: 2.5rem; /* Logical spacing */
-            background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(249,249,255,0.8));
-            backdrop-filter: blur(15px);
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-        
-        /* --- NEW: Bigger, Bolder Sub-Headers --- */
-        .sub-box-title {
-            font-size: 1.75rem; /* Larger */
-            font-weight: 800; /* Bolder */
-            color: var(--heading-color);
-            margin-bottom: 2rem;
-            text-align: center;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border-color);
-        }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .metric-card {
-            background: linear-gradient(145deg, #ffffff, #f9f9ff);
-            padding: 1.5rem;
-            border-radius: 1.25rem;
-            border: 1px solid rgba(108, 30, 116, 0.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(108, 30, 116, 0.15);
-        }
-
-        .metric-label {
-            font-size: 1rem;
-            color: var(--text-color);
-            font-weight: 500;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-        
-        .metric-value {
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: var(--primary-purple);
-            transition: transform 0.3s ease;
-        }
-
-        .metric-card:hover .metric-value {
-            transform: scale(1.1);
-        }
-        
-        .chart-container {
-            width: 100%;
-            height: 450px;
-            margin-top: 2rem;
-            position: relative;
-        }
-        
-        .report-button {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            border-radius: 1.5rem;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            background-color: var(--primary-purple); /* Unified purple color */
-        }
-
-        .report-button:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
-            background-color: #5a1860; /* Darker purple on hover */
-        }
-
-        .report-button-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .report-button-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .error-message-box {
-            text-align: center;
-            color: #d32f2f;
-            background-color: #ffebee;
-            padding: 2.5rem;
-            border-radius: 1.25rem;
-            margin-top: 2rem;
-            border: 1px solid #d32f2f;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .spinner {
-            border: 6px solid rgba(108, 30, 116, 0.2);
-            border-left-color: var(--primary-purple);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .loader-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 50vh;
-        }
-        
-        .last-updated-text {
-            text-align: center;
-            margin-top: 3.5rem;
-            font-size: 0.9rem;
-            color: #6b7280;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
-                overflow-y: auto;
-            }
-            .dashboard-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                justify-content: space-around;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                padding: 1rem 0.5rem;
-                position: static;
-            }
-            .sidebar-logo {
-                display: none;
-            }
-            .sidebar-nav-item {
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-            }
-            .main-content {
-                padding: 1.5rem;
-                margin-left: 0;
-                height: auto;
-            }
-            .top-level-box-title {
-                flex-direction: column;
-                font-size: 1.75rem;
-            }
-            .header-logo {
-                margin-top: 1rem;
-            }
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="dashboard-container">
-        <aside class="sidebar">
-            <div class="sidebar-logo">Dashboard</div>
-            <nav>
-                <a href="#" class="sidebar-nav-item active" data-target="overview">
-                    <i class="fas fa-chart-line nav-icon"></i>
-                    <span>Overview</span>
-                </a>
-                <a href="#" class="sidebar-nav-item" data-target="daily">
-                    <i class="fas fa-calendar-day nav-icon"></i>
-                    <span>Daily Metrics</span>
-                </a>
-                <a href="#" class="sidebar-nav-item" data-target="other-reports">
-                    <i class="fas fa-file-alt nav-icon"></i>
-                    <span>Other Reports</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <div id="overview-section" class="section-container">
-            </div>
-            
-            <div id="daily-section" class="section-container hidden">
-            </div>
-
-            <div id="other-reports-section" class="section-container hidden">
-                <div class="top-level-box">
-                    <h2 class="top-level-box-title">
-                        <span>Other Reports</span>
-                        <!-- FINAL LOGO FIX: Referencing your GitHub image directly -->
-                        <img class="header-logo" src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo">
-                    </h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-                        <!-- Buttons now use CSS class for unified color, no inline styles -->
-                        <a href="https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button">
-                            <div class="report-button-content">
-                                <i class="fas fa-book-open text-4xl"></i>
-                                <span class="report-button-title">Question Repository</span>
-                            </div>
-                        </a>
-
-                        <a href="https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button">
-                            <div class="report-button-content">
-                                <i class="fas fa-clipboard-check text-4xl"></i>
-                                <span class="report-button-title">Course Checks</span>
-                            </div>
-                        </a>
-
-                        <a href="https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button">
-                            <div class="report-button-content">
-                                <i class="fas fa-ticket-alt text-4xl"></i>
-                                <span class="report-button-title">Ask a Doubt + Tickets</span>
-                            </div>
-                        </a>
-
-                        <a href="https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button">
-                            <div class="report-button-content">
-                                <i class="fas fa-chart-pie text-4xl"></i>
-                                <span class="report-button-title">Weekly Batch Reports</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div id="last-updated-footer" class="last-updated-text">
-                </div>
-        </main>
+const LoadingSpinner = () => (
+    <div className="flex justify-center items-center h-64">
+        <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
     </div>
+);
 
-    <script>
-        // Data URLs from Google Sheets
-        const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
-        const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
-        
-        let dailyChartInstance = null;
-        
-        const dataCache = {
-            overview: null,
-            daily: null
-        };
+const ErrorMessage = ({ message }) => (
+    <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-6 py-4 rounded-xl text-center">
+        <h3 className="font-bold text-lg mb-2">Error Loading Data</h3>
+        <p>{message}</p>
+    </div>
+);
 
-        function showLoadingIndicator(containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = `<div class="loader-container"><div class="spinner"></div></div>`;
-        }
+const IconMetricCard = ({ label, value, icon }) => (
+    <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:scale-105 flex flex-col items-center text-center space-y-2">
+        <div className="text-3xl text-purple-300">
+            <i className={icon}></i>
+        </div>
+        <div className="text-3xl font-bold text-white tracking-tight">{value}</div>
+        <div className="text-sm text-white/60">{label}</div>
+    </div>
+);
 
-        function showFailureMessage(containerId, message) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = `
-                <div class="error-message-box">
-                    <h3 class="text-2xl font-bold mb-4">Error Loading Data</h3>
-                    <p class="text-lg">${message}</p>
-                    <p class="mt-4">Please check the console for more details.</p>
-                </div>
-            `;
-        }
-        
-        function parseCSV(csv) {
-            const lines = csv.split('\n').filter(line => line.trim() !== '');
-            if (lines.length < 2) {
-                console.error("CSV data has fewer than 2 lines (header + data).");
-                return [];
-            }
-            const headers = lines[0].split(',').map(header => header.trim());
-            const data = [];
+// --- Page Components ---
 
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                const values = line.match(/(?:"[^"]*"|[^,])+/g) || line.split(',');
-                if (values) {
-                    const trimmedValues = values.map(value => value.trim().replace(/"/g, ''));
-                    if (trimmedValues.length === headers.length) {
-                        const obj = {};
-                        for (let j = 0; j < headers.length; j++) {
-                            obj[headers[j]] = trimmedValues[j];
-                        }
-                        data.push(obj);
-                    }
-                }
-            }
-            return data;
-        }
+const OverviewPage = ({ data }) => {
+    if (!data) return <ErrorMessage message="Could not load overview data." />;
+    
+    const groupedData = data.reduce((acc, row) => {
+        const topLevel = row['Top-Level Box'];
+        const subHeader = row['Sub-Box Header'];
+        if (!acc[topLevel]) acc[topLevel] = {};
+        if (!acc[topLevel][subHeader]) acc[topLevel][subHeader] = [];
+        acc[topLevel][subHeader].push(row);
+        return acc;
+    }, {});
 
-        async function fetchCSVData(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                if (text.includes("Sorry, the file you have requested does not exist.") || text.includes("404 Not Found")) {
-                    return null;
-                }
-                return text;
-            } catch (error) {
-                console.error("Could not fetch CSV data:", error);
-                return null;
-            }
-        }
-        
-        function renderOverviewDashboard(data) {
-            const container = document.getElementById('overview-section');
-            container.innerHTML = '';
-            
-            if (!data || data.length === 0) {
-                showFailureMessage('overview-section', 'Failed to load Overview Metrics data. Please check the data source.');
-                return;
-            }
-            
-            const groupedData = data.reduce((acc, row) => {
-                const topLevelBox = row['Top-Level Box'];
-                const subBoxHeader = row['Sub-Box Header'];
-                if (!acc[topLevelBox]) { acc[topLevelBox] = {}; }
-                if (!acc[topLevelBox][subBoxHeader]) { acc[topLevelBox][subBoxHeader] = []; }
-                acc[topLevelBox][subBoxHeader].push(row);
-                return acc;
-            }, {});
-
-            for (const [topLevelBox, subBoxes] of Object.entries(groupedData)) {
-                const topLevelBoxEl = document.createElement('div');
-                topLevelBoxEl.className = "top-level-box";
-                topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title"><span>${topLevelBox}</span></h2>`;
-                
-                for (const [subBoxHeader, metrics] of Object.entries(subBoxes)) {
-                    const subBoxEl = document.createElement('div');
-                    subBoxEl.className = "sub-box";
-                    subBoxEl.innerHTML = `<h3 class="sub-box-title">${subBoxHeader}</h3>`;
-                    
-                    const metricsGrid = document.createElement('div');
-                    metricsGrid.className = "metrics-grid";
-                    
-                    metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).forEach(metric => {
-                        const metricCard = document.createElement('div');
-                        metricCard.className = "metric-card";
-                        metricCard.innerHTML = `
-                            <div class="metric-label">${metric['Data Header']}</div>
-                            <div class="metric-value">${metric['Value']}</div>
-                        `;
-                        metricsGrid.appendChild(metricCard);
-                    });
-                    subBoxEl.appendChild(metricsGrid);
-                    topLevelBoxEl.appendChild(subBoxEl);
-                }
-                container.appendChild(topLevelBoxEl);
-            }
-        }
-        
-        function renderDailyMetricsDashboard(data) {
-            const container = document.getElementById('daily-section');
-            container.innerHTML = '';
-            
-            if (!data || data.length === 0) {
-                showFailureMessage('daily-section', 'Failed to load Daily Metrics data. Please check the data source.');
-                return;
-            }
-
-            const topLevelBoxEl = document.createElement('div');
-            topLevelBoxEl.className = "top-level-box";
-            topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title"><span>Daily Metrics</span></h2>`;
-            container.appendChild(topLevelBoxEl);
-            
-            const dailyUserChartData = data.filter(d => d['Cumulative'] === 'Total Users');
-            if (dailyUserChartData.length > 0) {
-                const dates = dailyUserChartData.map(d => d['Date']);
-                const webData = dailyUserChartData.map(d => parseInt(d['WEB'], 10));
-                const androidData = dailyUserChartData.map(d => parseInt(d['ANDROID'], 10));
-                const iosData = dailyUserChartData.map(d => parseInt(d['iOS'], 10));
-                
-                const chartBox = document.createElement('div');
-                chartBox.className = "sub-box mb-10"; 
-                chartBox.innerHTML = `
-                    <h3 class="sub-box-title">Daily User Trend</h3>
-                    <div class="chart-container">
-                        <canvas id="dailyUserChart"></canvas>
+    return (
+        <div className="space-y-12">
+            {Object.entries(groupedData).map(([title, subBoxes]) => (
+                <section key={title}>
+                    <div className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
+                        <h2 className="text-3xl font-bold text-white text-center flex justify-center items-center gap-4">
+                            <i className={getIconForMetric(title)}></i>
+                            <span>{title}</span>
+                        </h2>
                     </div>
-                `;
-                topLevelBoxEl.appendChild(chartBox);
-                
-                if (dailyChartInstance) {
-                    dailyChartInstance.destroy();
-                }
-                
-                const ctx = document.getElementById('dailyUserChart').getContext('2d');
-                dailyChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: dates,
-                        datasets: [
-                            { label: 'Web Users', data: webData, borderColor: 'rgba(108, 30, 116, 1)', backgroundColor: 'rgba(108, 30, 116, 0.2)', tension: 0.4, fill: true, },
-                            { label: 'Android Users', data: androidData, borderColor: 'rgba(25, 126, 203, 1)', backgroundColor: 'rgba(25, 126, 203, 0.2)', tension: 0.4, fill: true, },
-                            { label: 'iOS Users', data: iosData, borderColor: 'rgba(235, 100, 100, 1)', backgroundColor: 'rgba(235, 100, 100, 0.2)', tension: 0.4, fill: true, }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: true, }, title: { display: false, } },
-                        scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: 'rgba(108, 30, 116, 0.1)' } } }
-                    }
-                });
+                    <div className="space-y-8">
+                        {Object.entries(subBoxes).map(([subTitle, metrics]) => (
+                            <div key={subTitle} className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                                <h3 className="text-2xl font-bold text-white/90 mb-6 text-center">{subTitle}</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {metrics.sort((a, b) => a.Order - b.Order).map(metric => (
+                                        <IconMetricCard 
+                                            key={metric['Data Header']} 
+                                            label={metric['Data Header']} 
+                                            value={metric['Value']}
+                                            icon={getIconForMetric(metric['Data Header'])}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            ))}
+        </div>
+    );
+};
+
+const DailyMetricsPage = ({ data }) => {
+    if (!data) return <ErrorMessage message="Could not load daily metrics data." />;
+
+    const getLatestMetric = (metricName) => {
+        const entries = data.filter(d => d['Cumulative'] === metricName);
+        if (entries.length === 0) return { WEB: 'N/A', ANDROID: 'N/A', iOS: 'N/A' };
+        return entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0];
+    };
+
+    const dau = getLatestMetric('Daily Active Users (DAU)');
+    const mau = getLatestMetric('Monthly Active Users (MAU)');
+    const rating = getLatestMetric('Rating');
+    const numRatings = getLatestMetric('Number of Ratings');
+
+    return (
+        <div>
+            <div className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
+                 <h2 className="text-3xl font-bold text-white text-center">Daily Metrics</h2>
+            </div>
+            <div className="space-y-8">
+                <div className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                    <h3 className="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i className={getIconForMetric('dau')}></i>Daily Active Users (DAU)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <IconMetricCard label="Web" value={dau.WEB} icon={getIconForMetric('web')} />
+                        <IconMetricCard label="Android" value={dau.ANDROID} icon={getIconForMetric('android')} />
+                        <IconMetricCard label="iOS" value={dau.iOS} icon={getIconForMetric('ios')} />
+                    </div>
+                </div>
+                 <div className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                    <h3 className="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i className={getIconForMetric('mau')}></i>Monthly Active Users (MAU)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <IconMetricCard label="Web" value={mau.WEB} icon={getIconForMetric('web')} />
+                        <IconMetricCard label="Android" value={mau.ANDROID} icon={getIconForMetric('android')} />
+                        <IconMetricCard label="iOS" value={mau.iOS} icon={getIconForMetric('ios')} />
+                    </div>
+                </div>
+                <div className="bg-black/10 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+                    <h3 className="text-2xl font-bold text-white/90 mb-6 text-center flex items-center justify-center gap-3"><i className={getIconForMetric('rating')}></i>Ratings</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <IconMetricCard label="Android Rating" value={rating.ANDROID} icon={getIconForMetric('android rating')} />
+                        <IconMetricCard label="iOS Rating" value={rating.iOS} icon={getIconForMetric('ios rating')} />
+                        <IconMetricCard label="Android # of Ratings" value={numRatings.ANDROID} icon={getIconForMetric('android')} />
+                        <IconMetricCard label="iOS # of Ratings" value={numRatings.iOS} icon={getIconForMetric('ios')} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const OtherReportsPage = () => {
+    const reports = [
+        { title: 'Question Repository', icon: 'fas fa-book-open', link: 'https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing' },
+        { title: 'Course Checks', icon: 'fas fa-clipboard-check', link: 'https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing' },
+        { title: 'Ask a Doubt + Tickets', icon: 'fas fa-ticket-alt', link: 'https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing' },
+        { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', link: 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing' },
+    ];
+
+    return (
+        <div>
+            <div className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-3xl p-6 mb-8">
+                <h2 className="text-3xl font-bold text-white text-center flex justify-center items-center gap-4">
+                    <span>Other Reports</span>
+                    <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" className="h-12 w-auto" />
+                </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {reports.map(report => (
+                    <a
+                        key={report.title}
+                        href={report.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group bg-purple-900/40 backdrop-blur-md p-8 rounded-3xl border border-purple-500/30 text-white text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-purple-900/60 hover:border-purple-500/60 hover:scale-105"
+                    >
+                        <i className={`${report.icon} text-4xl mb-4 text-purple-300 transition-transform duration-300 group-hover:scale-110`}></i>
+                        <span className="text-lg font-semibold">{report.title}</span>
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+
+// --- Main App Component ---
+export default function App() {
+    const [activeTab, setActiveTab] = useState('overview');
+    const [loading, setLoading] = useState(true);
+    const [overviewData, setOverviewData] = useState(null);
+    const [dailyData, setDailyData] = useState(null);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const [overviewRes, dailyRes] = await Promise.all([
+                    fetchAndParseData(OVERVIEW_URL),
+                    fetchAndParseData(DAILY_METRICS_URL)
+                ]);
+                if (overviewRes) setOverviewData(overviewRes);
+                else throw new Error("Failed to load Overview data.");
+                if (dailyRes) setDailyData(dailyRes);
+                else throw new Error("Failed to load Daily Metrics data.");
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
             }
+        };
+        loadData();
+    }, []);
+
+    const NavItem = ({ id, children }) => (
+        <button
+            onClick={() => setActiveTab(id)}
+            className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
+                activeTab === id
+                    ? 'bg-white/10 text-white shadow-lg'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+            }`}
+        >
+            {children}
+        </button>
+    );
+
+    const renderContent = () => {
+        if (loading) return <LoadingSpinner />;
+        if (error) return <ErrorMessage message={error} />;
+        switch (activeTab) {
+            case 'overview':
+                return <OverviewPage data={overviewData} />;
+            case 'daily':
+                return <DailyMetricsPage data={dailyData} />;
+            case 'reports':
+                return <OtherReportsPage />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className="h-screen flex flex-col bg-black text-white font-sans">
+            <div className="absolute inset-0 -z-10 h-full w-full bg-slate-950">
+                <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#6c1e7433,transparent)] animate-pulse-slow"></div>
+            </div>
+
+            <header className="w-full z-50 p-4 flex-shrink-0">
+                <nav className="bg-black/20 backdrop-blur-lg border border-white/10 rounded-full p-2 max-w-md mx-auto flex justify-center items-center space-x-2">
+                    <NavItem id="overview">Overview</NavItem>
+                    <NavItem id="daily">Daily Metrics</NavItem>
+                    <NavItem id="reports">Other Reports</NavItem>
+                </nav>
+            </header>
             
-            const groupedMetrics = data.reduce((acc, row) => {
-                const metricName = row['Cumulative'];
-                if (metricName && metricName !== 'Total Users' && metricName.trim() !== '') {
-                    if (!acc[metricName]) { acc[metricName] = []; }
-                    acc[metricName].push(row);
-                }
-                return acc;
-            }, {});
-
-            for (const [metricName, entries] of Object.entries(groupedMetrics)) {
-                const subBoxEl = document.createElement('div');
-                subBoxEl.className = "sub-box";
-                subBoxEl.innerHTML = `<h3 class="sub-box-title">${metricName}</h3>`;
-                
-                const metricsGrid = document.createElement('div');
-                metricsGrid.className = "metrics-grid";
-                
-                const latestEntry = entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0];
-                ['WEB', 'ANDROID', 'iOS'].forEach(platform => {
-                    if (latestEntry[platform] && latestEntry[platform] !== 'NA' && latestEntry[platform].trim() !== '') {
-                        const metricCard = document.createElement('div');
-                        metricCard.className = "metric-card";
-                        metricCard.innerHTML = `
-                            <div class="metric-label">${platform}</div>
-                            <div class="metric-value">${latestEntry[platform]}</div>
-                        `;
-                        metricsGrid.appendChild(metricCard);
-                    }
-                });
-                subBoxEl.appendChild(metricsGrid);
-                topLevelBoxEl.appendChild(subBoxEl);
-            }
-        }
-        
-        async function handleNavigation(target) {
-            const navItems = document.querySelectorAll('.sidebar-nav-item');
-            const sections = document.querySelectorAll('.section-container');
-            
-            navItems.forEach(nav => nav.classList.remove('active'));
-            const activeNavItem = document.querySelector(`.sidebar-nav-item[data-target="${target}"]`);
-            if (activeNavItem) activeNavItem.classList.add('active');
-            
-            sections.forEach(section => section.classList.add('hidden'));
-            const targetSection = document.getElementById(target + '-section');
-            if (targetSection) targetSection.classList.remove('hidden');
-
-            if (target === 'overview') {
-                if (!dataCache.overview) {
-                    showLoadingIndicator('overview-section');
-                    const csv = await fetchCSVData(OVERVIEW_URL);
-                    dataCache.overview = csv ? parseCSV(csv) : null;
-                }
-                renderOverviewDashboard(dataCache.overview);
-            } else if (target === 'daily') {
-                if (!dataCache.daily) {
-                    showLoadingIndicator('daily-section');
-                    const csv = await fetchCSVData(DAILY_METRICS_URL);
-                    dataCache.daily = csv ? parseCSV(csv) : null;
-                }
-                renderDailyMetricsDashboard(dataCache.daily);
-            }
-            updateLastUpdatedTime();
-        }
-        
-        function updateLastUpdatedTime() {
-            const now = new Date();
-            const formattedTime = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const footer = document.getElementById('last-updated-footer');
-            footer.innerHTML = `
-                Last updated: ${formattedTime} (IST)
-                <button id="refresh-button" class="ml-4 px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-md transition-colors duration-200">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-            `;
-            document.getElementById('refresh-button').addEventListener('click', () => {
-                refreshData();
-            });
-        }
-        
-        function refreshData() {
-            const activeTab = document.querySelector('.sidebar-nav-item.active').dataset.target;
-            if (dataCache.hasOwnProperty(activeTab)) {
-                dataCache[activeTab] = null;
-            }
-            handleNavigation(activeTab);
-        }
-
-        async function initializeDashboard() {
-            const navItems = document.querySelectorAll('.sidebar-nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetId = item.dataset.target;
-                    handleNavigation(targetId);
-                });
-            });
-
-            handleNavigation('overview');
-        }
-
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
-    </script>
-</body>
-</html>
+            <main className="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8">
+                {renderContent()}
+            </main>
+        </div>
+    );
+}
