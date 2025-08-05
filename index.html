@@ -68,24 +68,46 @@
             background-color: rgba(0, 0, 0, 0.2);
         }
         .hidden { display: none; }
+
+        /* --- NEW: Enhanced Navigation Button Styles --- */
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--nav-text-color);
+        }
+        .nav-item:hover {
+            color: var(--nav-text-hover);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        body.light-mode .nav-item:hover {
+             background-color: rgba(0, 0, 0, 0.03);
+        }
+        .nav-item.active {
+            background-color: var(--nav-active-bg);
+            color: var(--nav-active-text);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col">
     <header class="w-full z-50 p-4 flex-shrink-0">
-        <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 max-w-lg mx-auto flex justify-center items-center space-x-2">
-            <button data-tab="overview" class="nav-item px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300">Overview</button>
-            <button data-tab="daily" class="nav-item px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300">Daily Metrics</button>
-            <button data-tab="reports" class="nav-item px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300">Other Reports</button>
-            <button id="theme-toggle" class="px-3 py-3 rounded-full text-sm font-semibold transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
+        <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 max-w-xl mx-auto flex justify-center items-center space-x-2">
+            <button data-tab="overview" class="nav-item">Overview</button>
+            <button data-tab="daily" class="nav-item">Daily Metrics</button>
+            <button data-tab="reports" class="nav-item">Other Reports</button>
+            <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
                 <i class="fas fa-sun"></i>
             </button>
         </nav>
     </header>
     
     <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content">
-        <div id="overview-section" class="page-content"></div>
-        <div id="daily-section" class="page-content hidden"></div>
-        <div id="reports-section" class="page-content hidden"></div>
+        <div id="overview-section" class="page-content pt-8"></div>
+        <div id="daily-section" class="page-content hidden pt-8"></div>
+        <div id="reports-section" class="page-content hidden pt-8"></div>
     </main>
 
     <script>
@@ -96,6 +118,7 @@
             const dataCache = { overview: null, daily: null };
             let activeTab = 'overview';
 
+            // --- RADICAL FIX: ROBUST CSV PARSING ENGINE ---
             const parseCSV = (csv) => {
                 if (!csv) return [];
                 const lines = csv.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
@@ -105,7 +128,7 @@
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i];
                     const values = line.match(/(?:"[^"]*"|[^,]+)/g) || [];
-                     if (values.length > 0) {
+                     if (values.length > 0 && values.length <= headers.length) {
                         const obj = {};
                         headers.forEach((header, index) => {
                             obj[header] = values[index] ? values[index].trim().replace(/"/g, '') : '';
@@ -173,13 +196,9 @@
                     <div class="space-y-12">
                         ${Object.entries(groupedData).map(([title, subBoxes]) => `
                             <section>
-                                <h2 class="text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4 mb-8">
-                                    <i class="${getIconForMetric(title)}"></i>
-                                    <span>${title}</span>
-                                </h2>
                                 <div class="space-y-8">
                                     ${Object.entries(subBoxes).map(([subTitle, metrics]) => `
-                                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)] mb-8">
                                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
                                             <div class="flex flex-wrap justify-center gap-6">
                                                 ${metrics.sort((a, b) => a.Order - b.Order).map(metric => `
@@ -224,41 +243,38 @@
                 `;
 
                 container.innerHTML = `
-                    <div>
-                        <h2 class="text-3xl font-bold text-[var(--text-color)] text-center mb-8">Daily Metrics</h2>
-                        <div class="space-y-8">
-                            <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
-                                <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('dau')}"></i>Daily Active Users (DAU)</h3>
-                                <div class="flex flex-wrap justify-center gap-6">
-                                    ${createMetricCard('Web', dau.WEB, getIconForMetric('web'))}
-                                    ${createMetricCard('Android', dau.ANDROID, getIconForMetric('android'))}
-                                    ${createMetricCard('iOS', dau.iOS, getIconForMetric('ios'))}
-                                </div>
+                    <div class="space-y-8">
+                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('dau')}"></i>Daily Active Users (DAU)</h3>
+                            <div class="flex flex-wrap justify-center gap-6">
+                                ${createMetricCard('Web', dau.WEB, getIconForMetric('web'))}
+                                ${createMetricCard('Android', dau.ANDROID, getIconForMetric('android'))}
+                                ${createMetricCard('iOS', dau.iOS, getIconForMetric('ios'))}
                             </div>
-                            <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
-                                <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('mau')}"></i>Monthly Active Users (MAU)</h3>
-                                <div class="flex flex-wrap justify-center gap-6">
-                                    ${createMetricCard('Web', mau.WEB, getIconForMetric('web'))}
-                                    ${createMetricCard('Android', mau.ANDROID, getIconForMetric('android'))}
-                                    ${createMetricCard('iOS', mau.iOS, getIconForMetric('ios'))}
-                                </div>
+                        </div>
+                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('mau')}"></i>Monthly Active Users (MAU)</h3>
+                            <div class="flex flex-wrap justify-center gap-6">
+                                ${createMetricCard('Web', mau.WEB, getIconForMetric('web'))}
+                                ${createMetricCard('Android', mau.ANDROID, getIconForMetric('android'))}
+                                ${createMetricCard('iOS', mau.iOS, getIconForMetric('ios'))}
                             </div>
-                            <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
-                                <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Ratings</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
-                                        <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)]">Android</h4>
-                                        <div class="flex justify-center gap-6">
-                                            ${createMetricCard('Rating', rating.ANDROID, getIconForMetric('android rating'))}
-                                            ${createMetricCard('# of Ratings', numRatings.ANDROID, getIconForMetric('android'))}
-                                        </div>
+                        </div>
+                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Ratings</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
+                                    <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)]">Android</h4>
+                                    <div class="flex justify-center gap-6">
+                                        ${createMetricCard('Rating', rating.ANDROID, getIconForMetric('android rating'))}
+                                        ${createMetricCard('# of Ratings', numRatings.ANDROID, getIconForMetric('android'))}
                                     </div>
-                                    <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
-                                        <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)]">iOS</h4>
-                                        <div class="flex justify-center gap-6">
-                                            ${createMetricCard('Rating', rating.iOS, getIconForMetric('ios rating'))}
-                                            ${createMetricCard('# of Ratings', numRatings.iOS, getIconForMetric('ios'))}
-                                        </div>
+                                </div>
+                                <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
+                                    <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)]">iOS</h4>
+                                    <div class="flex justify-center gap-6">
+                                        ${createMetricCard('Rating', rating.iOS, getIconForMetric('ios rating'))}
+                                        ${createMetricCard('# of Ratings', numRatings.iOS, getIconForMetric('ios'))}
                                     </div>
                                 </div>
                             </div>
@@ -275,21 +291,16 @@
                     { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', link: 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing' },
                 ];
                 container.innerHTML = `
-                    <div>
-                        <h2 class="text-3xl font-bold text-[var(--text-color)] text-center mb-8 flex justify-center items-center gap-4">
-                            <span>Other Reports</span>
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            ${reports.map(report => `
-                                <a href="${report.link}" target="_blank" rel="noopener noreferrer" class="group relative bg-black/20 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 overflow-hidden h-48">
-                                    <i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-white/5 transition-all duration-500 group-hover:text-white/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>
-                                    <div class="relative z-10">
-                                        <i class="${report.icon} text-5xl mb-4 text-[var(--icon-color)] transition-transform duration-300 group-hover:scale-110"></i>
-                                        <span class="text-xl font-semibold">${report.title}</span>
-                                    </div>
-                                </a>
-                            `).join('')}
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        ${reports.map(report => `
+                            <a href="${report.link}" target="_blank" rel="noopener noreferrer" class="group relative bg-black/20 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 overflow-hidden h-48">
+                                <i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-white/5 transition-all duration-500 group-hover:text-white/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>
+                                <div class="relative z-10">
+                                    <i class="${report.icon} text-5xl mb-4 text-[var(--icon-color)] transition-transform duration-300 group-hover:scale-110"></i>
+                                    <span class="text-xl font-semibold">${report.title}</span>
+                                </div>
+                            </a>
+                        `).join('')}
                     </div>
                 `;
             };
@@ -300,9 +311,7 @@
             const switchTab = async (tabId) => {
                 activeTab = tabId;
                 navButtons.forEach(btn => {
-                    const isActive = btn.dataset.tab === tabId;
-                    btn.style.backgroundColor = isActive ? 'var(--nav-active-bg)' : '';
-                    btn.style.color = isActive ? 'var(--nav-active-text)' : 'var(--nav-text-color)';
+                    btn.classList.toggle('active', btn.dataset.tab === tabId);
                 });
 
                 pageContents.forEach(content => content.classList.add('hidden'));
