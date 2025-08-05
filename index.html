@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Dashboard</title>
 
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+    <!-- Tailwind CSS CDN for a responsive and utility-first framework -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Custom CSS for a refined, iOS-inspired Glass UI -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
@@ -111,11 +115,6 @@
             padding: 2.5rem 4rem; /* Increased padding for more space */
             overflow-y: auto;
             height: 100vh;
-            /* New: Constrain the max-width of the content */
-            max-width: 1400px; /* Set a reasonable max width for large screens */
-            margin: 0 auto; /* Center the content */
-            padding-left: calc(var(--sidebar-width) + 2.5rem);
-            box-sizing: border-box;
         }
         
         .top-level-box {
@@ -126,8 +125,6 @@
             border-radius: 2rem; /* More rounded corners for the main boxes */
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
-            /* New: Enforce a max-width for top-level boxes to prevent them from getting too wide */
-            /* Removed this to let the grid handle sizing, but it's an option if needed */
         }
         
         .top-level-box-title {
@@ -186,10 +183,10 @@
             color: var(--primary-purple);
         }
         
-        /* Updated scorecard container for a responsive grid layout */
+        /* Updated scorecard container for a single column, full-width layout */
         .scorecard-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid for scorecards */
+            display: flex;
+            flex-direction: column;
             gap: 2.5rem; /* Increased gap */
             margin-bottom: 3rem;
         }
@@ -294,13 +291,6 @@
             display: none !important;
         }
         
-        /* New: Responsive grid layout for sub-boxes on desktop */
-        .overview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 2rem;
-        }
-
         /* Responsive styles for mobile */
         @media (max-width: 768px) {
             body {
@@ -327,14 +317,11 @@
             .sidebar-nav-item {
                 padding: 0.75rem 1rem;
                 font-size: 1rem; /* Adjusted font size for mobile */
-                border-radius: 1rem;
-                margin-bottom: 0;
             }
             .main-content {
                 padding: 1.5rem;
                 margin-left: 0;
                 height: auto;
-                padding-left: 1.5rem;
             }
             .top-level-box-title {
                 text-align: center;
@@ -343,18 +330,13 @@
             .sub-box-title {
                 text-align: center;
             }
-            /* Reset the grid layout for small screens to a single column */
-            .overview-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 2.5rem;
-            }
         }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">Dashboard</div>
             <nav>
@@ -366,44 +348,64 @@
                     <i class="fas fa-calendar-day nav-icon"></i>
                     <span>Daily Metrics</span>
                 </a>
-                <a href="#" class="sidebar-nav-item" data-target="settings">
-                    <i class="fas fa-cog nav-icon"></i>
-                    <span>Settings</span>
+                <!-- New buttons to replace the 'Settings' button -->
+                <a href="#" class="sidebar-nav-item" data-target="product-reports">
+                    <i class="fas fa-box-open nav-icon"></i>
+                    <span>Product Reports</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="user-reports">
+                    <i class="fas fa-users nav-icon"></i>
+                    <span>User Reports</span>
                 </a>
             </nav>
         </aside>
 
+        <!-- Main Content Area -->
         <main class="main-content">
+            <!-- Section containers -->
             <div id="overview-section" class="section-container">
-                </div>
+                <!-- Overview metrics will be rendered here -->
+            </div>
             
             <div id="daily-section" class="section-container hidden">
-                </div>
+                <!-- Daily metrics will be rendered here -->
+            </div>
 
-            <div id="settings-section" class="section-container hidden">
-                <div class="top-level-box">
-                    <h2 class="top-level-box-title">Settings</h2>
-                    <p class="text-gray-600">This section is a placeholder for user settings.</p>
-                </div>
+            <!-- New sections for reports -->
+            <div id="product-reports-section" class="section-container hidden">
+                <!-- Product reports will be rendered here -->
+            </div>
+
+            <div id="user-reports-section" class="section-container hidden">
+                <!-- User reports will be rendered here -->
             </div>
 
             <div id="last-updated-footer" class="last-updated-text">
-                </div>
+                <!-- Last updated text and refresh button will be rendered here by JS -->
+            </div>
         </main>
     </div>
 
+    <!-- JavaScript for dynamic data fetching, parsing, and rendering -->
     <script>
         // Data URLs from Google Sheets
         const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
         const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
         
+        // New: Placeholder URLs for the new report sections
+        const PRODUCT_REPORTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv'; // <-- Update this URL with your Product Reports data
+        const USER_REPORTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv'; // <-- Update this URL with your User Reports data
+        
         // This will store the Chart.js instance so we can destroy and re-create it
         let dailyChartInstance = null;
+        let productChartInstance = null;
         
         // Cache to store fetched data to avoid redundant API calls
         const dataCache = {
             overview: null,
-            daily: null
+            daily: null,
+            productReports: null, // New: Cache for product reports
+            userReports: null     // New: Cache for user reports
         };
 
         /**
@@ -519,9 +521,9 @@
                 topLevelBoxEl.className = "top-level-box";
                 topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title">${topLevelBox}</h2>`;
                 
-                // New: Use a responsive grid layout for the sub-boxes
+                // Change: Use a single-column flex layout for the sub-boxes to make them full-width
                 const subBoxesContainer = document.createElement('div');
-                subBoxesContainer.className = "overview-grid";
+                subBoxesContainer.className = "flex flex-col space-y-10"; // Changed from grid layout
 
                 // Iterate through each sub-box and its metrics
                 for (const [subBoxHeader, metrics] of Object.entries(subBoxes)) {
@@ -655,8 +657,8 @@
             
             // Now render the individual daily metrics in sub-boxes
             const dailyMetricsContainer = document.createElement('div');
-            // New: Use a responsive grid layout for the daily metric cards
-            dailyMetricsContainer.className = "overview-grid";
+            // Change: Use a single-column flex layout for the daily metric cards
+            dailyMetricsContainer.className = "flex flex-col space-y-10"; // Changed from grid layout
 
             // Group by metric name
             const groupedMetrics = data.reduce((acc, row) => {
@@ -697,6 +699,73 @@
             }
 
             topLevelBoxEl.appendChild(dailyMetricsContainer);
+            container.appendChild(topLevelBoxEl);
+        }
+        
+        /**
+         * New: Renders the product reports section.
+         * @param {Array<Object>} data - The parsed data for product reports.
+         */
+        function renderProductReportsDashboard(data) {
+            const container = document.getElementById('product-reports-section');
+            container.innerHTML = '';
+
+            // This is a placeholder for your product reports content.
+            // You can replace this with actual logic to parse and render your product data.
+            const topLevelBoxEl = document.createElement('div');
+            topLevelBoxEl.className = "top-level-box";
+            topLevelBoxEl.innerHTML = `
+                <h2 class="top-level-box-title">Product Reports</h2>
+                <div class="sub-box mb-10">
+                    <h3 class="sub-box-title">Most Popular Products (Placeholder)</h3>
+                    <div class="space-y-4">
+                        <div class="metric-item">
+                            <span class="metric-label"><i class="fas fa-box text-purple-500"></i> Product A</span>
+                            <span class="metric-value">1,234 sales</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label"><i class="fas fa-box text-purple-500"></i> Product B</span>
+                            <span class="metric-value">987 sales</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label"><i class="fas fa-box text-purple-500"></i> Product C</span>
+                            <span class="metric-value">543 sales</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(topLevelBoxEl);
+        }
+
+        /**
+         * New: Renders the user reports section.
+         * @param {Array<Object>} data - The parsed data for user reports.
+         */
+        function renderUserReportsDashboard(data) {
+            const container = document.getElementById('user-reports-section');
+            container.innerHTML = '';
+            
+            // This is a placeholder for your user reports content.
+            // You can replace this with actual logic to parse and render your user data.
+            const topLevelBoxEl = document.createElement('div');
+            topLevelBoxEl.className = "top-level-box";
+            topLevelBoxEl.innerHTML = `
+                <h2 class="top-level-box-title">User Reports</h2>
+                <div class="sub-box mb-10">
+                    <h3 class="sub-box-title">User Demographics (Placeholder)</h3>
+                    <div class="space-y-4">
+                        <div class="metric-item">
+                            <span class="metric-label"><i class="fas fa-map-marker-alt text-purple-500"></i> Top Country</span>
+                            <span class="metric-value">USA</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label"><i class="fas fa-chart-pie text-purple-500"></i> Age Group</span>
+                            <span class="metric-value">25-34</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(topLevelBoxEl);
         }
         
         /**
@@ -733,8 +802,21 @@
                     dataCache.daily = csv ? parseCSV(csv) : null;
                 }
                 renderDailyMetricsDashboard(dataCache.daily);
+            } else if (target === 'product-reports') { // New: Handle product reports
+                if (!dataCache.productReports) {
+                    showLoadingIndicator('product-reports-section');
+                    const csv = await fetchCSVData(PRODUCT_REPORTS_URL);
+                    dataCache.productReports = csv ? parseCSV(csv) : null;
+                }
+                renderProductReportsDashboard(dataCache.productReports);
+            } else if (target === 'user-reports') { // New: Handle user reports
+                if (!dataCache.userReports) {
+                    showLoadingIndicator('user-reports-section');
+                    const csv = await fetchCSVData(USER_REPORTS_URL);
+                    dataCache.userReports = csv ? parseCSV(csv) : null;
+                }
+                renderUserReportsDashboard(dataCache.userReports);
             }
-            // The settings section is static, so no data fetching is needed.
             updateLastUpdatedTime();
         }
         
