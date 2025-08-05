@@ -24,6 +24,8 @@
             --text-muted-color: #a1a1a6;
             --card-bg: rgba(29, 29, 31, 0.7);
             --card-border: rgba(255, 255, 255, 0.1);
+            --card-hover-bg: rgba(40, 40, 42, 0.8); /* Darker greyish highlight */
+            --card-hover-shadow: 0 0 25px rgba(200, 200, 255, 0.1); /* Subtle glow */
             --header-bg: rgba(29, 29, 31, 0.7);
             --header-border: rgba(255, 255, 255, 0.1);
             --icon-color: #ffffff;
@@ -40,6 +42,8 @@
             --text-muted-color: #515154;
             --card-bg: rgba(255, 255, 255, 0.7);
             --card-border: rgba(0, 0, 0, 0.1);
+            --card-hover-bg: rgba(230, 230, 235, 0.9); /* Greyish highlight for light mode */
+            --card-hover-shadow: 0 0 25px rgba(0, 0, 0, 0.1); /* Subtle glow */
             --header-bg: rgba(255, 255, 255, 0.7);
             --header-border: rgba(0, 0, 0, 0.1);
             --icon-color: #000000;
@@ -71,11 +75,11 @@
 
         /* --- NAVIGATION STYLES --- */
         #navigation-bar {
-            max-width: 56rem; /* Significantly wider */
+            max-width: 56rem;
         }
         .nav-item {
-            padding: 1.25rem 2.5rem; /* Significantly bigger vertically */
-            font-size: 1.25rem; /* Larger font */
+            padding: 1.25rem 2.5rem;
+            font-size: 1.25rem;
             font-weight: 600;
             transition: all 0.3s ease;
             color: var(--nav-text-color);
@@ -93,6 +97,31 @@
             color: var(--nav-active-text);
             box-shadow: 0 4px 15px rgba(0,0,0,0.25);
         }
+
+        /* --- NEW HOVER EFFECT & SOFTER CORNERS --- */
+        .metric-card {
+            border-radius: 1.5rem; /* Softer corners */
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            background-color: var(--card-hover-bg);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: var(--card-hover-shadow); /* Apple TV glow */
+        }
+        body.light-mode .metric-card:hover {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        .metric-value {
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover .metric-value {
+            transform: scale(1.2); /* Makes the number pop even more */
+        }
+        .sub-box, .report-button {
+            border-radius: 1.5rem; /* Softer corners for all containers */
+        }
+
 
         /* --- MOBILE RESPONSIVE STYLES --- */
         @media (max-width: 768px) {
@@ -231,13 +260,13 @@
                                 </h2>
                                 <div class="space-y-8">
                                     ${Object.entries(subBoxes).map(([subTitle, metrics]) => `
-                                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)] mb-8">
+                                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] mb-8">
                                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
                                             <div class="card-grid flex flex-wrap justify-center gap-6">
                                                 ${metrics.sort((a, b) => a.Order - b.Order).map(metric => `
-                                                    <div class="flex-grow bg-black/5 p-6 rounded-2xl border border-white/10 transition-all duration-300 hover:bg-black/10 hover:border-white/20 hover:scale-105 flex flex-col items-center text-center space-y-3 min-w-[200px]">
+                                                    <div class="metric-card flex-grow bg-black/5 p-6 border border-white/10 flex flex-col items-center text-center space-y-3 min-w-[200px]">
                                                         <div class="text-3xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                        <div class="text-4xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                        <div class="metric-value text-4xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
                                                         <div class="text-sm text-[var(--text-muted-color)]">${metric['Data Header']}</div>
                                                     </div>
                                                 `).join('')}
@@ -268,16 +297,16 @@
                 const numRatings = getLatestMetric('Number of Ratings');
 
                 const createMetricCard = (label, value, icon) => `
-                    <div class="flex-grow bg-black/5 p-6 rounded-2xl border border-white/10 transition-all duration-300 hover:bg-black/10 hover:border-white/20 hover:scale-105 flex flex-col items-center text-center space-y-3 min-w-[200px]">
+                    <div class="metric-card flex-grow bg-black/5 p-6 border border-white/10 flex flex-col items-center text-center space-y-3 min-w-[200px]">
                         <div class="text-3xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
-                        <div class="text-4xl font-bold text-[var(--text-color)] tracking-tight">${value || 'N/A'}</div>
+                        <div class="metric-value text-4xl font-bold text-[var(--text-color)] tracking-tight">${value || 'N/A'}</div>
                         <div class="text-sm text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
 
                 container.innerHTML = `
                     <div class="space-y-8">
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)]">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('dau')}"></i>Daily Active Users (DAU)</h3>
                             <div class="card-grid flex flex-wrap justify-center gap-6">
                                 ${createMetricCard('Web', dau.WEB, getIconForMetric('web'))}
@@ -285,7 +314,7 @@
                                 ${createMetricCard('iOS', dau.iOS, getIconForMetric('ios'))}
                             </div>
                         </div>
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)]">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('mau')}"></i>Monthly Active Users (MAU)</h3>
                             <div class="card-grid flex flex-wrap justify-center gap-6">
                                 ${createMetricCard('Web', mau.WEB, getIconForMetric('web'))}
@@ -293,7 +322,7 @@
                                 ${createMetricCard('iOS', mau.iOS, getIconForMetric('ios'))}
                             </div>
                         </div>
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl border border-[var(--card-border)]">
+                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)]">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Ratings</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
@@ -326,7 +355,7 @@
                 container.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         ${reports.map(report => `
-                            <a href="${report.link}" target="_blank" rel="noopener noreferrer" class="group relative bg-black/20 backdrop-blur-md p-8 rounded-3xl border border-white/10 text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 overflow-hidden h-48">
+                            <a href="${report.link}" target="_blank" rel="noopener noreferrer" class="report-button group relative bg-black/20 backdrop-blur-md p-8 border border-white/10 text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-105 overflow-hidden h-48">
                                 <i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-white/5 transition-all duration-500 group-hover:text-white/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>
                                 <div class="relative z-10">
                                     <i class="${report.icon} text-5xl mb-4 text-[var(--icon-color)] transition-transform duration-300 group-hover:scale-110"></i>
