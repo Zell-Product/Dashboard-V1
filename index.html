@@ -22,7 +22,7 @@
             --primary-purple: #6c1e74;
             --light-background: #f0f4f9;
             --card-background: rgba(255, 255, 255, 0.85);
-            --border-color: rgba(108, 30, 116, 0.2);
+            --border-color: rgba(108, 30, 116, 0.15);
             --text-color: #374151;
             --heading-color: #1f2937;
             --sidebar-width: 280px;
@@ -115,14 +115,12 @@
         }
         
         .top-level-box {
-            margin-bottom: 3.5rem;
             padding: 2.5rem;
-            background-color: transparent; /* Make container transparent */
+            background-color: transparent;
             border: none;
             box-shadow: none;
         }
         
-        /* --- FINAL HEADER REDESIGN --- */
         .top-level-box-title {
             display: flex;
             justify-content: center;
@@ -133,7 +131,6 @@
             margin-bottom: 2.5rem;
             padding: 1rem;
             text-align: center;
-            /* Glassy Font Effect */
             background: linear-gradient(135deg, var(--primary-purple) 30%, #a83279 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -146,15 +143,14 @@
             width: auto;
         }
 
-        /* --- REDESIGNED SUB-BOX FOR GROUPING --- */
         .sub-box {
             padding: 2rem;
-            margin-bottom: 2.5rem; /* Space between groups */
-            background-color: var(--card-background);
+            margin-bottom: 2rem; /* Logical spacing */
+            background: linear-gradient(145deg, rgba(255,255,255,0.8), rgba(245,245,255,0.7));
             backdrop-filter: blur(15px);
             border-radius: 1.5rem;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(108, 30, 116, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
         
         .sub-box-title {
@@ -162,7 +158,7 @@
             font-weight: 700;
             color: var(--heading-color);
             margin-bottom: 1.5rem;
-            text-align: left;
+            text-align: center; /* Centered header */
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 1rem;
         }
@@ -174,11 +170,11 @@
         }
 
         .metric-card {
-            background-color: rgba(255, 255, 255, 0.7);
+            background: linear-gradient(145deg, #ffffff, #f9f9ff);
             padding: 1.5rem;
             border-radius: 1.25rem;
             border: 1px solid rgba(108, 30, 116, 0.1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
             text-align: center;
             transition: all 0.3s ease;
         }
@@ -373,7 +369,8 @@
                 <div class="top-level-box">
                     <h2 class="top-level-box-title">
                         <span>Other Reports</span>
-                        <img class="header-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABJ0lEQVR4Ae3WwQnCQBCF4X9aBSvBKuysxAq0go6sQCuxE6wEC8EKsAIr0QrMhCAfCBt4yHsfFLi/p/vAh3s3h4eHh4eHh1cBsA3wYp5s4H/sYlqJmuWqVn2cMiyqYt1a1a58k6rVqgZgI+tWrfp+t0qrVjWAmYh1axUD0AnYWq0aQJqI1WpVg2gT8FqtGkCaiNVq1QCaRPyvVjWAJBEvVqsGkCQCM2s1gDQRC2s1gDQRC2s1gDQRC2s1gDQRC2s1gDRhY60GUBA21moABWFjrQZQEObXagAFea9WDSBFea9WDSBFea9WDSBFea9WDSBFea9WDSBFeWutBlAQVtZqAAVhY60GUBDmV2sABXmvVg0gRXmvVg0gRXmvVg0gRXmvVg0gRXmvVg0gRblrrbcHKw4ODg4ODg5+A74AR2w0gU2DDBcAAAAASUVORK5CYII=" alt="Google Sheets Icon">
+                        <!-- FINAL LOGO FIX: Reliable, clean, embedded SVG icon -->
+                        <img class="header-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRUFENTQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQgMiBIMTggVjYgSDE0eiIvPjxwYXRoIGQ9Ik00IDIgSDEwIFYxMCBINDp6Ii8+PHBhdGggZD0iTTEwIDE0IEgxOCBWMTggSDEweiIvPjxwYXRoIGQ9Ik00IDE0IEg2IFYyMiBINDp6Ii8+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iMiIvPjwvc3ZnPg==" alt="Google Sheets Icon">
                     </h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
