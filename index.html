@@ -3,532 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Functional Dashboard</title>
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
-    
-    <!-- CDN Imports for React, Tailwind, and other libraries -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <title>Glassy Data Cards</title>
+    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
-    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.min.js"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
-        :root {
-            --primary-purple: #6c1e74;
-            --light-background: #f0f4f9;
-            --card-background: rgba(255, 255, 255, 0.75);
-            --border-color: rgba(108, 30, 116, 0.2);
-            --text-color: #374151;
-            --heading-color: #1f2937;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
+        /* Custom font for the page */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--light-background);
-            background-image: linear-gradient(135deg, #f0f4f9 0%, #e8edf3 100%);
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            color: var(--text-color);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        .dashboard-container {
-            display: flex;
+            background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
             min-height: 100vh;
         }
-
-        .sidebar {
-            width: 280px;
-            background-color: var(--card-background);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border-color);
-            padding: 2rem;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
-            position: fixed; /* Keep sidebar fixed */
-            height: 100vh;
-            overflow-y: auto; /* Allow sidebar content to scroll */
-        }
-
-        .sidebar-logo {
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: #ffffff;
-            background: linear-gradient(45deg, rgba(108, 30, 116, 0.9) 0%, rgba(140, 40, 150, 0.7) 100%);
-            backdrop-filter: blur(20px);
-            border-radius: 1.25rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-
-        .sidebar-nav-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.25rem;
-            margin-bottom: 0.75rem;
-            border-radius: 0.75rem;
-            color: var(--text-color);
-            font-size: 1.4rem;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-        
-        .sidebar-nav-item-content {
-            display: flex;
-            align-items: center;
-        }
-
-        .sidebar-nav-item-content svg {
-            margin-right: 1rem;
-        }
-
-        .sidebar-nav-item:hover {
-            background-color: rgba(108, 30, 116, 0.1);
-            color: var(--primary-purple);
-        }
-
-        .sidebar-nav-item.active {
-            background-color: var(--primary-purple);
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar-nav-nested {
-            padding-left: 2.5rem;
-            margin-top: -0.5rem; /* Adjust margin to bring it closer to the parent */
-            transition: all 0.3s ease-out;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-        }
-
-        .sidebar-nav-nested.expanded {
-            max-height: 100px; /* A value large enough to show content */
-            opacity: 1;
-        }
-        
-        .main-content {
-            flex-grow: 1;
-            padding: 3rem;
-            margin-left: 280px; /* Offset for fixed sidebar */
-        }
-        
-        .top-level-box {
-            margin-bottom: 3rem;
-            padding: 3rem;
-            background-color: var(--card-background);
-            backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-        }
-        .top-level-box-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-purple);
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .sub-box {
-            padding: 2rem;
-            background-color: rgba(108, 30, 116, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 1.25rem;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(108, 30, 116, 0.1);
-        }
-        .sub-box-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--heading-color);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        .metric-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(108, 30, 116, 0.15);
-        }
-        .metric-item:last-child {
-            border-bottom: none;
-        }
-        .metric-label {
-            font-size: 1.1rem;
-            color: var(--text-color);
-        }
-        .metric-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary-purple);
-        }
-        
-        .last-updated-text {
-            text-align: center;
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-        
-        .scorecard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .scorecard {
-            display: flex;
-            align-items: center;
-            background: linear-gradient(45deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(108, 30, 116, 0.15);
-            border-radius: 1.25rem;
-            padding: 2rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .scorecard:hover {
-          transform: translateY(-5px);
-        }
-        
-        .scorecard-icon {
-            width: 3.5rem;
-            height: 3.5rem;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(108, 30, 116, 0.1);
-            border-radius: 50%;
-            margin-right: 1.5rem;
-            color: var(--primary-purple);
-        }
-        
-        .scorecard-content h3 {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: var(--text-color);
-            margin-bottom: 0.25rem;
-        }
-        
-        .scorecard-content p {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--primary-purple);
-        }
-        
-        .chart-container {
-            background-color: var(--card-background);
-            backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-        }
-
-        /* Responsive styles for mobile */
-        @media (max-width: 768px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                justify-content: space-around;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                padding: 1.5rem 1rem;
-                position: relative;
-                margin-bottom: 2rem;
-            }
-            .sidebar-logo {
-                display: none;
-            }
-            .main-content {
-                padding: 1.5rem;
-                margin-left: 0;
-            }
-            .top-level-box-title {
-                text-align: center;
-                font-size: 2rem;
-            }
-            .sub-box-title {
-                text-align: center;
-            }
+        /* Custom styles for the glass effect on hover */
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
-<body>
-<div id="root"></div>
+<body class="p-8 flex items-center justify-center">
 
-<script>
-    const { useState, useEffect, useRef } = React;
-    const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
-    const { Users, CalendarClock, CloudDownload, BarChart2, FileSpreadsheet, ChevronRight } = lucide;
+    <!-- Main container for the glassy UI cards -->
+    <div class="max-w-7xl w-full mx-auto p-4 md:p-8 space-y-8">
 
-    const App = () => {
-        // Hard-coded sample data to ensure the UI renders.
-        // This is a temporary measure to confirm the base app is working.
-        const sampleOverviewData = [
-            { 'Top-Level Box': 'User Analytics', 'Sub-Box Header': 'Daily Active Users (DAU)', 'Order': '1', 'Data Header': 'Web', 'Value': '2,746' },
-            { 'Top-Level Box': 'User Analytics', 'Sub-Box Header': 'Daily Active Users (DAU)', 'Order': '2', 'Data Header': 'Android', 'Value': '503' },
-            { 'Top-Level Box': 'User Analytics', 'Sub-Box Header': 'Monthly Active Users (MAU)', 'Order': '1', 'Data Header': 'Web', 'Value': '8,909' },
-            { 'Top-Level Box': 'Batches Information', 'Sub-Box Header': 'General', 'Order': '1', 'Data Header': 'Total Enrolled Students', 'Value': '3498' },
-        ];
+        <!-- Header section -->
+        <header class="text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-2 tracking-wide">
+                Analyzed Data Overview
+            </h1>
+            <p class="text-lg text-white/80">
+                A beautifully formatted representation of your key metrics.
+            </p>
+        </header>
 
-        const sampleDailyMetricsData = [
-            { 'Cumulative': 'Downloads', 'WEB': 'NA', 'ANDROID': '3729', 'iOS': 'NA' },
-            { 'Cumulative': 'DAU', 'WEB': '1669', 'ANDROID': '503', 'iOS': 'NA' },
-            { 'Cumulative': 'MAU', 'WEB': '5667', 'ANDROID': '2951', 'iOS': 'NA' },
-        ];
+        <!-- Grid layout for the cards, responsive design -->
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <!-- Glassy Card 1 -->
+            <div class="glass-card transition-all duration-300 transform bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Data Point A</h3>
+                <p class="text-lg text-white/80 mb-4">
+                    This is a detailed description of the first data set. The formatting is clean and easy to read.
+                </p>
+                <div class="text-4xl font-extrabold text-white">4,582</div>
+                <div class="mt-4 flex items-center justify-between text-sm text-white/80">
+                    <span>Change from last week</span>
+                    <span class="text-green-300 font-bold">+12%</span>
+                </div>
+            </div>
 
-        // State variables to hold the raw data
-        const [overviewData, setOverviewData] = useState(sampleOverviewData);
-        const [dailyMetricsData, setDailyMetricsData] = useState(sampleDailyMetricsData);
-        
-        // This is a placeholder for future live data fetching logic
-        const [loading, setLoading] = useState(false);
-        const [error, setError] = useState(null);
+            <!-- Glassy Card 2 -->
+            <div class="glass-card transition-all duration-300 transform bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Data Point B</h3>
+                <p class="text-lg text-white/80 mb-4">
+                    Here's another important metric. The boxes are now wider to accommodate more text.
+                </p>
+                <div class="text-4xl font-extrabold text-white">98.5%</div>
+                <div class="mt-4 flex items-center justify-between text-sm text-white/80">
+                    <span>Change from last month</span>
+                    <span class="text-red-300 font-bold">-2.1%</span>
+                </div>
+            </div>
 
-        // Refs for scrolling to sections
-        const overviewRef = useRef(null);
-        const dailyMetricsRef = useRef(null);
-        const settingsRef = useRef(null);
-        
-        const sectionRefs = {
-            'overview-section': overviewRef,
-            'daily-section': dailyMetricsRef,
-            'settings-section': settingsRef
-        };
+            <!-- Glassy Card 3 -->
+            <div class="glass-card transition-all duration-300 transform bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Data Point C</h3>
+                <p class="text-lg text-white/80 mb-4">
+                    The glassy effect makes the UI feel modern and visually appealing.
+                </p>
+                <div class="text-4xl font-extrabold text-white">1,234</div>
+                <div class="mt-4 flex items-center justify-between text-sm text-white/80">
+                    <span>Daily users</span>
+                    <span class="text-green-300 font-bold">+5%</span>
+                </div>
+            </div>
 
-        const scrollToRef = (ref) => {
-            if (ref && ref.current) ref.current.scrollIntoView({ behavior: 'smooth' });
-        };
-        
-        const handleNavClick = (sectionId) => {
-            const ref = sectionRefs[sectionId];
-            scrollToRef(ref);
-        };
+            <!-- Glassy Card 4 -->
+            <div class="glass-card transition-all duration-300 transform bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Data Point D</h3>
+                <p class="text-lg text-white/80 mb-4">
+                    This card demonstrates the responsive nature of the design.
+                </p>
+                <div class="text-4xl font-extrabold text-white">$12,345</div>
+                <div class="mt-4 flex items-center justify-between text-sm text-white/80">
+                    <span>Total revenue</span>
+                    <span class="text-green-300 font-bold">+15%</span>
+                </div>
+            </div>
 
-        // Memoized data processing functions for better performance
-        const processOverviewData = React.useMemo(() => {
-            return overviewData.reduce((acc, row) => {
-                const topLevelBox = row['Top-Level Box'];
-                const subBoxHeader = row['Sub-Box Header'];
-                if (!acc[topLevelBox]) acc[topLevelBox] = {};
-                if (!acc[topLevelBox][subBoxHeader]) acc[topLevelBox][subBoxHeader] = [];
-                acc[topLevelBox][subBoxHeader].push(row);
-                return acc;
-            }, {});
-        }, [overviewData]);
+            <!-- Glassy Card 5 -->
+            <div class="glass-card transition-all duration-300 transform bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Data Point E</h3>
+                <p class="text-lg text-white/80 mb-4">
+                    The card layout ensures that the data is not vertically stretched.
+                </p>
+                <div class="text-4xl font-extrabold text-white">78</div>
+                <div class="mt-4 flex items-center justify-between text-sm text-white/80">
+                    <span>New accounts</span>
+                    <span class="text-red-300 font-bold">-3%</span>
+                </div>
+            </div>
 
-        const scorecards = React.useMemo(() => {
-            const dau = dailyMetricsData.find(d => d['Cumulative'] === 'DAU')?.WEB || 'NA';
-            const mau = dailyMetricsData.find(d => d['Cumulative'] === 'MAU')?.WEB || 'NA';
-            const visitors = 'Placeholder'; // Sample data doesn't have this, so a placeholder is used
-            return { dau, mau, visitors };
-        }, [dailyMetricsData]);
+            <!-- Glassy Card 6 -->
+            <div class="glass-card transition-all duration-300 transform bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Data Point F</h3>
+                <p class="text-lg text-white/80 mb-4">
+                    This card is a sample for a different type of data visualization.
+                </p>
+                <div class="text-4xl font-extrabold text-white">25.5°C</div>
+                <div class="mt-4 flex items-center justify-between text-sm text-white/80">
+                    <span>Average temperature</span>
+                    <span class="text-green-300 font-bold">+1.2°C</span>
+                </div>
+            </div>
+        </div>
 
-        const dailyMetricsSubBoxes = React.useMemo(() => {
-            return dailyMetricsData.filter(metric =>
-                !['Cumulative', 'DAU', 'MAU', 'Active Users', 'Total Visitors'].includes(metric['Cumulative']) &&
-                metric['Cumulative'] && metric['Cumulative'].trim() !== ''
-            );
-        }, [dailyMetricsData]);
+    </div>
 
-        const mockDauChartData = [
-            { name: 'Mon', users: 1600 },
-            { name: 'Tue', users: 1650 },
-            { name: 'Wed', users: 1750 },
-            { name: 'Thu', users: 1800 },
-            { name: 'Fri', users: 1780 },
-            { name: 'Sat', users: 1700 },
-            { name: 'Sun', users: 1690 },
-        ];
-        
-        // This function handles the conditional rendering based on the app's state
-        const renderContent = () => {
-            if (loading) {
-                return React.createElement('div', { className: 'loader-container' },
-                    React.createElement('div', { className: 'w-16 h-16 border-4 border-purple-200 border-l-purple-600 rounded-full animate-spin' })
-                );
-            }
-            if (error) {
-                return React.createElement('div', { className: 'error-container' },
-                    React.createElement('div', { className: 'text-center p-8 bg-red-50 border border-red-300 rounded-2xl shadow-lg max-w-lg mx-auto' },
-                        React.createElement('h3', { className: 'text-2xl font-bold text-red-600 mb-4' }, 'Data Loading Error'),
-                        React.createElement('p', { className: 'text-lg text-red-500' }, error),
-                        React.createElement('p', { className: 'text-sm text-gray-500 mt-4' }, 'This dashboard is currently configured to use hardcoded data.')
-                    )
-                );
-            }
-            if (Object.keys(processOverviewData).length === 0 && dailyMetricsData.length === 0) {
-                 return React.createElement('div', { className: 'error-container' },
-                    React.createElement('div', { className: 'text-center p-8 bg-yellow-50 border border-yellow-300 rounded-2xl shadow-lg max-w-lg mx-auto' },
-                        React.createElement('h3', { className: 'text-2xl font-bold text-yellow-600 mb-4' }, 'No Data Available'),
-                        React.createElement('p', { className: 'text-lg text-yellow-500' }, 'The dashboard could not load any data.')
-                    )
-                );
-            }
-
-            return React.createElement(React.Fragment, null,
-                React.createElement('section', { id: 'overview-section', ref: overviewRef, className: 'pt-24 pb-8' },
-                    React.createElement('div', { className: 'top-level-box' },
-                        React.createElement('h2', { className: 'top-level-box-title' }, 'Overview Metrics'),
-                        Object.entries(processOverviewData).map(([topLevelBox, subBoxes]) => (
-                            React.createElement('div', { key: topLevelBox, className: 'mb-8' },
-                                React.createElement('h3', { className: 'text-2xl font-semibold text-gray-800 mb-4' }, topLevelBox),
-                                React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
-                                    Object.entries(subBoxes).map(([subBoxHeader, metrics]) => (
-                                        React.createElement('div', { key: subBoxHeader, className: 'sub-box' },
-                                            React.createElement('h4', { className: 'sub-box-title' }, subBoxHeader),
-                                            React.createElement('div', { className: 'space-y-2' },
-                                                metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).map((metric, index) => (
-                                                    React.createElement('div', { key: index, className: 'metric-item' },
-                                                        React.createElement('span', { className: 'metric-label' }, metric['Data Header']),
-                                                        React.createElement('span', { className: 'metric-value' }, metric['Value'])
-                                                    )
-                                                ))
-                                            )
-                                        )
-                                    ))
-                                )
-                            )
-                        ))
-                    )
-                ),
-                React.createElement('section', { id: 'daily-section', ref: dailyMetricsRef, className: 'py-8' },
-                    React.createElement('div', { className: 'top-level-box' },
-                        React.createElement('h2', { className: 'top-level-box-title' }, 'Daily Metrics'),
-                        React.createElement('div', { className: 'scorecard-grid mb-8' },
-                            React.createElement('div', { className: 'scorecard' },
-                                React.createElement('div', { className: 'scorecard-icon' }, React.createElement(Users, { className: 'w-7 h-7' })),
-                                React.createElement('div', { className: 'scorecard-content' },
-                                    React.createElement('h3', null, 'Daily Active Users'),
-                                    React.createElement('p', null, scorecards.dau)
-                                )
-                            ),
-                            React.createElement('div', { className: 'scorecard' },
-                                React.createElement('div', { className: 'scorecard-icon' }, React.createElement(CalendarClock, { className: 'w-7 h-7' })),
-                                React.createElement('div', { className: 'scorecard-content' },
-                                    React.createElement('h3', null, 'Monthly Active Users'),
-                                    React.createElement('p', null, scorecards.mau)
-                                )
-                            ),
-                            React.createElement('div', { className: 'scorecard' },
-                                React.createElement('div', { className: 'scorecard-icon' }, React.createElement(CloudDownload, { className: 'w-7 h-7' })),
-                                React.createElement('div', { className: 'scorecard-content' },
-                                    React.createElement('h3', null, 'Total Visitors'),
-                                    React.createElement('p', null, scorecards.visitors)
-                                )
-                            )
-                        ),
-                        React.createElement('div', { className: 'chart-container mb-8' },
-                            React.createElement('h3', { className: 'top-level-box-title !mb-4 !pb-2' }, 'Daily Active Users Trend'),
-                            React.createElement(ResponsiveContainer, { width: '100%', height: 320 },
-                                React.createElement(LineChart, { data: mockDauChartData },
-                                    React.createElement(CartesianGrid, { strokeDasharray: '3 3', strokeOpacity: 0.5 }),
-                                    React.createElement(XAxis, { dataKey: 'name', stroke: '#6c1e74' }),
-                                    React.createElement(YAxis, { stroke: '#6c1e74' }),
-                                    React.createElement(Tooltip, {
-                                        contentStyle: {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                            borderRadius: '12px',
-                                            border: '1px solid rgba(108, 30, 116, 0.2)',
-                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                            backdropFilter: 'blur(10px)',
-                                            color: '#374151'
-                                        },
-                                        itemStyle: { color: '#6c1e74' }
-                                    }),
-                                    React.createElement(Line, { type: 'monotone', dataKey: 'users', stroke: '#6c1e74', strokeWidth: 2, dot: { r: 4 }, activeDot: { r: 6 } })
-                                )
-                            )
-                        ),
-                        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
-                            dailyMetricsSubBoxes.map((metric, index) => (
-                                React.createElement('div', { key: index, className: 'sub-box' },
-                                    React.createElement('h4', { className: 'sub-box-title' }, metric['Cumulative']),
-                                    React.createElement('div', { className: 'space-y-2' },
-                                        ['WEB', 'ANDROID', 'iOS'].map(platform => (
-                                            metric[platform] && metric[platform] !== 'NA' && metric[platform].trim() !== '' ?
-                                                React.createElement('div', { key: platform, className: 'metric-item' },
-                                                    React.createElement('span', { className: 'metric-label' }, platform),
-                                                    React.createElement('span', { className: 'metric-value' }, metric[platform])
-                                                ) : null
-                                        ))
-                                    )
-                                )
-                            ))
-                        )
-                    )
-                ),
-                React.createElement('section', { id: 'settings-section', ref: settingsRef, className: 'py-8' },
-                    React.createElement('div', { className: 'top-level-box' },
-                        React.createElement('h2', { className: 'top-level-box-title' }, 'Settings'),
-                        React.createElement('p', { className: 'text-gray-600' }, 'This section is a placeholder for user settings.')
-                    )
-                ),
-                React.createElement('footer', { className: 'last-updated-text py-8' }, 'Last updated: ' + new Date().toLocaleString())
-            );
-        };
-        
-        const Sidebar = ({ onNavClick }) => {
-            const [activeSection, setActiveSection] = useState('overview-section');
-            const [isGeneralReportsOpen, setIsGeneralReportsOpen] = useState(false);
-
-            const handleSectionClick = (sectionId) => {
-              setActiveSection(sectionId);
-              onNavClick(sectionId);
-            };
-            
-            const handleGeneralReportsClick = () => {
-                setIsGeneralReportsOpen(!isGeneralReportsOpen);
-            };
-
-            return React.createElement('aside', { className: 'sidebar' },
-                React.createElement('div', { className: 'sidebar-logo' }, 'Dashboard'),
-                React.createElement('nav', null,
-                    React.createElement('a', { onClick: () => handleSectionClick('overview-section'), className: `sidebar-nav-item ${activeSection === 'overview-section' ? 'active' : ''}` }, 
-                        React.createElement('div', { className: 'sidebar-nav-item-content' },
-                            React.createElement(Users, { className: 'w-6 h-6' }),
-                            ' Overview'
-                        )
-                    ),
-                    React.createElement('a', { onClick: handleGeneralReportsClick, className: `sidebar-nav-item` }, 
-                        React.createElement('div', { className: 'sidebar-nav-item-content' },
-                            React.createElement(BarChart2, { className: 'w-6 h-6' }),
-                            ' General Reports'
-                        ),
-                        React.createElement(ChevronRight, { className: `w-6 h-6 transition-transform duration-300 ${isGeneralReportsOpen ? 'rotate-90' : ''}`})
-                    ),
-                    React.createElement('div', { className: `sidebar-nav-nested ${isGeneralReportsOpen ? 'expanded' : ''}` },
-                        React.createElement('a', { onClick: () => handleSectionClick('daily-section'), className: `sidebar-nav-item ${activeSection === 'daily-section' ? 'active' : ''}` }, 
-                            React.createElement('div', { className: 'sidebar-nav-item-content' },
-                                'Daily Metrics'
-                            )
-                        )
-                    ),
-                    React.createElement('a', { onClick: () => handleSectionClick('settings-sect
+</body>
+</html>
