@@ -1,199 +1,681 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Dashboard</title>
-        <link rel="icon" href="favicon.png" type="image/png">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Dashboard</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        /* Define theme colors for a light, iOS-inspired Glass UI */
-        :root {
-            --primary-purple: #6c1e74;
-            --light-background: #f0f4f9;
-            --card-background: rgba(255, 255, 255, 0.75);
-            --border-color: rgba(108, 30, 116, 0.2);
-            --text-color: #374151;
-            --heading-color: #1f2937;
-            --sidebar-width: 280px;
-        }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        /* Define theme colors for a light, iOS-inspired Glass UI */
+        :root {
+            --primary-purple: #6c1e74;
+            --light-background: #f0f4f9;
+            --card-background: rgba(255, 255, 255, 0.75);
+            --border-color: rgba(108, 30, 116, 0.2);
+            --text-color: #374151;
+            --heading-color: #1f2937;
+            --sidebar-width: 280px;
+        }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-background);
-            background-image: linear-gradient(135deg, #f0f4f9 0%, #e8edf3 100%);
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            color: var(--text-color);
-            min-height: 100vh;
-            /* Prevent body from scrolling on desktop */
-            overflow: hidden;
-        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-background);
+            background-image: linear-gradient(135deg, #f0f4f9 0%, #e8edf3 100%);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            color: var(--text-color);
+            min-height: 100vh;
+            /* Prevent body from scrolling on desktop */
+            overflow: hidden;
+        }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-            flex-grow: 1;
-        }
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            flex-grow: 1;
+        }
 
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--card-background);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border-color);
-            padding: 2rem;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            z-index: 10;
-        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-background);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 10;
+        }
 
-        .sidebar-logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--heading-color);
-            margin-bottom: 3rem;
-            text-align: center;
-        }
+        .sidebar-logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--heading-color);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
 
-        .sidebar-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 0.75rem;
-            border-radius: 1.5rem;
-            color: var(--text-color);
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 0.75rem;
+            border-radius: 1.5rem;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
 
-        .sidebar-nav-item:hover {
-            background-color: rgba(108, 30, 116, 0.1);
-            color: var(--primary-purple);
-        }
+        .sidebar-nav-item:hover {
+            background-color: rgba(108, 30, 116, 0.1);
+            color: var(--primary-purple);
+        }
 
-        .sidebar-nav-item.active {
-            background-color: var(--primary-purple);
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar-nav-item.active .nav-icon {
-            color: #ffffff;
-        }
+        .sidebar-nav-item.active {
+            background-color: var(--primary-purple);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-nav-item.active .nav-icon {
+            color: #ffffff;
+        }
 
-        .nav-icon {
-            font-size: 1.5rem;
-            color: var(--primary-purple);
-        }
+        .nav-icon {
+            font-size: 1.5rem;
+            color: var(--primary-purple);
+        }
 
-        .main-content {
-            margin-left: var(--sidebar-width);
-            flex-grow: 1;
-            padding: 2.5rem 4rem;
-            overflow-y: auto;
-            height: 100vh;
-        }
-        
-        .top-level-box {
-            margin-bottom: 3.5rem;
-            padding: 3rem;
-            background-color: var(--card-background);
-            backdrop-filter: blur(20px);
-            border-radius: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-        }
-        
-        .top-level-box-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--heading-color);
-            margin-bottom: 2.5rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 1.5rem;
-        }
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2.5rem 4rem;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        
+        .top-level-box {
+            margin-bottom: 3.5rem;
+            padding: 3rem;
+            background-color: var(--card-background);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+        
+        .top-level-box-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            margin-bottom: 2.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
 
-        .sub-box {
-            padding: 2.5rem;
-            background-color: rgba(108, 30, 116, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(108, 30, 116, 0.1);
-        }
-        
-        .sub-box-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--heading-color);
-            margin-bottom: 1.5rem;
-        }
-        
-        .metric-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(108, 30, 116, 0.15);
-            transition: transform 0.2s ease-in-out;
-        }
+        .sub-box {
+            padding: 2.5rem;
+            background-color: rgba(108, 30, 116, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(108, 30, 116, 0.1);
+        }
+        
+        .sub-box-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--heading-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(108, 30, 116, 0.15);
+            transition: transform 0.2s ease-in-out;
+        }
 
-        .metric-item:hover {
-            transform: translateX(8px);
-        }
-        
-        .metric-item:last-child {
-            border-bottom: none;
-        }
-        
-        .metric-label {
-            font-size: 1.1rem;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .metric-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary-purple);
-        }
-        
-        .chart-container {
-            width: 100%;
-            height: 450px;
-            margin-top: 2rem;
-            position: relative;
-        }
-        
-        /* Updated styles for Report Buttons */
-        .report-button {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            border-radius: 1.5rem;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        .metric-item:hover {
+            transform: translateX(8px);
+        }
+        
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 450px;
+            margin-top: 2rem;
+            position: relative;
+        }
+        
+        /* Updated styles for Report Buttons */
+        .report-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-button:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .report-button-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .report-button-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .google-sheet-icon {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            opacity: 0.8;
+        }
+
+        /* Specific text color for light backgrounds */
+        .report-button.text-dark .report-button-title,
+        .report-button.text-dark .fas {
+            color: #374151; /* --text-color */
+        }
+
+        .error-message-box {
+            text-align: center;
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 2.5rem;
+            border-radius: 1.25rem;
+            margin-top: 2rem;
+            border: 1px solid #d32f2f;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .spinner {
+            border: 6px solid rgba(108, 30, 116, 0.2);
+            border-left-color: var(--primary-purple);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+        }
+        
+        .last-updated-text {
+            text-align: center;
+            margin-top: 3.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Responsive styles for mobile */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+            .dashboard-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                justify-content: space-around;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 1rem 0.5rem;
+                position: static;
+            }
+            .sidebar-logo {
+                display: none;
+            }
+            .sidebar-nav-item {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+            .main-content {
+                padding: 1.5rem;
+                margin-left: 0;
+                height: auto;
+            }
+            .top-level-box-title {
+                text-align: center;
+                font-size: 1.75rem;
+            }
+            .sub-box-title {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">Dashboard</div>
+            <nav>
+                <a href="#" class="sidebar-nav-item active" data-target="overview">
+                    <i class="fas fa-chart-line nav-icon"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="daily">
+                    <i class="fas fa-calendar-day nav-icon"></i>
+                    <span>Daily Metrics</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="other-reports">
+                    <i class="fas fa-file-alt nav-icon"></i>
+                    <span>Other Reports</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div id="overview-section" class="section-container">
+                </div>
+            
+            <div id="daily-section" class="section-container hidden">
+                </div>
+
+            <div id="other-reports-section" class="section-container hidden">
+                <div class="top-level-box">
+                    <h2 class="top-level-box-title">Other Reports</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                        <a href="https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #34A853;" onmouseover="this.style.backgroundColor='#2c8e45'" onmouseout="this.style.backgroundColor='#34A853'">
+                            <div class="report-button-content">
+                                <i class="fas fa-book-open text-4xl"></i>
+                                <span class="report-button-title">Question Repository</span>
+                            </div>
+                            <img src="https://cdn.worldvectorlogo.com/logos/google-sheets.svg" alt="Google Sheets" class="google-sheet-icon">
+                        </a>
+
+                        <a href="https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #4285F4;" onmouseover="this.style.backgroundColor='#3573d9'" onmouseout="this.style.backgroundColor='#4285F4'">
+                            <div class="report-button-content">
+                                <i class="fas fa-clipboard-check text-4xl"></i>
+                                <span class="report-button-title">Course Checks</span>
+                            </div>
+                            <img src="https://cdn.worldvectorlogo.com/logos/google-sheets.svg" alt="Google Sheets" class="google-sheet-icon">
+                        </a>
+
+                        <a href="https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button text-dark" style="background-color: #FBBC05;" onmouseover="this.style.backgroundColor='#e4a804'" onmouseout="this.style.backgroundColor='#FBBC05'">
+                            <div class="report-button-content">
+                                <i class="fas fa-ticket-alt text-4xl"></i>
+                                <span class="report-button-title">Ask a Doubt + Tickets</span>
+                            </div>
+                            <img src="https://cdn.worldvectorlogo.com/logos/google-sheets.svg" alt="Google Sheets" class="google-sheet-icon">
+                        </a>
+
+                        <a href="https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #EA4335;" onmouseover="this.style.backgroundColor='#d93527'" onmouseout="this.style.backgroundColor='#EA4335'">
+                            <div class="report-button-content">
+                                <i class="fas fa-chart-pie text-4xl"></i>
+                                <span class="report-button-title">Weekly Batch Reports</span>
+                            </div>
+                            <img src="https://cdn.worldvectorlogo.com/logos/google-sheets.svg" alt="Google Sheets" class="google-sheet-icon">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="last-updated-footer" class="last-updated-text">
+                </div>
+        </main>
+    </div>
+
+    <script>
+        // Data URLs from Google Sheets
+        const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
+        const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
+        
+        let dailyChartInstance = null;
+        
+        const dataCache = {
+            overview: null,
+            daily: null
+        };
+
+        function showLoadingIndicator(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="loader-container"><div class="spinner"></div></div>`;
+        }
+
+        function showFailureMessage(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="error-message-box">
+                    <h3 class="text-2xl font-bold mb-4">Error Loading Data</h3>
+                    <p class="text-lg">${message}</p>
+                    <p class="mt-4">Please check the console for more details.</p>
+                </div>
+            `;
+        }
+        
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim() !== '');
+            if (lines.length < 2) {
+                console.error("CSV data has fewer than 2 lines (header + data).");
+                return [];
+            }
+            const headers = lines[0].split(',').map(header => header.trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                const values = line.match(/(?:"[^"]*"|[^,])+/g) || line.split(',');
+                if (values) {
+                    const trimmedValues = values.map(value => value.trim().replace(/"/g, ''));
+                    if (trimmedValues.length === headers.length) {
+                        const obj = {};
+                        for (let j = 0; j < headers.length; j++) {
+                            obj[headers[j]] = trimmedValues[j];
+                        }
+                        data.push(obj);
+                    }
+                }
+            }
+            return data;
+        }
+
+        async function fetchCSVData(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const text = await response.text();
+                if (text.includes("Sorry, the file you have requested does not exist.") || text.includes("404 Not Found")) {
+                    return null;
+                }
+                return text;
+            } catch (error) {
+                console.error("Could not fetch CSV data:", error);
+                return null;
+            }
+        }
+        
+        function renderOverviewDashboard(data) {
+            const container = document.getElementById('overview-section');
+            container.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                showFailureMessage('overview-section', 'Failed to load Overview Metrics data. Please check the data source.');
+                return;
+            }
+            
+            const groupedData = data.reduce((acc, row) => {
+                const topLevelBox = row['Top-Level Box'];
+                const subBoxHeader = row['Sub-Box Header'];
+                if (!acc[topLevelBox]) { acc[topLevelBox] = {}; }
+                if (!acc[topLevelBox][subBoxHeader]) { acc[topLevelBox][subBoxHeader] = []; }
+                acc[topLevelBox][subBoxHeader].push(row);
+                return acc;
+            }, {});
+
+            for (const [topLevelBox, subBoxes] of Object.entries(groupedData)) {
+                const topLevelBoxEl = document.createElement('div');
+                topLevelBoxEl.className = "top-level-box";
+                topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title">${topLevelBox}</h2>`;
+                
+                const subBoxesContainer = document.createElement('div');
+                subBoxesContainer.className = "flex flex-col space-y-10"; 
+
+                for (const [subBoxHeader, metrics] of Object.entries(subBoxes)) {
+                    const subBoxEl = document.createElement('div');
+                    subBoxEl.className = "sub-box";
+                    subBoxEl.innerHTML = `<h3 class="sub-box-title">${subBoxHeader}</h3><div class="space-y-4"></div>`;
+                    const metricsContainer = subBoxEl.querySelector('div.space-y-4');
+                    
+                    metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).forEach(metric => {
+                        const metricEl = document.createElement('div');
+                        metricEl.className = "metric-item";
+                        metricEl.innerHTML = `
+                            <span class="metric-label">
+                                <i class="fas fa-database text-purple-500"></i>
+                                ${metric['Data Header']}
+                            </span>
+                            <span class="metric-value">${metric['Value']}</span>
+                        `;
+                        metricsContainer.appendChild(metricEl);
+                    });
+                    subBoxesContainer.appendChild(subBoxEl);
+                }
+                topLevelBoxEl.appendChild(subBoxesContainer);
+                container.appendChild(topLevelBoxEl);
+            }
+        }
+        
+        function renderDailyMetricsDashboard(data) {
+            const container = document.getElementById('daily-section');
+            container.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                showFailureMessage('daily-section', 'Failed to load Daily Metrics data. Please check the data source.');
+                return;
+            }
+
+            const topLevelBoxEl = document.createElement('div');
+            topLevelBoxEl.className = "top-level-box";
+            topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title">Daily Metrics</h2>`;
+            container.appendChild(topLevelBoxEl);
+            
+            const dailyUserChartData = data.filter(d => d['Cumulative'] === 'Total Users');
+            if (dailyUserChartData.length > 0) {
+                const dates = dailyUserChartData.map(d => d['Date']);
+                const webData = dailyUserChartData.map(d => parseInt(d['WEB'], 10));
+                const androidData = dailyUserChartData.map(d => parseInt(d['ANDROID'], 10));
+                const iosData = dailyUserChartData.map(d => parseInt(d['iOS'], 10));
+                
+                const chartBox = document.createElement('div');
+                chartBox.className = "sub-box mb-10"; 
+                chartBox.innerHTML = `
+                    <h3 class="sub-box-title">Daily User Trend</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyUserChart"></canvas>
+                    </div>
+                `;
+                topLevelBoxEl.appendChild(chartBox);
+                
+                if (dailyChartInstance) {
+                    dailyChartInstance.destroy();
+                }
+                
+                const ctx = document.getElementById('dailyUserChart').getContext('2d');
+                dailyChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [
+                            { label: 'Web Users', data: webData, borderColor: 'rgba(108, 30, 116, 1)', backgroundColor: 'rgba(108, 30, 116, 0.2)', tension: 0.4, fill: true, },
+                            { label: 'Android Users', data: androidData, borderColor: 'rgba(25, 126, 203, 1)', backgroundColor: 'rgba(25, 126, 203, 0.2)', tension: 0.4, fill: true, },
+                            { label: 'iOS Users', data: iosData, borderColor: 'rgba(235, 100, 100, 1)', backgroundColor: 'rgba(235, 100, 100, 0.2)', tension: 0.4, fill: true, }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true, }, title: { display: false, } },
+                        scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: 'rgba(108, 30, 116, 0.1)' } } }
+                    }
+                });
+            }
+            
+            const dailyMetricsContainer = document.createElement('div');
+            dailyMetricsContainer.className = "flex flex-col space-y-10";
+
+            const groupedMetrics = data.reduce((acc, row) => {
+                const metricName = row['Cumulative'];
+                if (metricName && metricName !== 'Total Users' && metricName.trim() !== '') {
+                    if (!acc[metricName]) { acc[metricName] = []; }
+                    acc[metricName].push(row);
+                }
+                return acc;
+            }, {});
+
+            for (const [metricName, entries] of Object.entries(groupedMetrics)) {
+                const subBoxEl = document.createElement('div');
+                subBoxEl.className = "sub-box";
+                subBoxEl.innerHTML = `<h3 class="sub-box-title">${metricName}</h3><div class="space-y-4"></div>`;
+                const metricsContainer = subBoxEl.querySelector('div.space-y-4');
+                
+                entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
+
+                const latestEntry = entries[0];
+                ['WEB', 'ANDROID', 'iOS'].forEach(platform => {
+                    if (latestEntry[platform] && latestEntry[platform] !== 'NA' && latestEntry[platform].trim() !== '') {
+                        const metricEl = document.createElement('div');
+                        metricEl.className = "metric-item";
+                        metricEl.innerHTML = `
+                            <span class="metric-label"><i class="fas fa-chart-bar text-purple-500"></i> ${platform}</span>
+                            <span class="metric-value">${latestEntry[platform]}</span>
+                        `;
+                        metricsContainer.appendChild(metricEl);
+                    }
+                });
+                dailyMetricsContainer.appendChild(subBoxEl);
+            }
+
+            topLevelBoxEl.appendChild(dailyMetricsContainer);
+        }
+        
+        async function handleNavigation(target) {
+            const navItems = document.querySelectorAll('.sidebar-nav-item');
+            const sections = document.querySelectorAll('.section-container');
+            
+            navItems.forEach(nav => nav.classList.remove('active'));
+            const activeNavItem = document.querySelector(`.sidebar-nav-item[data-target="${target}"]`);
+            if (activeNavItem) activeNavItem.classList.add('active');
+            
+            sections.forEach(section => section.classList.add('hidden'));
+            const targetSection = document.getElementById(target + '-section');
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            if (target === 'overview') {
+                if (!dataCache.overview) {
+                    showLoadingIndicator('overview-section');
+                    const csv = await fetchCSVData(OVERVIEW_URL);
+                    dataCache.overview = csv ? parseCSV(csv) : null;
+                }
+                renderOverviewDashboard(dataCache.overview);
+            } else if (target === 'daily') {
+                if (!dataCache.daily) {
+                    showLoadingIndicator('daily-section');
+                    const csv = await fetchCSVData(DAILY_METRICS_URL);
+                    dataCache.daily = csv ? parseCSV(csv) : null;
+                }
+                renderDailyMetricsDashboard(dataCache.daily);
+            }
+            updateLastUpdatedTime();
+        }
+        
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const formattedTime = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const footer = document.getElementById('last-updated-footer');
+            footer.innerHTML = `
+                Last updated: ${formattedTime} (IST)
+                <button id="refresh-button" class="ml-4 px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-md transition-colors duration-200">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            `;
+            document.getElementById('refresh-button').addEventListener('click', () => {
+                refreshData();
+            });
+        }
+        
+        function refreshData() {
+            const activeTab = document.querySelector('.sidebar-nav-item.active').dataset.target;
+            if (dataCache.hasOwnProperty(activeTab)) {
+                dataCache[activeTab] = null;
+            }
+            handleNavigation(activeTab);
+        }
+
+        async function initializeDashboard() {
+            const navItems = document.querySelectorAll('.sidebar-nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.dataset.target;
+                    handleNavigation(targetId);
+                });
+            });
+
+            handleNavigation('overview');
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
