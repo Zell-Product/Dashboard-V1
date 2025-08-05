@@ -14,7 +14,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* Define theme colors for a light, iOS-inspired Glass UI */
         :root {
             --primary-purple: #6c1e74;
             --light-background: #f0f4f9;
@@ -34,7 +33,6 @@
             box-sizing: border-box;
             color: var(--text-color);
             min-height: 100vh;
-            /* Prevent body from scrolling on desktop */
             overflow: hidden;
         }
 
@@ -122,13 +120,19 @@
             border: 1px solid var(--border-color);
         }
         
+        /* --- HEADER STYLE REDESIGN: Apple-Inspired Glassy UI --- */
         .top-level-box-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--heading-color);
+            font-size: 2rem;
+            font-weight: 800; /* Bolder */
+            color: #5856D6; /* iOS-inspired purple */
             margin-bottom: 2.5rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 1.5rem;
+            padding: 1.25rem 2rem; /* Better spacing */
+            background-color: rgba(255, 255, 255, 0.6); /* Translucent background */
+            backdrop-filter: blur(12px); /* Glassy blur effect */
+            border-radius: 1.25rem; /* Rounded corners */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Soft shadow for depth */
+            text-align: center; /* Centered for a modern look */
         }
 
         .sub-box {
@@ -185,7 +189,6 @@
             position: relative;
         }
         
-        /* Updated styles for Report Buttons */
         .report-button {
             display: flex;
             flex-direction: column;
@@ -219,26 +222,24 @@
             font-weight: 600;
         }
 
-        /* --- STYLE CHANGE 1: Enhanced the logo's appearance --- */
         .google-sheet-icon {
             position: absolute;
             bottom: 12px;
             right: 12px;
-            width: 32px;  /* Increased size */
-            height: 32px; /* Increased size */
-            opacity: 1;   /* Made fully visible */
-            transition: transform 0.3s ease; /* Added smooth transition */
+            width: 32px;
+            height: 32px;
+            opacity: 1;
+            transition: transform 0.3s ease;
+            border-radius: 6px; /* Slightly rounded corners for the icon */
         }
         
-        /* --- STYLE CHANGE 2: Added a nice hover effect --- */
         .report-button:hover .google-sheet-icon {
-            transform: scale(1.15); /* Zoom in on hover */
+            transform: scale(1.15);
         }
 
-        /* Specific text color for light backgrounds */
         .report-button.text-dark .report-button-title,
         .report-button.text-dark .fas {
-            color: #374151; /* --text-color */
+            color: #374151;
         }
 
         .error-message-box {
@@ -287,7 +288,6 @@
             display: none !important;
         }
         
-        /* Responsive styles for mobile */
         @media (max-width: 768px) {
             body {
                 overflow-x: hidden;
@@ -351,10 +351,10 @@
 
         <main class="main-content">
             <div id="overview-section" class="section-container">
-                </div>
+            </div>
             
             <div id="daily-section" class="section-container hidden">
-                </div>
+            </div>
 
             <div id="other-reports-section" class="section-container hidden">
                 <div class="top-level-box">
@@ -366,7 +366,7 @@
                                 <i class="fas fa-book-open text-4xl"></i>
                                 <span class="report-button-title">Question Repository</span>
                             </div>
-                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
+                            <img src="data:image/png;base64,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" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
 
                         <a href="https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #4285F4;" onmouseover="this.style.backgroundColor='#3573d9'" onmouseout="this.style.backgroundColor='#4285F4'">
@@ -374,7 +374,7 @@
                                 <i class="fas fa-clipboard-check text-4xl"></i>
                                 <span class="report-button-title">Course Checks</span>
                             </div>
-                            <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
+                           <img src="data:image/png;base64,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" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
 
                         <a href="https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button text-dark" style="background-color: #FBBC05;" onmouseover="this.style.backgroundColor='#e4a804'" onmouseout="this.style.backgroundColor='#FBBC05'">
@@ -382,7 +382,7 @@
                                 <i class="fas fa-ticket-alt text-4xl"></i>
                                 <span class="report-button-title">Ask a Doubt + Tickets</span>
                             </div>
-                           <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
+                           <img src="data:image/png;base64,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" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
 
                         <a href="https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="report-button" style="background-color: #EA4335;" onmouseover="this.style.backgroundColor='#d93527'" onmouseout="this.style.backgroundColor='#EA4335'">
@@ -390,7 +390,7 @@
                                 <i class="fas fa-chart-pie text-4xl"></i>
                                 <span class="report-button-title">Weekly Batch Reports</span>
                             </div>
-                           <img src="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/sheets-logo.png" alt="Google Sheets Logo" class="google-sheet-icon">
+                           <img src="data:image/png;base64,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" alt="Google Sheets Logo" class="google-sheet-icon">
                         </a>
                     </div>
                 </div>
