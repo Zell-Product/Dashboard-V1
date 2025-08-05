@@ -21,7 +21,7 @@
         :root {
             --primary-purple: #6c1e74;
             --light-background: #f0f4f9;
-            --card-background: rgba(255, 255, 255, 0.75);
+            --card-background: rgba(255, 255, 255, 0.85);
             --border-color: rgba(108, 30, 116, 0.2);
             --text-color: #374151;
             --heading-color: #1f2937;
@@ -116,12 +116,10 @@
         
         .top-level-box {
             margin-bottom: 3.5rem;
-            padding: 3rem;
-            background-color: var(--card-background);
-            backdrop-filter: blur(20px);
-            border-radius: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            background-color: transparent; /* Make container transparent */
+            border: none;
+            box-shadow: none;
         }
         
         /* --- FINAL HEADER REDESIGN --- */
@@ -130,7 +128,7 @@
             justify-content: center;
             align-items: center;
             gap: 1rem;
-            font-size: 2.5rem; /* Larger font size */
+            font-size: 2.5rem;
             font-weight: 800;
             margin-bottom: 2.5rem;
             padding: 1rem;
@@ -144,60 +142,58 @@
         }
         
         .header-logo {
-            height: 40px; /* Proportional size */
+            height: 40px;
             width: auto;
-            border-radius: 6px;
         }
 
+        /* --- REDESIGNED SUB-BOX FOR GROUPING --- */
         .sub-box {
-            padding: 2.5rem;
-            background-color: rgba(255,255,255,0.4);
-            backdrop-filter: blur(10px);
+            padding: 2rem;
+            margin-bottom: 2.5rem; /* Space between groups */
+            background-color: var(--card-background);
+            backdrop-filter: blur(15px);
             border-radius: 1.5rem;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(108, 30, 116, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(108, 30, 116, 0.15);
         }
         
         .sub-box-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--heading-color);
             margin-bottom: 1.5rem;
-            text-align: center;
+            text-align: left;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 1rem;
         }
         
-        /* --- NEW: Grid layout for metrics --- */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
         }
 
-        /* --- NEW: Metric Card Design --- */
         .metric-card {
             background-color: rgba(255, 255, 255, 0.7);
             padding: 1.5rem;
             border-radius: 1.25rem;
-            border: 1px solid rgba(108, 30, 116, 0.15);
+            border: 1px solid rgba(108, 30, 116, 0.1);
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             text-align: center;
             transition: all 0.3s ease;
         }
 
-        /* --- NEW: Hover Pop Effect --- */
         .metric-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 25px rgba(108, 30, 116, 0.15);
         }
 
         .metric-label {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--text-color);
             font-weight: 500;
             margin-bottom: 0.75rem;
-            display: block; /* Ensure it takes its own line */
+            display: block;
         }
         
         .metric-value {
@@ -340,7 +336,7 @@
                 margin-top: 1rem;
             }
             .metrics-grid {
-                grid-template-columns: 1fr; /* Single column on mobile */
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -499,29 +495,38 @@
             
             const groupedData = data.reduce((acc, row) => {
                 const topLevelBox = row['Top-Level Box'];
-                if (!acc[topLevelBox]) { acc[topLevelBox] = []; }
-                acc[topLevelBox].push(row);
+                const subBoxHeader = row['Sub-Box Header'];
+                if (!acc[topLevelBox]) { acc[topLevelBox] = {}; }
+                if (!acc[topLevelBox][subBoxHeader]) { acc[topLevelBox][subBoxHeader] = []; }
+                acc[topLevelBox][subBoxHeader].push(row);
                 return acc;
             }, {});
 
-            for (const [topLevelBox, metrics] of Object.entries(groupedData)) {
+            for (const [topLevelBox, subBoxes] of Object.entries(groupedData)) {
                 const topLevelBoxEl = document.createElement('div');
                 topLevelBoxEl.className = "top-level-box";
                 topLevelBoxEl.innerHTML = `<h2 class="top-level-box-title"><span>${topLevelBox}</span></h2>`;
                 
-                const metricsGrid = document.createElement('div');
-                metricsGrid.className = "metrics-grid";
-                
-                metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).forEach(metric => {
-                    const metricCard = document.createElement('div');
-                    metricCard.className = "metric-card";
-                    metricCard.innerHTML = `
-                        <span class="metric-label">${metric['Data Header']}</span>
-                        <span class="metric-value">${metric['Value']}</span>
-                    `;
-                    metricsGrid.appendChild(metricCard);
-                });
-                topLevelBoxEl.appendChild(metricsGrid);
+                for (const [subBoxHeader, metrics] of Object.entries(subBoxes)) {
+                    const subBoxEl = document.createElement('div');
+                    subBoxEl.className = "sub-box";
+                    subBoxEl.innerHTML = `<h3 class="sub-box-title">${subBoxHeader}</h3>`;
+                    
+                    const metricsGrid = document.createElement('div');
+                    metricsGrid.className = "metrics-grid";
+                    
+                    metrics.sort((a, b) => parseInt(a['Order']) - parseInt(b['Order'])).forEach(metric => {
+                        const metricCard = document.createElement('div');
+                        metricCard.className = "metric-card";
+                        metricCard.innerHTML = `
+                            <div class="metric-label">${metric['Data Header']}</div>
+                            <div class="metric-value">${metric['Value']}</div>
+                        `;
+                        metricsGrid.appendChild(metricCard);
+                    });
+                    subBoxEl.appendChild(metricsGrid);
+                    topLevelBoxEl.appendChild(subBoxEl);
+                }
                 container.appendChild(topLevelBoxEl);
             }
         }
@@ -581,9 +586,6 @@
                 });
             }
             
-            const metricsGrid = document.createElement('div');
-            metricsGrid.className = "metrics-grid";
-
             const groupedMetrics = data.reduce((acc, row) => {
                 const metricName = row['Cumulative'];
                 if (metricName && metricName !== 'Total Users' && metricName.trim() !== '') {
@@ -594,20 +596,28 @@
             }, {});
 
             for (const [metricName, entries] of Object.entries(groupedMetrics)) {
+                const subBoxEl = document.createElement('div');
+                subBoxEl.className = "sub-box";
+                subBoxEl.innerHTML = `<h3 class="sub-box-title">${metricName}</h3>`;
+                
+                const metricsGrid = document.createElement('div');
+                metricsGrid.className = "metrics-grid";
+                
                 const latestEntry = entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0];
                 ['WEB', 'ANDROID', 'iOS'].forEach(platform => {
                     if (latestEntry[platform] && latestEntry[platform] !== 'NA' && latestEntry[platform].trim() !== '') {
                         const metricCard = document.createElement('div');
                         metricCard.className = "metric-card";
                         metricCard.innerHTML = `
-                            <span class="metric-label">${metricName} (${platform})</span>
-                            <span class="metric-value">${latestEntry[platform]}</span>
+                            <div class="metric-label">${platform}</div>
+                            <div class="metric-value">${latestEntry[platform]}</div>
                         `;
                         metricsGrid.appendChild(metricCard);
                     }
                 });
+                subBoxEl.appendChild(metricsGrid);
+                topLevelBoxEl.appendChild(subBoxEl);
             }
-            topLevelBoxEl.appendChild(metricsGrid);
         }
         
         async function handleNavigation(target) {
