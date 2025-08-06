@@ -33,6 +33,7 @@
             --nav-text-hover: #ffffff;
             --nav-active-bg: rgba(255, 255, 255, 0.1);
             --nav-active-text: #ffffff;
+            --footer-bg: #1d1d1f;
         }
 
         body.light-mode {
@@ -51,6 +52,7 @@
             --nav-text-hover: #000000;
             --nav-active-bg: rgba(0, 0, 0, 0.05);
             --nav-active-text: #000000;
+            --footer-bg: #e5e5e7;
         }
 
         body {
@@ -107,18 +109,40 @@
         .metric-value { transition: transform 0.3s ease; }
         .metric-card:hover .metric-value { transform: scale(1.2); }
         
-        /* --- NEW: Apple TV Inspired Report Buttons --- */
         .report-button {
             border-radius: 1.5rem;
-            background-color: rgba(128, 128, 128, 0.15); /* Glassy silver-grey tint */
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .report-button:hover {
-            background-color: rgba(128, 128, 128, 0.25); /* Brighter tint on hover */
-        }
-        .report-button .report-content { transition: transform 0.3s ease; }
-        .report-button:hover .report-content { transform: scale(1.1); }
 
+        /* --- NEW: Apple TV Inspired Footer --- */
+        #page-footer {
+            background-color: var(--footer-bg);
+            color: var(--text-muted-color);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            width: 100%;
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        #refresh-button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            margin-left: 1rem;
+            transition: all 0.2s ease;
+        }
+        #refresh-button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        body.light-mode #refresh-button {
+            background: rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        body.light-mode #refresh-button:hover {
+            background: rgba(0,0,0,0.1);
+        }
 
         @media (max-width: 768px) {
             #navigation-bar { width: 100%; max-width: 100%; padding: 0.25rem; }
@@ -147,6 +171,16 @@
         <div id="daily-section" class="page-content hidden pt-8"></div>
         <div id="reports-section" class="page-content hidden pt-8"></div>
     </main>
+    
+    <!-- NEW FOOTER STRUCTURE -->
+    <footer id="page-footer">
+        <div class="flex justify-center items-center">
+            <span id="last-updated-text"></span>
+            <button id="refresh-button">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -156,7 +190,6 @@
             const dataCache = { overview: null, daily: null };
             let activeTab = 'overview';
 
-            // --- RADICAL FIX: ROBUST CSV PARSING ENGINE ---
             const parseCSV = (csv) => {
                 if (!csv) return [];
                 const lines = csv.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
@@ -398,9 +431,22 @@
                     renderDailyMetricsPage(activeContent, dataCache.daily);
                 }
             };
+            
+            const lastUpdatedEl = document.getElementById('last-updated-text');
+            const refreshButton = document.getElementById('refresh-button');
+            
+            const updateLastUpdatedTime = () => {
+                 const now = new Date();
+                const formattedTime = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                lastUpdatedEl.textContent = `Data synced from Google Sheets at ${formattedTime} (IST).`;
+            };
 
-            initialLoad();
-            setInterval(refreshData, 300000);
+            refreshButton.addEventListener('click', refreshData);
+            
+            initialLoad().then(updateLastUpdatedTime);
+            setInterval(() => {
+                refreshData().then(updateLastUpdatedTime);
+            }, 300000);
         });
     </script>
 </body>
