@@ -75,10 +75,13 @@
         }
         .hidden { display: none; }
 
-        #navigation-bar { max-width: 56rem; }
+        /* --- NAVIGATION STYLES --- */
+        #navigation-bar {
+            max-width: 48rem; /* Resized to a more elegant width */
+        }
         .nav-item {
-            padding: 1.25rem 2.5rem;
-            font-size: 1.25rem;
+            padding: 0.75rem 1.5rem; /* Resized for a sleeker feel */
+            font-size: 1rem; /* Resized font */
             font-weight: 600;
             transition: all 0.3s ease;
             color: var(--nav-text-color);
@@ -111,17 +114,9 @@
         
         .report-button {
             border-radius: 1.5rem;
-            background-color: rgba(128, 128, 128, 0.15); /* Glassy silver-grey tint */
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .report-button:hover {
-            background-color: rgba(128, 128, 128, 0.25); /* Brighter tint on hover */
-        }
-        .report-button .report-content { transition: transform 0.3s ease; }
-        .report-button:hover .report-content { transform: scale(1.1); }
 
-
-        /* --- NEW: Apple TV Inspired Footer --- */
+        /* --- Apple TV Inspired Footer --- */
         #page-footer {
             background-color: var(--footer-bg);
             color: var(--text-muted-color);
@@ -130,16 +125,13 @@
             font-size: 0.8rem;
             width: 100%;
             flex-shrink: 0;
-            margin-top: auto;
             opacity: 0;
-            transform: translateY(100%);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            position: sticky;
-            bottom: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
         }
         #page-footer.visible {
             opacity: 1;
-            transform: translateY(0);
+            pointer-events: auto;
         }
         #refresh-button {
             background: rgba(255,255,255,0.1);
@@ -187,17 +179,17 @@
         <div id="overview-section" class="page-content pt-8"></div>
         <div id="daily-section" class="page-content hidden pt-8"></div>
         <div id="reports-section" class="page-content hidden pt-8"></div>
+        
+        <!-- FOOTER MOVED INSIDE MAIN SCROLLING CONTAINER -->
+        <footer id="page-footer">
+            <div class="flex justify-center items-center">
+                <span id="last-updated-text"></span>
+                <button id="refresh-button">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </footer>
     </main>
-    
-    <!-- FOOTER STRUCTURE -->
-    <footer id="page-footer">
-        <div class="flex justify-center items-center">
-            <span id="last-updated-text"></span>
-            <button id="refresh-button">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-        </div>
-    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -207,7 +199,6 @@
             const dataCache = { overview: null, daily: null };
             let activeTab = 'overview';
 
-            // --- RADICAL FIX: ROBUST CSV PARSING ENGINE ---
             const parseCSV = (csv) => {
                 if (!csv) return [];
                 const lines = csv.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
@@ -221,7 +212,7 @@
                         const obj = {};
                         headers.forEach((header, index) => {
                             let value = values[index] ? values[index].trim().replace(/"/g, '') : '';
-                            if (value === '#NAME?') value = '...'; // Handle loading state from IMPORTRANGE
+                            if (value === '#NAME?') value = '...';
                             obj[header] = value;
                         });
                         data.push(obj);
