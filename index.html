@@ -643,9 +643,11 @@
                         },
                         scales: {
                             y: {
-                                beginAtZero: true,
+                                min: 0,
+                                max: 100,
                                 grid: { color: gridColor },
                                 ticks: { 
+                                    stepSize: 20,
                                     color: tickColor, 
                                     font: { family: bodyFont },
                                     callback: function(value) { return value + '%'; }
@@ -662,7 +664,11 @@
 
             const renderQuestionRepoPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Question Repository data."); return; }
-                const processedData = data.parsed.reduce((acc, row) => {
+                const allRows = data.parsed;
+                
+                const qrfStatusRows = allRows.filter(r => r['Top-Level Box'] === 'QRF Status');
+
+                const processedData = qrfStatusRows.reduce((acc, row) => {
                     const group = row['Sub-Box Header'];
                     if (group && !acc[group]) acc[group] = {};
                     if(group) {
