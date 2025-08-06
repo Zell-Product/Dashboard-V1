@@ -178,6 +178,16 @@
     <header class="w-full z-50 p-4 flex-shrink-0">
         <div class="w-full max-w-7xl mx-auto flex items-center justify-center h-14 relative">
             
+            <div id="main-header" class="w-full h-full flex items-center justify-center relative">
+                <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1 md:gap-2">
+                    <button data-tab="overview" class="nav-item">Overview</button>
+                    <button data-tab="reports" class="nav-item">Reports</button>
+                    <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                </nav>
+            </div>
+
             <div id="page-header" class="hidden w-full h-full items-center justify-center relative">
                  <button id="header-back-button" class="absolute left-0 top-1/2 -translate-y-1/2 bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
                     <i class="fas fa-chevron-left text-xl"></i>
@@ -190,14 +200,6 @@
                     <i class="fas fa-external-link-alt"></i>
                 </a>
             </div>
-
-            <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1 md:gap-2">
-                <button data-tab="overview" class="nav-item">Overview</button>
-                <button data-tab="reports" class="nav-item">Reports</button>
-                <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
-                    <i class="fas fa-sun"></i>
-                </button>
-            </nav>
         </div>
     </header>
     
@@ -241,6 +243,7 @@
             const mainContent = document.getElementById('main-content');
             const navButtons = document.querySelectorAll('.nav-item');
             const pageContents = document.querySelectorAll('.page-content');
+            const mainHeader = document.getElementById('main-header');
             const navigationBar = document.getElementById('navigation-bar');
             const headerBackButton = document.getElementById('header-back-button');
             const pageHeader = document.getElementById('page-header');
@@ -663,7 +666,7 @@
                     const group = row['Sub-Box Header'];
                     if (group && !acc[group]) acc[group] = {};
                     if(group) {
-                        const key = row['Data Header'].toLowerCase().replace('%', '').trim();
+                        const key = row['Data Header'].toLowerCase().replace('%', '').trim().replace(/ /g, '_');
                         acc[group][key] = row['Value'];
                     }
                     return acc;
@@ -676,6 +679,8 @@
                     if (value > 35 && value <= 75) return 'medium';
                     return 'good';
                 };
+                
+                const accaSplit = processedData['ACCA Question'];
 
                 const createSectionHTML = (title, groupData, isEnlarged = false) => {
                     if (!groupData) return '';
@@ -683,26 +688,26 @@
                     const colorClass = getPerformanceColorClass(colorState);
                     if (isEnlarged) {
                         return `
-                            <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-2xl">
+                            <div class="bg-black/10 p-6 md:p-8 border border-white/10 rounded-2xl">
                                 <div class="border-b border-[var(--card-border)] pb-4 mb-6 md:mb-8">
                                     <h3 class="text-3xl font-bold text-center text-[var(--text-color)]">${title}</h3>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                                     <div class="space-y-4">
-                                        <div class="qrf-scorecard bg-black/10 p-4 rounded-xl flex justify-between items-center border border-white/10">
+                                        <div class="qrf-scorecard bg-black/20 p-4 rounded-xl flex justify-between items-center border border-white/10">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
                                             <span class="value text-3xl font-semibold text-[var(--text-color)]">${groupData.draft || 'N/A'}</span>
                                         </div>
-                                        <div class="qrf-scorecard bg-black/10 p-4 rounded-xl flex justify-between items-center border border-white/10">
+                                        <div class="qrf-scorecard bg-black/20 p-4 rounded-xl flex justify-between items-center border border-white/10">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
                                             <span class="value text-3xl font-semibold text-[var(--text-color)]">${groupData.approved || 'N/A'}</span>
                                         </div>
-                                        <div class="qrf-scorecard bg-black/10 p-4 rounded-xl flex justify-between items-center border border-white/10">
+                                        <div class="qrf-scorecard bg-black/20 p-4 rounded-xl flex justify-between items-center border border-white/10">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Total</span>
                                             <span class="value text-3xl font-semibold text-[var(--text-color)]">${groupData.total || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div class="qrf-scorecard bg-black/10 p-6 rounded-xl text-center border border-transparent" data-color-state="${colorState}">
+                                    <div class="qrf-scorecard bg-black/20 p-6 rounded-xl text-center border border-transparent" data-color-state="${colorState}">
                                         <div class="value text-7xl font-bold ${colorClass} tracking-tighter">${groupData.completion || 'N/A'}</div>
                                         <div class="text-xl text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
@@ -711,26 +716,26 @@
                         `;
                     }
                     return `
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl flex flex-col">
+                        <div class="bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col">
                              <div class="border-b border-[var(--card-border)] pb-3 mb-5">
                                  <h3 class="text-2xl font-bold text-center text-[var(--text-color)]">${title}</h3>
                              </div>
                              <div class="flex-grow flex flex-col justify-between">
                                  <div class="flex justify-center gap-4 mb-6">
-                                     <div class="qrf-scorecard bg-black/10 p-3 rounded-lg text-center border border-white/10 flex-1">
+                                     <div class="qrf-scorecard bg-black/20 p-3 rounded-lg text-center border border-white/10 flex-1">
                                          <div class="value text-3xl font-semibold tracking-tight">${groupData.draft || 'N/A'}</div>
                                          <div class="text-xs text-[var(--text-muted-color)]">Draft</div>
                                      </div>
-                                     <div class="qrf-scorecard bg-black/10 p-3 rounded-lg text-center border border-white/10 flex-1">
+                                     <div class="qrf-scorecard bg-black/20 p-3 rounded-lg text-center border border-white/10 flex-1">
                                          <div class="value text-3xl font-semibold tracking-tight">${groupData.approved || 'N/A'}</div>
                                          <div class="text-xs text-[var(--text-muted-color)]">Approved</div>
                                      </div>
-                                     <div class="qrf-scorecard bg-black/10 p-3 rounded-lg text-center border border-white/10 flex-1">
+                                     <div class="qrf-scorecard bg-black/20 p-3 rounded-lg text-center border border-white/10 flex-1">
                                          <div class="value text-3xl font-semibold tracking-tight">${groupData.total || 'N/A'}</div>
                                          <div class="text-xs text-[var(--text-muted-color)]">Total</div>
                                      </div>
                                  </div>
-                                 <div class="qrf-scorecard bg-black/10 p-4 rounded-lg text-center border border-transparent" data-color-state="${colorState}">
+                                 <div class="qrf-scorecard bg-black/20 p-4 rounded-lg text-center border border-transparent" data-color-state="${colorState}">
                                      <div class="value text-5xl font-bold ${colorClass} tracking-tighter">${groupData.completion || 'N/A'}</div>
                                      <div class="text-sm text-[var(--text-muted-color)]">Completion</div>
                                  </div>
@@ -750,6 +755,42 @@
                             <div>
                                 ${createSectionHTML('Overall', processedData.Overall, true)}
                             </div>
+                            ${accaSplit ? `
+                            <div class="bg-black/10 p-6 border border-white/10 rounded-2xl">
+                                <h3 class="text-2xl font-bold text-center text-[var(--text-color)] mb-6">ACCA Questions Split</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                                    <div class="bg-black/20 p-4 rounded-xl border border-white/10 text-center">
+                                        <h4 class="text-lg font-semibold text-[var(--text-muted-color)] mb-4">Subjective Questions</h4>
+                                        <div class="flex justify-around items-center">
+                                            <div>
+                                                <div class="text-3xl font-bold">${accaSplit.subjective_questions_count || 'N/A'}</div>
+                                                <div class="text-xs text-[var(--text-muted-color)]">Count</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-3xl font-bold">${accaSplit.subjective_questions_ || 'N/A'}</div>
+                                                <div class="text-xs text-[var(--text-muted-color)]">Percentage</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-black/20 p-4 rounded-xl border border-white/10 text-center">
+                                        <h4 class="text-lg font-semibold text-[var(--text-muted-color)] mb-4">Non-Subjective Questions</h4>
+                                        <div class="flex justify-around items-center">
+                                            <div>
+                                                <div class="text-3xl font-bold">${accaSplit['non-subjective_questions_count'] || 'N/A'}</div>
+                                                <div class="text-xs text-[var(--text-muted-color)]">Count</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-3xl font-bold">${accaSplit['non-subjective_questions_'] || 'N/A'}</div>
+                                                <div class="text-xs text-[var(--text-muted-color)]">Percentage</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-black/20 p-4 rounded-xl border border-white/10 text-center">
+                                    <h4 class="text-lg font-semibold text-[var(--text-muted-color)]">Total Questions</h4>
+                                    <div class="text-4xl font-bold mt-2">${accaSplit.total_questions || 'N/A'}</div>
+                                </div>
+                            </div>` : ''}
                         </div>
                     </div>
                 `;
@@ -858,7 +899,7 @@
                     pageHeaderTitle.textContent = title;
                     pageHeader.classList.remove('hidden');
                     pageHeader.classList.add('flex');
-                    navigationBar.classList.add('hidden');
+                    mainHeader.classList.add('hidden');
                     if (sheetUrl) {
                         openSheetButton.href = sheetUrl;
                         openSheetButton.classList.remove('hidden');
@@ -868,7 +909,7 @@
                 } else {
                     pageHeader.classList.add('hidden');
                     pageHeader.classList.remove('flex');
-                    navigationBar.classList.remove('hidden');
+                    mainHeader.classList.remove('hidden');
                     openSheetButton.classList.add('hidden');
                 }
             };
