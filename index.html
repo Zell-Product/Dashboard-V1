@@ -211,6 +211,7 @@
             const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
             const QUESTION_REPO_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1254961431&single=true&output=csv';
             const COURSE_CHECKS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo2_1ighNkAxsTHM-9kCcKcOaMHRdojOqI_5wVVHTjJA_K80HdvzHtga5XRwStdlK7sYCbYRxRhGbV/pub?gid=1674961572&single=true&output=csv';
+            const LMS_SUPPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=1975801635&single=true&output=csv';
 
             const SHEET_URLS = {
                 'course-checks-section': 'https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing',
@@ -219,7 +220,7 @@
                 'batch-reports-section': 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing'
             };
 
-            const dataCache = { overview: null, daily: null, questionRepo: null, courseChecks: null };
+            const dataCache = { overview: null, daily: null, questionRepo: null, courseChecks: null, lmsSupport: null };
             let courseChecksChart = null;
 
             const mainContent = document.getElementById('main-content');
@@ -255,14 +256,29 @@
                 }
                 return { parsed: data, raw: lines };
             };
+            
+            const parseSimpleCSV = (csv) => {
+                if (!csv) return {};
+                const metrics = {};
+                const lines = csv.replace(/\r/g, '').split('\n');
+                lines.forEach(line => {
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const key = parts[0].trim().replace(/"/g, '');
+                        const value = parts[1].trim().replace(/"/g, '');
+                        if (key) metrics[key] = value;
+                    }
+                });
+                return metrics;
+            };
 
-            const fetchAndParseData = async (url) => {
+            const fetchAndParseData = async (url, parser = parseCSV) => {
                 try {
                     const response = await fetch(`${url}&t=${new Date().getTime()}`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const text = await response.text();
                     if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
-                    return parseCSV(text);
+                    return parser(text);
                 } catch (error) {
                     console.error("Could not fetch or parse data:", error);
                     return null;
@@ -657,17 +673,24 @@
             };
 
             const renderAskADoubtPage = (container, data) => {
-                if (!data || !data.parsed) { showError(container, "Could not load Support data."); return; }
+                if (!data) { showError(container, "Could not load Support data."); return; }
+                
+                const metrics = data; // Data is already a simple key-value object from parseSimpleCSV
+                
+                const getMetricValue = (key) => metrics[key] || 'N/A';
+                const openDoubts = parseInt(getMetricValue('Open Doubts'), 10);
+                const openTickets = parseInt(getMetricValue('Open Support Tickets'), 10);
 
-                const supportSectionData = data.parsed.filter(row => row['Top-Level Box'] && row['Top-Level Box'].trim() === 'Ask a Doubt + Tickets');
-                const doubtsData = supportSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'Doubts');
-                const ticketsData = supportSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'Support Tickets');
+                const getConditionalColor = (value) => {
+                    if (isNaN(value)) return 'text-[var(--text-color)]';
+                    return value >= 10 ? 'text-red-500' : 'text-green-500';
+                };
 
-                const createMetricCard = (metric) => `
+                const createMetricCard = (label, value, icon, colorClass = 'text-[var(--text-color)]') => `
                     <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px]">
-                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                        <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
-                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                        <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
+                        <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${value}</div>
+                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
 
@@ -676,13 +699,15 @@
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
                              <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
                              <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                ${doubtsData.map(createMetricCard).join('')}
+                                ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
+                                ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), 'fas fa-exclamation-circle', getConditionalColor(openDoubts))}
                              </div>
                         </div>
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
                              <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
                              <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                ${ticketsData.map(createMetricCard).join('')}
+                                ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
+                                ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), 'fas fa-exclamation-triangle', getConditionalColor(openTickets))}
                              </div>
                         </div>
                     </div>
@@ -694,7 +719,7 @@
                     { title: 'Daily Metrics', icon: 'fas fa-chart-line', id: 'show-daily-metrics-btn' },
                     { title: 'LMS Checks', icon: 'fas fa-clipboard-check', id: 'show-course-checks-btn' },
                     { title: 'Question Repository', icon: 'fas fa-book-open', id: 'show-question-repo-btn' },
-                    { title: 'Ask a Doubt + Tickets', icon: 'fas fa-headset', id: 'show-ask-a-doubt-btn' },
+                    { title: 'Ask a Doubt + LMS Tickets', icon: 'fas fa-headset', id: 'show-ask-a-doubt-btn' },
                     { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', id: 'show-batch-reports-btn' },
                 ];
                 container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${reports.map(report => {const commonClasses = "report-button group relative bg-[var(--card-bg)] backdrop-blur-md p-8 border border-[var(--card-border)] text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--card-hover-bg)] hover:border-white/20 hover:scale-105 overflow-hidden h-48";const contentHtml = `<div class="relative z-10 report-content flex flex-col items-center justify-center"><i class="${report.icon} text-4xl mb-4 text-[var(--icon-color)] transition-transform duration-300"></i><span class="text-lg font-semibold">${report.title}</span></div><i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-black/5 transition-all duration-500 group-hover:text-black/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>`; if (report.link) { return `<a href="${report.link}" target="_blank" rel="noopener noreferrer" class="${commonClasses}">${contentHtml}</a>`;} else { return `<button id="${report.id}" class="${commonClasses}">${contentHtml}</button>`;}}).join('')}</div>`;
@@ -785,12 +810,12 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const askADoubtSection = document.getElementById('ask-a-doubt-section');
                 askADoubtSection.classList.remove('hidden');
-                setPageHeader('Support Center', SHEET_URLS['ask-a-doubt-section']);
-                if (!dataCache.overview) {
+                setPageHeader('LMS Support', SHEET_URLS['ask-a-doubt-section']);
+                if (!dataCache.lmsSupport) {
                     showLoading(askADoubtSection);
-                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
+                    dataCache.lmsSupport = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
                 }
-                renderAskADoubtPage(askADoubtSection, dataCache.overview);
+                renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport);
             };
             
             const showReportsList = () => {
@@ -806,26 +831,24 @@
                 const sectionId = activeSection.id;
                 showLoading(activeSection);
                 
-                const needsOverviewData = ['overview-section', 'batch-reports-section', 'ask-a-doubt-section'].includes(sectionId);
-                
-                if (needsOverviewData) {
+                if (sectionId === 'overview-section') {
                     dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
-                }
-                if (sectionId === 'daily-section') {
+                    renderOverviewPage(activeSection, dataCache.overview);
+                } else if (sectionId === 'batch-reports-section') {
+                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
+                    renderBatchReportsPage(activeSection, dataCache.overview);
+                } else if (sectionId === 'ask-a-doubt-section') {
+                    dataCache.lmsSupport = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
+                    renderAskADoubtPage(activeSection, dataCache.lmsSupport);
+                } else if (sectionId === 'daily-section') {
                     dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
+                    renderDailyMetricsPage(activeSection, dataCache.daily);
                 } else if (sectionId === 'course-checks-section') {
                     dataCache.courseChecks = await fetchAndParseData(COURSE_CHECKS_URL);
+                    renderCourseChecksPage(activeSection, dataCache.courseChecks);
                 } else if (sectionId === 'question-repo-section') {
                     dataCache.questionRepo = await fetchAndParseData(QUESTION_REPO_URL);
-                }
-
-                switch (sectionId) {
-                    case 'overview-section': renderOverviewPage(activeSection, dataCache.overview); break;
-                    case 'batch-reports-section': renderBatchReportsPage(activeSection, dataCache.overview); break;
-                    case 'ask-a-doubt-section': renderAskADoubtPage(activeSection, dataCache.overview); break;
-                    case 'daily-section': renderDailyMetricsPage(activeSection, dataCache.daily); break;
-                    case 'course-checks-section': renderCourseChecksPage(activeSection, dataCache.courseChecks); break;
-                    case 'question-repo-section': renderQuestionRepoPage(activeSection, dataCache.questionRepo); break;
+                    renderQuestionRepoPage(activeSection, dataCache.questionRepo);
                 }
             };
             
