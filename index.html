@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Dashboard</title>
     
-    <!-- FAVICON LINK UPDATED -->
     <link rel="icon" href="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/favicon%20BW.png" type="image/png">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
@@ -165,14 +162,22 @@
 </head>
 <body class="h-screen flex flex-col">
     <header class="w-full z-50 p-4 flex-shrink-0">
-        <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 mx-auto flex justify-center items-center gap-1 md:gap-2">
-            <button data-tab="overview" class="nav-item">Overview</button>
-            <button data-tab="daily" class="nav-item">Daily Metrics</button>
-            <button data-tab="reports" class="nav-item">Other Reports</button>
-            <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
-                <i class="fas fa-sun"></i>
-            </button>
-        </nav>
+        <div class="w-full max-w-7xl mx-auto flex items-center justify-center h-14 relative">
+            <div id="header-back-container" class="absolute left-0 top-0 h-full flex items-center">
+                <button id="header-back-button" class="hidden text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] text-lg font-medium transition-colors duration-300 flex items-center px-3 py-2 rounded-lg">
+                    <i class="fas fa-chevron-left mr-2" style="font-size: 0.9em; line-height: inherit;"></i>
+                    <span>Back</span>
+                </button>
+            </div>
+
+            <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1 md:gap-2">
+                <button data-tab="overview" class="nav-item">Overview</button>
+                <button data-tab="reports" class="nav-item">Other Reports</button>
+                <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </nav>
+        </div>
     </header>
     
     <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content">
@@ -180,7 +185,6 @@
         <div id="daily-section" class="page-content hidden pt-8"></div>
         <div id="reports-section" class="page-content hidden pt-8"></div>
         
-        <!-- FOOTER MOVED INSIDE MAIN SCROLLING CONTAINER -->
         <footer id="page-footer">
             <div class="flex justify-center items-center">
                 <span id="last-updated-text"></span>
@@ -197,7 +201,12 @@
             const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
 
             const dataCache = { overview: null, daily: null };
-            let activeTab = 'overview';
+
+            const mainContent = document.getElementById('main-content');
+            const navButtons = document.querySelectorAll('.nav-item');
+            const pageContents = document.querySelectorAll('.page-content');
+            const navigationBar = document.getElementById('navigation-bar');
+            const headerBackButton = document.getElementById('header-back-button');
 
             const parseCSV = (csv) => {
                 if (!csv) return [];
@@ -244,6 +253,7 @@
                 if (lowerLabel.includes('batch')) return 'fas fa-layer-group';
                 if (lowerLabel.includes('user analytics')) return 'fas fa-chart-pie';
                 if (lowerLabel.includes('student support')) return 'fas fa-hands-helping';
+                if (lowerLabel.includes('daily metrics')) return 'fas fa-chart-line';
                 if (lowerLabel.includes('web')) return 'fab fa-chrome';
                 if (lowerLabel.includes('android')) return 'fab fa-android';
                 if (lowerLabel.includes('ios')) return 'fab fa-apple';
@@ -328,6 +338,7 @@
                     </div>
                 `;
 
+                // NO back button here. This solves the "empty space" issue.
                 container.innerHTML = `
                     <div class="space-y-8">
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)]">
@@ -370,7 +381,8 @@
             };
             
             const renderReportsPage = (container) => {
-                 const reports = [
+                const reports = [
+                    { title: 'Daily Metrics', icon: 'fas fa-chart-line', id: 'show-daily-metrics-btn' },
                     { title: 'Question Repository', icon: 'fas fa-book-open', link: 'https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing' },
                     { title: 'Course Checks', icon: 'fas fa-clipboard-check', link: 'https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing' },
                     { title: 'Ask a Doubt + Tickets', icon: 'fas fa-ticket-alt', link: 'https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing' },
@@ -378,24 +390,30 @@
                 ];
                 container.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        ${reports.map(report => `
-                            <a href="${report.link}" target="_blank" rel="noopener noreferrer" class="report-button group relative bg-[var(--card-bg)] backdrop-blur-md p-8 border border-[var(--card-border)] text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--card-hover-bg)] hover:border-white/20 hover:scale-105 overflow-hidden h-48">
+                        ${reports.map(report => {
+                            const commonClasses = "report-button group relative bg-[var(--card-bg)] backdrop-blur-md p-8 border border-[var(--card-border)] text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--card-hover-bg)] hover:border-white/20 hover:scale-105 overflow-hidden h-48";
+                            const contentHtml = `
                                 <i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-black/5 transition-all duration-500 group-hover:text-black/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>
                                 <div class="relative z-10 report-content">
                                     <i class="${report.icon} text-5xl mb-4 text-[var(--icon-color)] transition-transform duration-300"></i>
                                     <span class="text-xl font-semibold">${report.title}</span>
                                 </div>
-                            </a>
-                        `).join('')}
+                            `;
+
+                            if (report.link) {
+                                return `<a href="${report.link}" target="_blank" rel="noopener noreferrer" class="${commonClasses}">${contentHtml}</a>`;
+                            } else {
+                                return `<button id="${report.id}" class="${commonClasses}">${contentHtml}</button>`;
+                            }
+                        }).join('')}
                     </div>
                 `;
             };
-
-            const navButtons = document.querySelectorAll('.nav-item');
-            const pageContents = document.querySelectorAll('.page-content');
-
+            
             const switchTab = async (tabId) => {
-                activeTab = tabId;
+                navigationBar.classList.remove('hidden');
+                headerBackButton.classList.add('hidden');
+
                 navButtons.forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.tab === tabId);
                 });
@@ -408,15 +426,13 @@
                     showLoading(activeContent);
                     dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
                     renderOverviewPage(activeContent, dataCache.overview);
-                } else if (tabId === 'daily' && !dataCache.daily) {
-                    showLoading(activeContent);
-                    dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
-                    renderDailyMetricsPage(activeContent, dataCache.daily);
                 }
             };
-
+            
             navButtons.forEach(button => {
-                button.addEventListener('click', () => switchTab(button.dataset.tab));
+                if (button.dataset.tab) {
+                    button.addEventListener('click', () => switchTab(button.dataset.tab));
+                }
             });
             
             const themeToggle = document.getElementById('theme-toggle');
@@ -432,14 +448,17 @@
             };
             
             const refreshData = async () => {
-                const activeContent = document.querySelector('.page-content:not(.hidden)');
-                showLoading(activeContent);
-                if (activeTab === 'overview') {
+                const overviewSection = document.getElementById('overview-section');
+                const dailySection = document.getElementById('daily-section');
+
+                if (!overviewSection.classList.contains('hidden')) {
+                    showLoading(overviewSection);
                     dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
-                    renderOverviewPage(activeContent, dataCache.overview);
-                } else if (activeTab === 'daily') {
+                    renderOverviewPage(overviewSection, dataCache.overview);
+                } else if (!dailySection.classList.contains('hidden')) {
+                    showLoading(dailySection);
                     dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
-                    renderDailyMetricsPage(activeContent, dataCache.daily);
+                    renderDailyMetricsPage(dailySection, dataCache.daily);
                 }
             };
             
@@ -452,11 +471,12 @@
                 lastUpdatedEl.textContent = `Data synced from Google Sheets at ${formattedTime} (IST).`;
             };
 
-            refreshButton.addEventListener('click', refreshData);
+            refreshButton.addEventListener('click', () => {
+                refreshData().then(updateLastUpdatedTime);
+            });
             
             initialLoad().then(updateLastUpdatedTime);
 
-            const mainContent = document.getElementById('main-content');
             const footer = document.getElementById('page-footer');
             mainContent.addEventListener('scroll', () => {
                 const { scrollTop, scrollHeight, clientHeight } = mainContent;
@@ -467,9 +487,43 @@
                 }
             });
 
+            // --- CONTEXTUAL NAVIGATION LOGIC ---
+            const showDailyMetrics = async () => {
+                const reportsSection = document.getElementById('reports-section');
+                const dailySection = document.getElementById('daily-section');
+                
+                reportsSection.classList.add('hidden');
+                dailySection.classList.remove('hidden');
+
+                navigationBar.classList.add('hidden');
+                headerBackButton.classList.remove('hidden');
+
+                if (!dataCache.daily) {
+                    showLoading(dailySection);
+                    dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
+                    renderDailyMetricsPage(dailySection, dataCache.daily);
+                }
+            };
+
+            const showReportsList = () => {
+                document.getElementById('reports-section').classList.remove('hidden');
+                document.getElementById('daily-section').classList.add('hidden');
+
+                navigationBar.classList.remove('hidden');
+                headerBackButton.classList.add('hidden');
+            };
+            
+            headerBackButton.addEventListener('click', showReportsList);
+            
+            mainContent.addEventListener('click', (event) => {
+                if (event.target.closest('#show-daily-metrics-btn')) {
+                    showDailyMetrics();
+                }
+            });
+
             setInterval(() => {
                 refreshData().then(updateLastUpdatedTime);
-            }, 300000);
+            }, 300000); // 5 minutes
         });
     </script>
 </body>
