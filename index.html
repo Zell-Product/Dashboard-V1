@@ -9,6 +9,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -34,6 +35,9 @@
             --footer-bg: #1d1d1f;
             --chart-grid-color: rgba(255, 255, 255, 0.1);
             --chart-tick-color: #a1a1a6;
+            --good-hover-tint: rgba(34, 197, 94, 0.15);
+            --medium-hover-tint: rgba(245, 158, 11, 0.15);
+            --bad-hover-tint: rgba(239, 68, 68, 0.15);
         }
 
         body.light-mode {
@@ -55,6 +59,9 @@
             --footer-bg: #e5e5e7;
             --chart-grid-color: rgba(0, 0, 0, 0.1);
             --chart-tick-color: #515154;
+            --good-hover-tint: rgba(34, 197, 94, 0.1);
+            --medium-hover-tint: rgba(245, 158, 11, 0.1);
+            --bad-hover-tint: rgba(239, 68, 68, 0.1);
         }
 
         body {
@@ -108,6 +115,10 @@
         .metric-value { transition: transform 0.3s ease; }
         .metric-card:hover .metric-value { transform: scale(1.2); }
         
+        .metric-card[data-color-state="good"]:hover { background-color: var(--good-hover-tint); }
+        .metric-card[data-color-state="medium"]:hover { background-color: var(--medium-hover-tint); }
+        .metric-card[data-color-state="bad"]:hover { background-color: var(--bad-hover-tint); }
+
         .report-button { border-radius: 1.5rem; }
         
         .qrf-scorecard { transition: background-color 0.3s ease; }
@@ -115,6 +126,10 @@
         .qrf-scorecard:hover { background-color: rgba(255,255,255,0.05); }
         body.light-mode .qrf-scorecard:hover { background-color: rgba(0,0,0,0.03); }
         .qrf-scorecard:hover .value { transform: scale(1.15); }
+
+        .qrf-scorecard[data-color-state="good"]:hover { background-color: var(--good-hover-tint); }
+        .qrf-scorecard[data-color-state="medium"]:hover { background-color: var(--medium-hover-tint); }
+        .qrf-scorecard[data-color-state="bad"]:hover { background-color: var(--bad-hover-tint); }
 
         #page-footer {
             background-color: var(--footer-bg);
@@ -265,7 +280,8 @@
                     const parts = line.split(',');
                     if (parts.length >= 2) {
                         const key = parts[0].trim().replace(/"/g, '');
-                        const value = parts[1].trim().replace(/"/g, '');
+                        let value = parts[1].trim().replace(/"/g, '');
+                        if (value === '#NAME?') value = '...';
                         if (key) metrics[key] = value;
                     }
                 });
@@ -287,6 +303,10 @@
 
             const getIconForMetric = (label) => {
                 const lowerLabel = label.toLowerCase();
+                if (lowerLabel.includes('enrolled')) return 'fas fa-user-graduate';
+                if (lowerLabel.includes('attendance')) return 'fas fa-user-check';
+                if (lowerLabel.includes('lps')) return 'fas fa-chart-line';
+                if (lowerLabel.includes('qc batches')) return 'fas fa-clipboard-check';
                 if (lowerLabel.includes('dau')) return 'fas fa-users';
                 if (lowerLabel.includes('mau')) return 'fas fa-calendar-week';
                 if (lowerLabel.includes('web')) return 'fas fa-globe';
@@ -303,14 +323,35 @@
             const showLoading = (container) => { container.innerHTML = `<div class="flex justify-center items-center h-64"><div class="w-16 h-16 border-4 border-[var(--text-muted-color)] border-t-[var(--text-color)] rounded-full animate-spin"></div></div>`; };
             const showError = (container, message) => { container.innerHTML = `<div class="bg-red-900/50 border border-red-500/50 text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto"><h3 class="font-bold text-lg mb-2">Error Loading Data</h3><p>${message}</p></div>`; };
 
+            const getPerformanceColorState = (label, valueStr) => {
+                const value = parseFloat(valueStr);
+                if (isNaN(value)) return 'neutral';
+                
+                let thresholds = { bad: 35, medium: 70 };
+                if (label.includes('LPS')) {
+                    thresholds = { bad: 35, medium: 75 };
+                }
+
+                if (value <= thresholds.bad) return 'bad';
+                if (value > thresholds.bad && value <= thresholds.medium) return 'medium';
+                return 'good';
+            };
+            
+            const getPerformanceColorClass = (state) => {
+                if (state === 'bad') return 'text-red-500';
+                if (state === 'medium') return 'text-amber-500';
+                if (state === 'good') return 'text-green-500';
+                return 'text-[var(--text-color)]';
+            };
+
             const renderOverviewPage = (container, data) => {
                 if (!data) { showError(container, "Could not load overview data."); return; }
                 const groupedData = data.parsed.reduce((acc, row) => { const topLevel = row['Top-Level Box']; if (topLevel) { if (!acc[topLevel]) acc[topLevel] = []; acc[topLevel].push(row); } return acc; }, {});
                 
                 let content = '';
                 for (const [title, rows] of Object.entries(groupedData)) {
-                    content += `<section class="space-y-8">
-                        <h2 class="text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4 mb-8">
+                    content += `<div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                        <h2 class="text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4">
                             <i class="${getIconForMetric(title)}"></i><span>${title}</span>
                         </h2>`;
 
@@ -319,26 +360,33 @@
                         const performanceData = rows.filter(r => r['Sub-Box Header'] === 'Performance Data');
                         content += `
                             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                                <div class="lg:col-span-2 sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
+                                <div class="lg:col-span-2 sub-box bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col h-full">
                                     <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
                                     <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
                                         ${generalData.map(metric => `
-                                            <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px]">
-                                                <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                                            <div class="metric-card" data-color-state="neutral">
+                                                <div class="flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                    <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                                    <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                    <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                                                </div>
                                             </div>`).join('')}
                                     </div>
                                 </div>
-                                <div class="lg:col-span-3 sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
+                                <div class="lg:col-span-3 sub-box bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col h-full">
                                     <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
                                     <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                        ${performanceData.map(metric => `
-                                            <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px]">
-                                                <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                            </div>`).join('')}
+                                        ${performanceData.map(metric => {
+                                            const colorState = getPerformanceColorState(metric['Data Header'], metric.Value);
+                                            const colorClass = getPerformanceColorClass(colorState);
+                                            return `<div class="metric-card" data-color-state="${colorState}">
+                                                <div class="flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                    <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                                    <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                    <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                                                </div>
+                                            </div>`
+                                        }).join('')}
                                     </div>
                                 </div>
                             </div>
@@ -355,23 +403,32 @@
                         content += chunkedSubBoxes.map(row => `
                             <div class="grid grid-cols-1 ${row.length > 1 ? 'md:grid-cols-2' : ''} gap-8">
                                 ${row.map(([subTitle, metrics]) => `
-                                    <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
+                                    <div class="sub-box bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col h-full">
                                         <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
                                         <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                            ${metrics.sort((a, b) => a.Order - b.Order).map(metric => `
-                                                <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px]">
-                                                    <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                    <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                    <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                                </div>
-                                            `).join('')}
+                                            ${metrics.sort((a, b) => a.Order - b.Order).map(metric => {
+                                                const val = parseInt(metric.Value, 10);
+                                                let colorState = 'neutral';
+                                                let colorClass = 'text-[var(--text-color)]';
+                                                if (metric['Data Header'].toLowerCase().includes('unanswered') || metric['Data Header'].toLowerCase().includes('open')) {
+                                                    colorState = val >= 10 ? 'bad' : 'good';
+                                                    colorClass = getPerformanceColorClass(colorState);
+                                                }
+                                                return `<div class="metric-card" data-color-state="${colorState}">
+                                                    <div class="flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                                        <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                                                    </div>
+                                                </div>`
+                                            }).join('')}
                                         </div>
                                     </div>
                                 `).join('')}
                             </div>
                         `).join('');
                     }
-                    content += '</section>';
+                    content += '</div>';
                 }
                 container.innerHTML = `<div class="space-y-12">${content}</div>`;
             };
@@ -385,6 +442,12 @@
                 const rating = getLatestMetric('Rating');
                 const numRatings = getLatestMetric('Number of Ratings');
 
+                const getRatingColor = (rating) => {
+                    const val = parseFloat(rating);
+                    if (isNaN(val)) return 'text-[var(--text-color)]';
+                    return val >= 4 ? 'text-green-500' : 'text-[var(--text-color)]';
+                };
+
                 const createPlatformCard = (label, value) => `
                     <div class="qrf-scorecard bg-black/10 p-3 rounded-lg text-center border border-white/10 flex-1">
                         <div class="value text-2xl md:text-3xl font-semibold tracking-tight">${value || 'N/A'}</div>
@@ -392,10 +455,10 @@
                     </div>
                 `;
                 
-                const createRatingCard = (label, value, icon) => `
-                    <div class="metric-card flex-grow bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2">
+                const createRatingCard = (label, value, icon, colorClass = 'text-[var(--text-color)]') => `
+                    <div class="metric-card flex-grow bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 rounded-3xl" data-color-state="${colorClass.includes('green') ? 'good' : 'neutral'}">
                         <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
-                        <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${value || 'N/A'}</div>
+                        <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${value || 'N/A'}</div>
                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
@@ -429,14 +492,14 @@
                                 <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('android')}"></i>Android</h4>
                                     <div class="flex justify-center gap-6">
-                                        ${createRatingCard('Avg. Rating', rating.ANDROID, 'fas fa-star')}
+                                        ${createRatingCard('Avg. Rating', rating.ANDROID, 'fas fa-star', getRatingColor(rating.ANDROID))}
                                         ${createRatingCard('# of Ratings', numRatings.ANDROID, 'fas fa-user-edit')}
                                     </div>
                                 </div>
                                 <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('ios')}"></i>iOS</h4>
                                     <div class="flex justify-center gap-6">
-                                        ${createRatingCard('Avg. Rating', rating.iOS, 'fas fa-star')}
+                                        ${createRatingCard('Avg. Rating', rating.iOS, 'fas fa-star', getRatingColor(rating.iOS))}
                                         ${createRatingCard('# of Ratings', numRatings.iOS, 'fas fa-user-edit')}
                                     </div>
                                 </div>
@@ -453,32 +516,63 @@
                 return 'text-green-500';
             };
 
-            const renderCourseChecksPage = (container, data) => {
+            const getSuccessRateColorState = (rateStr) => {
+                const rate = parseFloat(rateStr);
+                if (isNaN(rate)) return 'neutral';
+                if (rate <= 35) return 'bad';
+                if (rate > 35 && rate <= 75) return 'medium';
+                return 'good';
+            };
+
+            const renderCourseChecksPage = (container, data, days = 10) => {
                 if (!data || !data.raw || data.raw.length < 1) { showError(container, "Could not load Course Checks data."); return; }
                 
                 const firstLine = data.raw[0].split(',');
                 const successRate = firstLine.length > 2 ? firstLine[2].trim().replace(/"/g, '') : 'N/A';
                 const successRateColor = getSuccessRateColor(successRate);
+                const successRateState = getSuccessRateColorState(successRate);
 
-                const chartData = data.parsed
+                const allChartData = data.parsed
                     .filter(row => row['Pass %'] && row['Pass %'].trim() !== '' && !isNaN(parseFloat(row['Pass %'])))
                     .map(row => ({
                         date: row['Date'],
                         value: parseFloat(row['Pass %'])
                     }));
+                
+                const chartData = allChartData.slice(-days);
 
                 container.innerHTML = `
                     <div class="space-y-8">
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl text-center border border-[var(--card-border)]">
+                        <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl text-center border border-[var(--card-border)]" data-color-state="${successRateState}">
                             <h3 class="text-lg font-medium text-[var(--text-muted-color)] uppercase tracking-widest">Success Rate</h3>
                             <div class="text-8xl font-bold my-2 tracking-tighter ${successRateColor}">${successRate}</div>
-                            <i class="fas fa-check-circle text-lg ${successRateColor}"></i>
                         </div>
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl min-h-[400px]">
-                             <canvas id="courseChecksChartCanvas"></canvas>
+                         <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                             <div class="flex justify-center mb-6 items-center gap-4">
+                                <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
+                                <div id="timeline-toggle" class="bg-black/20 rounded-full p-1 flex gap-1">
+                                    <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                    <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">10 Days</button>
+                                    <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
+                                    <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                                </div>
+                            </div>
+                            <div class="min-h-[400px]">
+                                <canvas id="courseChecksChartCanvas"></canvas>
+                            </div>
                         </div>
                     </div>
                 `;
+
+                const timelineButtons = container.querySelectorAll('.timeline-btn');
+                timelineButtons.forEach(btn => {
+                    if (parseInt(btn.dataset.days) === days) {
+                        btn.classList.add('bg-[var(--nav-active-bg)]', 'text-[var(--nav-active-text)]');
+                    }
+                    btn.addEventListener('click', () => {
+                        renderCourseChecksPage(container, data, parseInt(btn.dataset.days));
+                    });
+                });
 
                 const ctx = document.getElementById('courseChecksChartCanvas').getContext('2d');
                 if (courseChecksChart) {
@@ -490,10 +584,6 @@
                 const tickColor = isLightMode ? '#515154' : '#a1a1a6';
                 const bodyFont = "'Inter', sans-serif";
 
-                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                gradient.addColorStop(0, 'rgba(45, 212, 191, 0.4)');
-                gradient.addColorStop(1, 'rgba(45, 212, 191, 0)');
-
                 courseChecksChart = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -501,16 +591,31 @@
                         datasets: [{
                             label: 'Pass %',
                             data: chartData.map(d => d.value),
-                            borderColor: '#2DD4BF',
-                            backgroundColor: gradient,
                             borderWidth: 3,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#2DD4BF',
-                            pointBorderWidth: 2,
                             pointRadius: 5,
                             pointHoverRadius: 8,
                             tension: 0.4,
-                            fill: true
+                            fill: false,
+                             segment: {
+                                borderColor: ctx => {
+                                    const y = ctx.p1.parsed.y;
+                                    if (y <= 35) return 'rgb(239, 68, 68)'; // red-500
+                                    if (y > 35 && y <= 75) return 'rgb(245, 158, 11)'; // amber-500
+                                    return 'rgb(34, 197, 94)'; // green-500
+                                }
+                            },
+                            pointBorderColor: (ctx) => {
+                                const y = ctx.raw;
+                                if (y <= 35) return 'rgb(239, 68, 68)';
+                                if (y > 35 && y <= 75) return 'rgb(245, 158, 11)';
+                                return 'rgb(34, 197, 94)';
+                            },
+                            pointBackgroundColor: (ctx) => {
+                                const y = ctx.raw;
+                                if (y <= 35) return 'rgba(239, 68, 68, 0.5)';
+                                if (y > 35 && y <= 75) return 'rgba(245, 158, 11, 0.5)';
+                                return 'rgba(34, 197, 94, 0.5)';
+                            }
                         }]
                     },
                     options: {
@@ -558,13 +663,24 @@
                     const group = row['Sub-Box Header'];
                     if (group && !acc[group]) acc[group] = {};
                     if(group) {
-                        const key = row['Data Header'].toLowerCase();
+                        const key = row['Data Header'].toLowerCase().replace('%', '').trim();
                         acc[group][key] = row['Value'];
                     }
                     return acc;
                 }, {});
+
+                const getCompletionColorState = (valueStr) => {
+                    const value = parseFloat(valueStr);
+                    if (isNaN(value)) return 'neutral';
+                    if (value <= 35) return 'bad';
+                    if (value > 35 && value <= 75) return 'medium';
+                    return 'good';
+                };
+
                 const createSectionHTML = (title, groupData, isEnlarged = false) => {
                     if (!groupData) return '';
+                    const colorState = getCompletionColorState(groupData.completion);
+                    const colorClass = getPerformanceColorClass(colorState);
                     if (isEnlarged) {
                         return `
                             <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-2xl">
@@ -586,8 +702,8 @@
                                             <span class="value text-3xl font-semibold text-[var(--text-color)]">${groupData.total || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div class="qrf-scorecard bg-black/10 p-6 rounded-xl text-center border border-transparent hover:border-white/10">
-                                        <div class="value text-8xl font-bold text-[var(--text-color)] tracking-tighter">${groupData.completion || 'N/A'}</div>
+                                    <div class="qrf-scorecard bg-black/10 p-6 rounded-xl text-center border border-transparent" data-color-state="${colorState}">
+                                        <div class="value text-7xl font-bold ${colorClass} tracking-tighter">${groupData.completion || 'N/A'}</div>
                                         <div class="text-xl text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
                                 </div>
@@ -614,8 +730,8 @@
                                          <div class="text-xs text-[var(--text-muted-color)]">Total</div>
                                      </div>
                                  </div>
-                                 <div class="qrf-scorecard bg-black/10 p-4 rounded-lg text-center border border-transparent hover:border-white/10">
-                                     <div class="value text-5xl font-bold text-[var(--text-color)] tracking-tighter">${groupData.completion || 'N/A'}</div>
+                                 <div class="qrf-scorecard bg-black/10 p-4 rounded-lg text-center border border-transparent" data-color-state="${colorState}">
+                                     <div class="value text-5xl font-bold ${colorClass} tracking-tighter">${groupData.completion || 'N/A'}</div>
                                      <div class="text-sm text-[var(--text-muted-color)]">Completion</div>
                                  </div>
                                </div>
@@ -624,8 +740,8 @@
                 };
 
                 container.innerHTML = `
-                    <div class="pt-2 pb-8">
-                        <h2 class="text-5xl font-bold text-center text-[var(--text-color)] mb-12" style="text-shadow: 0 0 25px rgba(255, 255, 255, 0.15);">QRF Status</h2>
+                    <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                         <h2 class="text-3xl font-bold text-center text-[var(--text-color)] mb-8" style="text-shadow: 0 0 25px rgba(255, 255, 255, 0.15);">QRF Status</h2>
                         <div class="space-y-8">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 ${createSectionHTML('ACCA', processedData.ACCA)}
@@ -646,26 +762,28 @@
                 const generalData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'General');
                 const performanceData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'Performance Data');
 
-                const createMetricCard = (metric) => `
-                    <div class="bg-black/5 p-6 rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center space-y-2">
+                const createMetricCard = (metric, isPerformance = false) => {
+                    const colorState = isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
+                    const colorClass = isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
+                    return `<div class="metric-card bg-black/5 p-6 rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center space-y-2" data-color-state="${colorState}">
                         <i class="${getIconForMetric(metric['Data Header'])} text-3xl text-[var(--icon-color)] opacity-80"></i>
-                        <div class="text-4xl font-bold text-[var(--text-color)] tracking-tight">${metric.Value || 'N/A'}</div>
+                        <div class="text-4xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
                         <div class="text-sm font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                    </div>
-                `;
+                    </div>`;
+                };
 
                 container.innerHTML = `
                     <div class="space-y-10">
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                ${generalData.map(createMetricCard).join('')}
+                                ${generalData.map(metric => createMetricCard(metric, false)).join('')}
                             </div>
                         </div>
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                                ${performanceData.map(createMetricCard).join('')}
+                                ${performanceData.map(metric => createMetricCard(metric, true)).join('')}
                             </div>
                         </div>
                     </div>
@@ -675,7 +793,7 @@
             const renderAskADoubtPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Support data."); return; }
                 
-                const metrics = data; // Data is already a simple key-value object from parseSimpleCSV
+                const metrics = data; 
                 
                 const getMetricValue = (key) => metrics[key] || 'N/A';
                 const openDoubts = parseInt(getMetricValue('Open Doubts'), 10);
@@ -685,10 +803,20 @@
                     if (isNaN(value)) return 'text-[var(--text-color)]';
                     return value >= 10 ? 'text-red-500' : 'text-green-500';
                 };
+                
+                const getConditionalIcon = (value, highIcon, lowIcon) => {
+                    if (isNaN(value)) return highIcon;
+                    return value >= 10 ? highIcon : lowIcon;
+                };
+                
+                const getConditionalState = (value) => {
+                     if (isNaN(value)) return 'neutral';
+                    return value >= 10 ? 'bad' : 'good';
+                }
 
-                const createMetricCard = (label, value, icon, colorClass = 'text-[var(--text-color)]') => `
-                    <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px]">
-                        <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
+                const createMetricCard = (label, value, icon, colorClass = 'text-[var(--text-color)]', state = 'neutral') => `
+                    <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl" data-color-state="${state}">
+                        <div class="text-2xl ${colorClass}"><i class="${icon}"></i></div>
                         <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${value}</div>
                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
                     </div>
@@ -700,14 +828,14 @@
                              <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
                              <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
                                 ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
-                                ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), 'fas fa-exclamation-circle', getConditionalColor(openDoubts))}
+                                ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
                              </div>
                         </div>
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
                              <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
                              <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
                                 ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
-                                ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), 'fas fa-exclamation-triangle', getConditionalColor(openTickets))}
+                                ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), getConditionalIcon(openTickets, 'fas fa-exclamation-triangle', 'fas fa-check-circle'), getConditionalColor(openTickets), getConditionalState(openTickets))}
                              </div>
                         </div>
                     </div>
