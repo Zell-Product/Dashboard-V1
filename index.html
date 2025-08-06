@@ -24,8 +24,8 @@
             --text-muted-color: #a1a1a6;
             --card-bg: rgba(29, 29, 31, 0.7);
             --card-border: rgba(255, 255, 255, 0.1);
-            --card-hover-bg: rgba(40, 40, 42, 0.8); /* Darker greyish highlight */
-            --card-hover-shadow: 0 0 25px rgba(200, 200, 255, 0.1); /* Subtle glow */
+            --card-hover-bg: rgba(40, 40, 42, 0.8);
+            --card-hover-shadow: 0 0 25px rgba(200, 200, 255, 0.1);
             --header-bg: rgba(29, 29, 31, 0.7);
             --header-border: rgba(255, 255, 255, 0.1);
             --icon-color: #ffffff;
@@ -42,8 +42,8 @@
             --text-muted-color: #515154;
             --card-bg: rgba(255, 255, 255, 0.7);
             --card-border: rgba(0, 0, 0, 0.1);
-            --card-hover-bg: rgba(230, 230, 235, 0.9); /* Greyish highlight for light mode */
-            --card-hover-shadow: 0 0 25px rgba(0, 0, 0, 0.1); /* Subtle glow */
+            --card-hover-bg: rgba(230, 230, 235, 0.9);
+            --card-hover-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
             --header-bg: rgba(255, 255, 255, 0.7);
             --header-border: rgba(0, 0, 0, 0.1);
             --icon-color: #000000;
@@ -73,10 +73,7 @@
         }
         .hidden { display: none; }
 
-        /* --- NAVIGATION STYLES --- */
-        #navigation-bar {
-            max-width: 56rem;
-        }
+        #navigation-bar { max-width: 56rem; }
         .nav-item {
             padding: 1.25rem 2.5rem;
             font-size: 1.25rem;
@@ -89,65 +86,47 @@
             color: var(--nav-text-hover);
             background-color: rgba(255, 255, 255, 0.05);
         }
-        body.light-mode .nav-item:hover {
-             background-color: rgba(0, 0, 0, 0.03);
-        }
+        body.light-mode .nav-item:hover { background-color: rgba(0, 0, 0, 0.03); }
         .nav-item.active {
             background-color: var(--nav-active-bg);
             color: var(--nav-active-text);
             box-shadow: 0 4px 15px rgba(0,0,0,0.25);
         }
 
-        /* --- HOVER EFFECT & SOFTER CORNERS --- */
         .metric-card {
-            border-radius: 1.5rem; /* Softer corners */
+            border-radius: 1.5rem;
             transition: all 0.3s ease;
         }
         .metric-card:hover {
             background-color: var(--card-hover-bg);
             border-color: rgba(255, 255, 255, 0.2);
             transform: scale(1.05);
-            box-shadow: var(--card-hover-shadow); /* Apple TV glow */
+            box-shadow: var(--card-hover-shadow);
         }
-        body.light-mode .metric-card:hover {
-            border-color: rgba(0, 0, 0, 0.2);
+        body.light-mode .metric-card:hover { border-color: rgba(0, 0, 0, 0.2); }
+        .metric-value { transition: transform 0.3s ease; }
+        .metric-card:hover .metric-value { transform: scale(1.2); }
+        
+        /* --- NEW: Apple TV Inspired Report Buttons --- */
+        .report-button {
+            border-radius: 1.5rem;
+            background-color: rgba(128, 128, 128, 0.15); /* Glassy silver-grey tint */
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .metric-value {
-            transition: transform 0.3s ease;
+        .report-button:hover {
+            background-color: rgba(128, 128, 128, 0.25); /* Brighter tint on hover */
         }
-        .metric-card:hover .metric-value {
-            transform: scale(1.2); /* Makes the number pop even more */
-        }
-        .sub-box, .report-button {
-            border-radius: 1.5rem; /* Softer corners for all containers */
-        }
+        .report-button .report-content { transition: transform 0.3s ease; }
+        .report-button:hover .report-content { transform: scale(1.1); }
 
 
-        /* --- MOBILE RESPONSIVE STYLES --- */
         @media (max-width: 768px) {
-            #navigation-bar {
-                width: 100%;
-                max-width: 100%;
-                padding: 0.25rem;
-            }
-            .nav-item {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.875rem;
-                flex-grow: 1;
-                text-align: center;
-            }
-            #theme-toggle {
-                flex-grow: 0;
-            }
-            .page-content {
-                padding-top: 1rem;
-            }
-            .card-grid {
-                flex-direction: column;
-            }
-            .card-grid .flex-grow {
-                min-width: 0;
-            }
+            #navigation-bar { width: 100%; max-width: 100%; padding: 0.25rem; }
+            .nav-item { padding: 0.75rem 0.5rem; font-size: 0.875rem; flex-grow: 1; text-align: center; }
+            #theme-toggle { flex-grow: 0; }
+            .page-content { padding-top: 1rem; }
+            .card-grid { flex-direction: column; }
+            .card-grid .flex-grow { min-width: 0; }
         }
     </style>
 </head>
@@ -177,6 +156,7 @@
             const dataCache = { overview: null, daily: null };
             let activeTab = 'overview';
 
+            // --- RADICAL FIX: ROBUST CSV PARSING ENGINE ---
             const parseCSV = (csv) => {
                 if (!csv) return [];
                 const lines = csv.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
@@ -186,7 +166,7 @@
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i];
                     const values = line.match(/(?:"[^"]*"|[^,]+)/g) || [];
-                     if (values.length > 0 && values.length <= headers.length) {
+                     if (values.length > 0) {
                         const obj = {};
                         headers.forEach((header, index) => {
                             obj[header] = values[index] ? values[index].trim().replace(/"/g, '') : '';
