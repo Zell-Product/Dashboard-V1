@@ -205,7 +205,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 10rem);
+                max-width: calc(100% - 9rem); /* Adjusted for better spacing */
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -220,6 +220,13 @@
             .card-grid { flex-direction: column; }
             .card-grid.force-row { flex-direction: row; }
             .card-grid .flex-grow { min-width: 0; }
+
+            /* FIX: Reduce padding on QRF nav buttons for mobile */
+            .qrf-nav-item {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -774,6 +781,7 @@
                 }
 
                 const isLightMode = document.body.classList.contains('light-mode');
+                const isMobile = window.innerWidth < 768;
                 const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
                 const tickColor = isLightMode ? '#515154' : '#a1a1a6';
                 const bodyFont = "'Inter', sans-serif";
@@ -785,9 +793,9 @@
                         datasets: [{
                             label: 'Pass %',
                             data: chartData.map(d => d.value),
-                            borderWidth: 3,
-                            pointRadius: 5,
-                            pointHoverRadius: 8,
+                            borderWidth: isMobile ? 2 : 3,
+                            pointRadius: isMobile ? 3 : 5,
+                            pointHoverRadius: isMobile ? 6 : 8,
                             tension: 0.4,
                             fill: false,
                              segment: {
@@ -846,7 +854,11 @@
                             },
                             x: {
                                 grid: { display: false },
-                                ticks: { color: tickColor, font: { family: bodyFont } }
+                                ticks: { 
+                                    color: tickColor, 
+                                    font: { family: bodyFont },
+                                    maxTicksLimit: isMobile ? 6 : undefined
+                                }
                             }
                         }
                     }
@@ -1113,6 +1125,7 @@
                 const renderLineChart = (canvasId, dailyData, days) => {
                     const today = new Date();
                     today.setHours(23, 59, 59, 999); 
+                    const isMobile = window.innerWidth < 768;
                     
                     const chartData = dailyData.parsed
                         .filter(d => {
@@ -1133,8 +1146,8 @@
                         data: {
                             labels: chartLabels,
                             datasets: [
-                                { label: 'Draft', data: chartData.map(d => parseNumericValue(d.Draft)), borderColor: 'rgb(239, 68, 68)', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4, borderWidth: 3, pointRadius: 4, pointHoverRadius: 7, fill: true },
-                                { label: 'Approved', data: chartData.map(d => parseNumericValue(d.Approved)), borderColor: 'rgb(34, 197, 94)', backgroundColor: 'rgba(34, 197, 94, 0.1)', tension: 0.4, borderWidth: 3, pointRadius: 4, pointHoverRadius: 7, fill: true }
+                                { label: 'Draft', data: chartData.map(d => parseNumericValue(d.Draft)), borderColor: 'rgb(239, 68, 68)', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4, borderWidth: isMobile ? 2 : 3, pointRadius: isMobile ? 3 : 4, pointHoverRadius: isMobile ? 6 : 7, fill: true },
+                                { label: 'Approved', data: chartData.map(d => parseNumericValue(d.Approved)), borderColor: 'rgb(34, 197, 94)', backgroundColor: 'rgba(34, 197, 94, 0.1)', tension: 0.4, borderWidth: isMobile ? 2 : 3, pointRadius: isMobile ? 3 : 4, pointHoverRadius: isMobile ? 6 : 7, fill: true }
                             ]
                         },
                         options: {
@@ -1177,7 +1190,13 @@
                                 y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { family: bodyFont } } }, 
                                 x: { 
                                     grid: { display: false }, 
-                                    ticks: { color: tickColor, font: { family: bodyFont } } 
+                                    ticks: { 
+                                        color: tickColor, 
+                                        font: { family: bodyFont },
+                                        maxTicksLimit: isMobile ? 6 : undefined,
+                                        maxRotation: 0,
+                                        minRotation: 0
+                                    } 
                                 } 
                             }
                         }
@@ -1411,6 +1430,7 @@
                 const renderSupportTrendChart = () => {
                     if (supportLineChart) supportLineChart.destroy();
                     
+                    const isMobile = window.innerWidth < 768;
                     const chartData = trendsData.map(d => ({
                         date: d.date,
                         value: d[currentDataType]
@@ -1439,9 +1459,9 @@
                                 data: dataPoints,
                                 borderColor: pointColor,
                                 backgroundColor: bgColor,
-                                borderWidth: 3,
-                                pointRadius: 5,
-                                pointHoverRadius: 8,
+                                borderWidth: isMobile ? 2 : 3,
+                                pointRadius: isMobile ? 3 : 5,
+                                pointHoverRadius: isMobile ? 6 : 8,
                                 tension: 0.4,
                                 fill: true,
                             }]
@@ -1483,7 +1503,13 @@
                                     type: 'time',
                                     time: { unit: 'day', displayFormats: { day: 'd MMM' } },
                                     grid: { display: false },
-                                    ticks: { color: tickColor, font: { family: bodyFont } }
+                                    ticks: { 
+                                        color: tickColor, 
+                                        font: { family: bodyFont },
+                                        maxTicksLimit: isMobile ? 5 : undefined,
+                                        maxRotation: 0,
+                                        minRotation: 0
+                                    }
                                 }
                             }
                         }
