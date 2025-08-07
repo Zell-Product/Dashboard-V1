@@ -195,10 +195,15 @@
                 <div class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center px-8 py-3">
                     <h1 id="page-header-title" class="text-2xl font-bold text-[var(--text-color)]"></h1>
                 </div>
-                 <a id="open-sheet-button" href="#" target="_blank" rel="noopener noreferrer" class="absolute right-0 top-1/2 -translate-y-1/2 bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] h-12 px-5 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
-                    <span class="mr-2 hidden md:inline">Open Sheet</span>
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    <button id="header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10 hidden">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <a id="open-sheet-button" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] h-12 px-5 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                        <span class="mr-2 hidden md:inline">Open Sheet</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -249,6 +254,7 @@
             const pageHeader = document.getElementById('page-header');
             const pageHeaderTitle = document.getElementById('page-header-title');
             const openSheetButton = document.getElementById('open-sheet-button');
+            const headerRefreshButton = document.getElementById('header-refresh-button');
             const themeToggle = document.getElementById('theme-toggle');
             const lastUpdatedEl = document.getElementById('last-updated-text');
             const refreshButton = document.getElementById('refresh-button');
@@ -291,16 +297,23 @@
                 return metrics;
             };
 
-            const fetchAndParseData = async (url, parser = parseCSV) => {
-                try {
-                    const response = await fetch(`${url}&t=${new Date().getTime()}`);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const text = await response.text();
-                    if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
-                    return parser(text);
-                } catch (error) {
-                    console.error("Could not fetch or parse data:", error);
-                    return null;
+            const fetchAndParseData = async (url, parser = parseCSV, retries = 3, delay = 1000) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(`${url}&t=${new Date().getTime()}`);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        const text = await response.text();
+                        if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
+                        return parser(text); // Success
+                    } catch (error) {
+                        console.error(`Attempt ${i + 1} to fetch from ${url} failed:`, error.message);
+                        if (i < retries - 1) {
+                            await new Promise(res => setTimeout(res, delay * (i + 1))); // Exponential backoff
+                        } else {
+                            console.error("Could not fetch or parse data after multiple attempts:", error);
+                            return null; // All retries failed
+                        }
+                    }
                 }
             };
 
@@ -552,18 +565,18 @@
                         </div>
                          <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                              <div class="flex justify-center mb-6 items-center gap-4">
-                                <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
-                                <div id="timeline-toggle" class="bg-black/20 rounded-full p-1 flex gap-1">
-                                    <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                    <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">10 Days</button>
-                                    <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
-                                    <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
-                                </div>
-                            </div>
-                            <div class="min-h-[400px]">
-                                <canvas id="courseChecksChartCanvas"></canvas>
-                            </div>
-                        </div>
+                                 <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
+                                 <div id="timeline-toggle" class="bg-black/20 rounded-full p-1 flex gap-1">
+                                     <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                     <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">10 Days</button>
+                                     <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
+                                     <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                                 </div>
+                             </div>
+                             <div class="min-h-[400px]">
+                                 <canvas id="courseChecksChartCanvas"></canvas>
+                             </div>
+                         </div>
                     </div>
                 `;
 
@@ -600,25 +613,25 @@
                             tension: 0.4,
                             fill: false,
                              segment: {
-                                borderColor: ctx => {
-                                    const y = ctx.p1.parsed.y;
-                                    if (y <= 35) return 'rgb(239, 68, 68)'; // red-500
-                                    if (y > 35 && y <= 75) return 'rgb(245, 158, 11)'; // amber-500
-                                    return 'rgb(34, 197, 94)'; // green-500
-                                }
-                            },
-                            pointBorderColor: (ctx) => {
-                                const y = ctx.raw;
-                                if (y <= 35) return 'rgb(239, 68, 68)';
-                                if (y > 35 && y <= 75) return 'rgb(245, 158, 11)';
-                                return 'rgb(34, 197, 94)';
-                            },
-                            pointBackgroundColor: (ctx) => {
-                                const y = ctx.raw;
-                                if (y <= 35) return 'rgba(239, 68, 68, 0.5)';
-                                if (y > 35 && y <= 75) return 'rgba(245, 158, 11, 0.5)';
-                                return 'rgba(34, 197, 94, 0.5)';
-                            }
+                                 borderColor: ctx => {
+                                     const y = ctx.p1.parsed.y;
+                                     if (y <= 35) return 'rgb(239, 68, 68)'; // red-500
+                                     if (y > 35 && y <= 75) return 'rgb(245, 158, 11)'; // amber-500
+                                     return 'rgb(34, 197, 94)'; // green-500
+                                 }
+                             },
+                             pointBorderColor: (ctx) => {
+                                 const y = ctx.raw;
+                                 if (y <= 35) return 'rgb(239, 68, 68)';
+                                 if (y > 35 && y <= 75) return 'rgb(245, 158, 11)';
+                                 return 'rgb(34, 197, 94)';
+                             },
+                             pointBackgroundColor: (ctx) => {
+                                 const y = ctx.raw;
+                                 if (y <= 35) return 'rgba(239, 68, 68, 0.5)';
+                                 if (y > 35 && y <= 75) return 'rgba(245, 158, 11, 0.5)';
+                                 return 'rgba(34, 197, 94, 0.5)';
+                             }
                         }]
                     },
                     options: {
@@ -871,21 +884,21 @@
 
                 container.innerHTML = `
                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
+                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
                              <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
                              <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
-                                ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
+                                 ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
+                                 ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
                              </div>
-                        </div>
-                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
+                         </div>
+                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
                              <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
                              <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
-                                ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), getConditionalIcon(openTickets, 'fas fa-exclamation-triangle', 'fas fa-check-circle'), getConditionalColor(openTickets), getConditionalState(openTickets))}
+                                 ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
+                                 ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), getConditionalIcon(openTickets, 'fas fa-exclamation-triangle', 'fas fa-check-circle'), getConditionalColor(openTickets), getConditionalState(openTickets))}
                              </div>
-                        </div>
-                    </div>
+                         </div>
+                     </div>
                 `;
             };
             
@@ -901,11 +914,18 @@
             };
 
             const setPageHeader = (title, sheetUrl) => {
+                headerRefreshButton.classList.add('hidden'); // Hide header refresh button by default
                 if (title) {
                     pageHeaderTitle.textContent = title;
                     pageHeader.classList.remove('hidden');
                     pageHeader.classList.add('flex');
                     mainHeader.classList.add('hidden');
+                    
+                    const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
+                    if (activeSection && activeSection.id !== 'reports-section') {
+                        headerRefreshButton.classList.remove('hidden');
+                    }
+
                     if (sheetUrl) {
                         openSheetButton.href = sheetUrl;
                         openSheetButton.classList.remove('hidden');
@@ -928,11 +948,19 @@
                 activeContent.classList.remove('hidden');
                 if (tabId === 'overview' && !dataCache.overview) {
                     showLoading(activeContent);
-                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
+                    const newData = await fetchAndParseData(OVERVIEW_URL);
+                    if (newData) {
+                        dataCache.overview = newData;
+                        renderOverviewPage(activeContent, dataCache.overview);
+                    } else {
+                        showError(activeContent, "Failed to fetch overview data. Please try again.");
+                    }
+                } else if (tabId === 'overview') {
                     renderOverviewPage(activeContent, dataCache.overview);
                 }
             };
 
+            // ▼▼▼ ALL `show...` FUNCTIONS ARE NOW FIXED ▼▼▼
             const showDailyMetrics = async () => {
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const dailySection = document.getElementById('daily-section');
@@ -940,7 +968,14 @@
                 setPageHeader('Daily Metrics');
                 if (!dataCache.daily) {
                     showLoading(dailySection);
-                    dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
+                    const newData = await fetchAndParseData(DAILY_METRICS_URL);
+                    if (newData) {
+                        dataCache.daily = newData;
+                        renderDailyMetricsPage(dailySection, dataCache.daily);
+                    } else {
+                        showError(dailySection, "Failed to fetch daily metrics data. Please try again.");
+                    }
+                } else {
                     renderDailyMetricsPage(dailySection, dataCache.daily);
                 }
             };
@@ -952,7 +987,14 @@
                 setPageHeader('LMS Checks', SHEET_URLS['course-checks-section']);
                 if (!dataCache.courseChecks) {
                     showLoading(courseChecksSection);
-                    dataCache.courseChecks = await fetchAndParseData(COURSE_CHECKS_URL);
+                    const newData = await fetchAndParseData(COURSE_CHECKS_URL);
+                     if (newData) {
+                        dataCache.courseChecks = newData;
+                        renderCourseChecksPage(courseChecksSection, dataCache.courseChecks);
+                    } else {
+                        showError(courseChecksSection, "Failed to fetch LMS checks data. Please try again.");
+                    }
+                } else {
                     renderCourseChecksPage(courseChecksSection, dataCache.courseChecks);
                 }
             };
@@ -964,8 +1006,15 @@
                 setPageHeader('Question Repository', SHEET_URLS['question-repo-section']);
                 if (!dataCache.questionRepo) {
                     showLoading(questionRepoSection);
-                    dataCache.questionRepo = await fetchAndParseData(QUESTION_REPO_URL);
-                    renderQuestionRepoPage(questionRepoSection, dataCache.questionRepo);
+                    const newData = await fetchAndParseData(QUESTION_REPO_URL);
+                    if (newData) {
+                        dataCache.questionRepo = newData;
+                        renderQuestionRepoPage(questionRepoSection, dataCache.questionRepo);
+                    } else {
+                        showError(questionRepoSection, "Failed to fetch question repository data. Please try again.");
+                    }
+                } else {
+                     renderQuestionRepoPage(questionRepoSection, dataCache.questionRepo);
                 }
             };
 
@@ -976,9 +1025,16 @@
                 setPageHeader('Batch Reports', SHEET_URLS['batch-reports-section']);
                 if (!dataCache.overview) {
                     showLoading(batchReportsSection);
-                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
+                    const newData = await fetchAndParseData(OVERVIEW_URL);
+                    if (newData) {
+                        dataCache.overview = newData;
+                        renderBatchReportsPage(batchReportsSection, dataCache.overview);
+                    } else {
+                        showError(batchReportsSection, "Failed to fetch batch reports data. Please try again.");
+                    }
+                } else {
+                    renderBatchReportsPage(batchReportsSection, dataCache.overview);
                 }
-                renderBatchReportsPage(batchReportsSection, dataCache.overview);
             };
 
             const showAskADoubtPage = async () => {
@@ -988,9 +1044,16 @@
                 setPageHeader('LMS Support', SHEET_URLS['ask-a-doubt-section']);
                 if (!dataCache.lmsSupport) {
                     showLoading(askADoubtSection);
-                    dataCache.lmsSupport = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
+                    const newData = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
+                    if (newData) {
+                        dataCache.lmsSupport = newData;
+                        renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport);
+                    } else {
+                        showError(askADoubtSection, "Failed to fetch LMS support data. Please try again.");
+                    }
+                } else {
+                    renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport);
                 }
-                renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport);
             };
             
             const showReportsList = () => {
@@ -1006,24 +1069,55 @@
                 const sectionId = activeSection.id;
                 showLoading(activeSection);
                 
+                let newData;
                 if (sectionId === 'overview-section') {
-                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
-                    renderOverviewPage(activeSection, dataCache.overview);
+                    newData = await fetchAndParseData(OVERVIEW_URL);
+                    if (newData) {
+                        dataCache.overview = newData;
+                        renderOverviewPage(activeSection, newData);
+                    } else {
+                         showError(activeSection, "Failed to refresh data. Please check your connection and try again.");
+                    }
                 } else if (sectionId === 'batch-reports-section') {
-                    dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
-                    renderBatchReportsPage(activeSection, dataCache.overview);
+                    newData = await fetchAndParseData(OVERVIEW_URL);
+                    if (newData) {
+                        dataCache.overview = newData;
+                        renderBatchReportsPage(activeSection, newData);
+                    } else {
+                         showError(activeSection, "Failed to refresh data. Please check your connection and try again.");
+                    }
                 } else if (sectionId === 'ask-a-doubt-section') {
-                    dataCache.lmsSupport = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
-                    renderAskADoubtPage(activeSection, dataCache.lmsSupport);
+                    newData = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
+                    if (newData) {
+                        dataCache.lmsSupport = newData;
+                        renderAskADoubtPage(activeSection, newData);
+                    } else {
+                        showError(activeSection, "Failed to refresh data. Please check your connection and try again.");
+                    }
                 } else if (sectionId === 'daily-section') {
-                    dataCache.daily = await fetchAndParseData(DAILY_METRICS_URL);
-                    renderDailyMetricsPage(activeSection, dataCache.daily);
+                    newData = await fetchAndParseData(DAILY_METRICS_URL);
+                    if (newData) {
+                        dataCache.daily = newData;
+                        renderDailyMetricsPage(activeSection, newData);
+                    } else {
+                        showError(activeSection, "Failed to refresh data. Please check your connection and try again.");
+                    }
                 } else if (sectionId === 'course-checks-section') {
-                    dataCache.courseChecks = await fetchAndParseData(COURSE_CHECKS_URL);
-                    renderCourseChecksPage(activeSection, dataCache.courseChecks);
+                    newData = await fetchAndParseData(COURSE_CHECKS_URL);
+                    if (newData) {
+                        dataCache.courseChecks = newData;
+                        renderCourseChecksPage(activeSection, newData);
+                    } else {
+                        showError(activeSection, "Failed to refresh data. Please check your connection and try again.");
+                    }
                 } else if (sectionId === 'question-repo-section') {
-                    dataCache.questionRepo = await fetchAndParseData(QUESTION_REPO_URL);
-                    renderQuestionRepoPage(activeSection, dataCache.questionRepo);
+                    newData = await fetchAndParseData(QUESTION_REPO_URL);
+                    if (newData) {
+                        dataCache.questionRepo = newData;
+                        renderQuestionRepoPage(activeSection, newData);
+                    } else {
+                        showError(activeSection, "Failed to refresh data. Please check your connection and try again.");
+                    }
                 }
             };
             
@@ -1066,9 +1160,20 @@
                 else if (target.id === 'show-ask-a-doubt-btn') showAskADoubtPage();
             });
             
-            refreshButton.addEventListener('click', () => {
-                refreshData().then(updateLastUpdatedTime);
-            });
+            const handleRefreshClick = () => {
+                const refreshIcon = refreshButton.querySelector('i');
+                const headerRefreshIcon = headerRefreshButton.querySelector('i');
+                refreshIcon?.classList.add('animate-spin');
+                headerRefreshIcon?.classList.add('animate-spin');
+                refreshData().then(() => {
+                    updateLastUpdatedTime();
+                    refreshIcon?.classList.remove('animate-spin');
+                    headerRefreshIcon?.classList.remove('animate-spin');
+                });
+            };
+
+            refreshButton.addEventListener('click', handleRefreshClick);
+            headerRefreshButton.addEventListener('click', handleRefreshClick);
             
             mainContent.addEventListener('scroll', () => {
                 const { scrollTop, scrollHeight, clientHeight } = mainContent;
@@ -1082,7 +1187,7 @@
             initialLoad();
             setInterval(() => {
                 refreshData().then(updateLastUpdatedTime);
-            }, 300000);
+            }, 300000); // 5 minutes
         });
     </script>
 </body>
