@@ -381,12 +381,10 @@
                 };
             };
 
-            // FIX: New dedicated parser for the Weekly Batch Reports sheet.
             const parseBatchReportsCSV = (csv) => {
                 if (!csv) return null;
                 const lines = csv.replace(/\r/g, '').split('\n');
                 
-                // Helper to get a specific cell value (B2 is rowIndex=1, colIndex=1)
                 const getValue = (rowIndex, colIndex) => {
                     if (lines.length > rowIndex) {
                         const values = lines[rowIndex].split(',');
