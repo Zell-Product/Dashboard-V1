@@ -300,7 +300,7 @@
                 'batch-reports-section': 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing'
             };
 
-            const dataCache = { overview: null, daily: null, lmsStats: null, testsCompletion: null, questionRepo: null, accaDaily: null, cfaDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null, lmsTrends: null };
+            const dataCache = { overview: null, daily: null, lmsStats: null, questionRepo: null, accaDaily: null, cfaDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null, lmsTrends: null, batchReports: null };
             let courseChecksChart = null;
             let accaPieChart = null, accaLineChart = null, cfaPieChart = null, cfaLineChart = null;
             let supportLineChart = null;
@@ -374,16 +374,29 @@
                 };
             };
 
-            const parseTestsCompletionCSV = (csv) => {
-                if (!csv) return 'N/A';
+            // FIX: New dedicated parser for the Weekly Batch Reports sheet.
+            const parseBatchReportsCSV = (csv) => {
+                if (!csv) return null;
                 const lines = csv.replace(/\r/g, '').split('\n');
-                if (lines.length > 5) {
-                    const values = lines[5].split(',');
-                    if (values.length > 1) {
-                        return values[1].trim().replace(/"/g, '');
+                
+                // Helper to get a specific cell value (B2 is rowIndex=1, colIndex=1)
+                const getValue = (rowIndex, colIndex) => {
+                    if (lines.length > rowIndex) {
+                        const values = lines[rowIndex].split(',');
+                        if (values.length > colIndex) {
+                            return values[colIndex].trim().replace(/"/g, '');
+                        }
                     }
-                }
-                return 'N/A';
+                    return 'N/A';
+                };
+
+                return {
+                    totalEnrolled: getValue(1, 1),      // Cell B2
+                    liveBatches: getValue(2, 1),      // Cell B3
+                    avgAttendance: getValue(3, 1),      // Cell B4
+                    avgLPS: getValue(4, 1),           // Cell B5
+                    testsCompletion: getValue(5, 1)   // Cell B6
+                };
             };
 
             const parseLmsTrendsCSV = (csv) => {
@@ -1269,22 +1282,19 @@
                 setupSubPage('cfa', cfaDailyData);
             };
 
-            const renderBatchReportsPage = (container, data, testsCompletionData) => {
-                if (!data || !data.parsed) { showError(container, "Could not load Batch Reports data."); return; }
+            const renderBatchReportsPage = (container, data) => {
+                if (!data) { showError(container, "Could not load Batch Reports data."); return; }
                 
-                const batchSectionData = data.parsed.filter(row => row['Top-Level Box'] && row['Top-Level Box'].trim() === 'Batches Information');
-                const generalData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'General');
-                let performanceData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'Performance Data');
+                const generalData = [
+                    { 'Data Header': 'Total Enrolled Students', 'Value': data.totalEnrolled },
+                    { 'Data Header': 'Live Batches Count', 'Value': data.liveBatches }
+                ];
 
-                // Filter out the 'QC Batch Check' metric
-                performanceData = performanceData.filter(metric => metric['Data Header'].trim() !== 'QC Batches Check %');
-
-                if (testsCompletionData) {
-                    performanceData.push({
-                        'Data Header': 'Tests Completion %',
-                        'Value': testsCompletionData
-                    });
-                }
+                const performanceData = [
+                    { 'Data Header': 'Average Attendance %', 'Value': data.avgAttendance },
+                    { 'Data Header': 'Average LPS', 'Value': data.avgLPS },
+                    { 'Data Header': 'Tests Completion %', 'Value': data.testsCompletion }
+                ];
 
                 const createMetricCard = (metric, isPerformance = false) => {
                     const colorState = isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
@@ -1707,25 +1717,18 @@
                 setPageHeader('Batch Reports', SHEET_URLS['batch-reports-section']);
                 updateFooterText('batch-reports-section');
 
-                const needsOverviewFetch = !dataCache.overview;
-                const needsTestsFetch = !dataCache.testsCompletion;
-
-                if (needsOverviewFetch || needsTestsFetch) {
+                if (!dataCache.batchReports) {
                     showLoading(batchReportsSection);
-                    const [overviewData, testsData] = await Promise.all([
-                        needsOverviewFetch ? fetchAndParseData(OVERVIEW_URL) : Promise.resolve(dataCache.overview),
-                        needsTestsFetch ? fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseTestsCompletionCSV) : Promise.resolve(dataCache.testsCompletion)
-                    ]);
+                    const batchData = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
 
-                    if (overviewData && testsData) {
-                        dataCache.overview = overviewData;
-                        dataCache.testsCompletion = testsData;
-                        renderBatchReportsPage(batchReportsSection, dataCache.overview, dataCache.testsCompletion);
+                    if (batchData) {
+                        dataCache.batchReports = batchData;
+                        renderBatchReportsPage(batchReportsSection, dataCache.batchReports);
                     } else {
                         showError(batchReportsSection, "Failed to fetch batch reports data. Please try again.");
                     }
                 } else {
-                    renderBatchReportsPage(batchReportsSection, dataCache.overview, dataCache.testsCompletion);
+                    renderBatchReportsPage(batchReportsSection, dataCache.batchReports);
                 }
             };
 
@@ -1777,7 +1780,7 @@
                     await switchTab('overview');
                 } else if (mainTabId === 'reports') {
                     switch(activeSection.id) {
-                        case 'batch-reports-section': dataCache.overview = null; dataCache.testsCompletion = null; await showBatchReportsPage(); break;
+                        case 'batch-reports-section': dataCache.batchReports = null; await showBatchReportsPage(); break;
                         case 'daily-section': dataCache.daily = null; dataCache.lmsStats = null; await showDailyMetrics(); break;
                         case 'course-checks-section': dataCache.courseChecks = null; await showCourseChecksPage(); break;
                         case 'question-repo-section': dataCache.questionRepo = null; dataCache.accaDaily = null; dataCache.cfaDaily = null; dataCache.accaSplit = null; await showQuestionRepo(); break;
