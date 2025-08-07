@@ -24,7 +24,7 @@
             --card-bg: rgba(29, 29, 31, 0.7);
             --card-border: rgba(255, 255, 255, 0.1);
             --card-hover-bg: rgba(40, 40, 42, 0.8);
-            --card-hover-shadow: 0 0 25px rgba(200, 200, 255, 0.1);
+            --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
             --header-bg: rgba(29, 29, 31, 0.7);
             --header-border: rgba(255, 255, 255, 0.1);
             --icon-color: #ffffff;
@@ -32,6 +32,7 @@
             --nav-text-hover: #ffffff;
             --nav-active-bg: rgba(255, 255, 255, 0.1);
             --nav-active-text: #ffffff;
+            --sub-box-bg: rgba(0,0,0,0.2);
             --footer-bg: #1d1d1f;
             --chart-grid-color: rgba(255, 255, 255, 0.1);
             --chart-tick-color: #a1a1a6;
@@ -41,21 +42,22 @@
         }
 
         body.light-mode {
-            /* Light Mode */
+            /* NEW Light Mode - Apple Inspired */
             --bg-color: #f5f5f7;
             --text-color: #1d1d1f;
-            --text-muted-color: #515154;
+            --text-muted-color: #6e6e73;
             --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(0, 0, 0, 0.1);
-            --card-hover-bg: rgba(230, 230, 235, 0.9);
-            --card-hover-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
-            --header-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --card-hover-bg: rgba(255, 255, 255, 0.9);
+            --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --header-bg: rgba(247, 247, 247, 0.8);
             --header-border: rgba(0, 0, 0, 0.1);
             --icon-color: #000000;
             --nav-text-color: #515154;
             --nav-text-hover: #000000;
-            --nav-active-bg: rgba(0, 0, 0, 0.05);
+            --nav-active-bg: #e5e5e7;
             --nav-active-text: #000000;
+            --sub-box-bg: rgba(0,0,0,0.03);
             --footer-bg: #e5e5e7;
             --chart-grid-color: rgba(0, 0, 0, 0.1);
             --chart-tick-color: #515154;
@@ -76,13 +78,18 @@
         .main-content::-webkit-scrollbar { width: 8px; }
         .main-content::-webkit-scrollbar-track { background: transparent; }
         .main-content::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
         }
-        body.light-mode .main-content::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2);
+        body:not(.light-mode) .main-content::-webkit-scrollbar-thumb {
+             background-color: rgba(255, 255, 255, 0.2);
         }
         .hidden { display: none; }
+        .fa-sync-alt.animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
 
         #navigation-bar { max-width: 48rem; }
         .nav-item {
@@ -104,16 +111,16 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.25);
         }
 
-        .metric-card { border-radius: 1.5rem; transition: all 0.3s ease; }
+        .metric-card { border-radius: 1.5rem; transition: all 0.3s ease; border: 1px solid var(--card-border); background-color: var(--card-bg); backdrop-filter: blur(10px); }
         .metric-card:hover {
             background-color: var(--card-hover-bg);
             border-color: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
+            transform: translateY(-4px) scale(1.03);
             box-shadow: var(--card-hover-shadow);
         }
         body.light-mode .metric-card:hover { border-color: rgba(0, 0, 0, 0.2); }
         .metric-value { transition: transform 0.3s ease; }
-        .metric-card:hover .metric-value { transform: scale(1.2); }
+        .metric-card:hover .metric-value { transform: scale(1.1); }
         
         .metric-card[data-color-state="good"]:hover { background-color: var(--good-hover-tint); }
         .metric-card[data-color-state="medium"]:hover { background-color: var(--medium-hover-tint); }
@@ -146,21 +153,34 @@
             transform: scale(1.1);
         }
         
-        .timeline-toggle .timeline-btn { transition: all 0.2s ease-in-out; }
+        .timeline-toggle {
+            transition: all 0.2s ease-in-out;
+        }
+        .timeline-toggle .timeline-btn { 
+            transition: all 0.2s ease-in-out;
+            transform: scale(1);
+        }
+        .timeline-toggle .timeline-btn.active {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
         .timeline-toggle .timeline-btn:not(.active):hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.02);
             background-color: rgba(255, 255, 255, 0.1);
         }
         body.light-mode .timeline-toggle .timeline-btn:not(.active):hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
 
+
         #page-footer {
             background-color: var(--footer-bg);
             color: var(--text-muted-color);
             padding: 1.5rem;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             width: 100%;
             flex-shrink: 0;
             opacity: 0;
@@ -171,26 +191,31 @@
             opacity: 1;
             pointer-events: auto;
         }
-        #refresh-button {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 9999px;
-            padding: 0.5rem 1rem;
-            font-size: 0.8rem;
-            margin-left: 1rem;
-            transition: all 0.2s ease;
-        }
-        #refresh-button:hover { background: rgba(255,255,255,0.2); }
-        body.light-mode #refresh-button {
-            background: rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        body.light-mode #refresh-button:hover { background: rgba(0,0,0,0.1); }
-
+        
         @media (max-width: 768px) {
-            #navigation-bar { width: 100%; max-width: 100%; padding: 0.25rem; }
-            .nav-item { padding: 0.75rem 0.5rem; font-size: 0.875rem; flex-grow: 1; text-align: center; }
-            #theme-toggle { flex-grow: 0; }
+            .header-container {
+                min-height: 3.5rem; /* 56px */
+            }
+             #page-header {
+                gap: 0.5rem; /* 8px */
+                justify-content: space-between;
+            }
+            #page-header-center-content {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                width: auto;
+                max-width: calc(100% - 10rem);
+            }
+            #page-header-title {
+                font-size: 1rem; /* text-base */
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            #navigation-bar { width: auto; flex-grow: 1; margin: 0 0.5rem; }
+            .nav-item { padding: 0.75rem 0.25rem; font-size: 0.8rem; flex-grow: 1; text-align: center; }
+            #theme-toggle { flex-shrink: 0; padding-left: 1rem; padding-right: 1rem; }
             .page-content { padding-top: 1rem; }
             .card-grid { flex-direction: column; }
             .card-grid.force-row { flex-direction: row; }
@@ -199,31 +224,39 @@
     </style>
 </head>
 <body class="h-screen flex flex-col">
-    <header class="w-full z-50 p-4 flex-shrink-0">
-        <div class="w-full max-w-7xl mx-auto flex items-center justify-center h-14 relative">
+    <header class="w-full z-50 p-2 md:p-4 flex-shrink-0">
+        <div class="w-full max-w-7xl mx-auto flex items-center justify-center header-container relative">
             
-            <div id="main-header" class="w-full h-full flex items-center justify-center relative">
-                <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1 md:gap-2">
+            <div id="main-header" class="w-full h-full flex items-center justify-between md:justify-center relative">
+                <div class="w-12 h-12 flex-shrink-0 md:absolute md:left-0"></div>
+                <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
                     <button data-tab="overview" class="nav-item">Overview</button>
                     <button data-tab="reports" class="nav-item">Reports</button>
                     <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
                         <i class="fas fa-sun"></i>
                     </button>
                 </nav>
+                 <div class="w-12 h-12 flex-shrink-0 md:absolute md:right-0 flex items-center justify-center">
+                     <button id="main-header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                         <i class="fas fa-sync-alt"></i>
+                     </button>
+                 </div>
             </div>
 
             <div id="page-header" class="hidden w-full h-full items-center justify-center relative">
-                 <button id="header-back-button" class="absolute left-0 top-1/2 -translate-y-1/2 bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
-                    <i class="fas fa-chevron-left text-xl"></i>
-                </button>
-                <div id="page-header-center-content" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center px-8 py-3">
-                    <h1 id="page-header-title" class="text-2xl font-bold text-[var(--text-color)]"></h1>
+                <div class="absolute left-0 top-1/2 -translate-y-1/2">
+                    <button id="header-back-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                        <i class="fas fa-chevron-left text-xl"></i>
+                    </button>
+                </div>
+                <div id="page-header-center-content" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center px-4 md:px-8 py-3 mx-auto">
+                    <h1 id="page-header-title" class="text-xl md:text-2xl font-bold text-[var(--text-color)]"></h1>
                 </div>
                 <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2">
                     <button id="header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10 hidden">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <a id="open-sheet-button" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] h-12 px-5 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                    <a id="open-sheet-button" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 md:h-12 md:w-auto md:px-5 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
                         <span class="mr-2 hidden md:inline">Open Sheet</span>
                         <i class="fas fa-external-link-alt"></i>
                     </a>
@@ -242,12 +275,7 @@
         <div id="ask-a-doubt-section" class="page-content hidden pt-8 pb-16"></div>
         
         <footer id="page-footer">
-            <div class="flex justify-center items-center">
-                <span id="last-updated-text"></span>
-                <button id="refresh-button">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-            </div>
+            <div id="footer-content" class="text-center"></div>
         </footer>
     </main>
 
@@ -261,32 +289,33 @@
             const ACCA_SPLIT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1011528086&single=true&output=csv';
             const COURSE_CHECKS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo2_1ighNkAxsTHM-9kCcKcOaMHRdojOqI_5wVVHTjJA_K80HdvzHtga5XRwStdlK7sYCbYRxRhGbV/pub?gid=1674961572&single=true&output=csv';
             const LMS_SUPPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=1975801635&single=true&output=csv';
+            const LMS_TRENDS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=420305713&single=true&output=csv';
+            const WEEKLY_BATCH_REPORTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK-8xEDVQIGw4xhw-5jY0NvHYi0OEYB0iJiUERycG8bvwyImE3LnEoEqYgTNBlFNjcsA7VI8-cAU0q/pub?gid=746074448&single=true&output=csv';
 
             const SHEET_URLS = {
+                'daily-section': 'https://docs.google.com/spreadsheets/d/17_clxpnwRjQ7qEiR6taISN9eLblZQ-4fr9WB2EqyQeE/edit?usp=sharing',
                 'course-checks-section': 'https://docs.google.com/spreadsheets/d/1nvGEbgEfrVrW1zWGndsRjF2naOp24BRk0cCRlLBoing/edit?usp=sharing',
                 'question-repo-section': 'https://docs.google.com/spreadsheets/d/195XkhREyrh329AtiWItixWUm-J019vf7NzKyCBQvIYw/edit?usp=sharing',
                 'ask-a-doubt-section': 'https://docs.google.com/spreadsheets/d/101pxzW4-A1nuoazXwWi0XFx61iLc9QhcRA-8AbkW2UM/edit?usp=sharing',
                 'batch-reports-section': 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing'
             };
 
-            const dataCache = { overview: null, daily: null, questionRepo: null, accaDaily: null, cfaDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null };
+            const dataCache = { overview: null, daily: null, lmsStats: null, testsCompletion: null, questionRepo: null, accaDaily: null, cfaDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null, lmsTrends: null };
             let courseChecksChart = null;
             let accaPieChart = null, accaLineChart = null, cfaPieChart = null, cfaLineChart = null;
+            let supportLineChart = null;
 
             const mainContent = document.getElementById('main-content');
             const navButtons = document.querySelectorAll('.nav-item');
             const pageContents = document.querySelectorAll('.page-content');
             const mainHeader = document.getElementById('main-header');
-            const navigationBar = document.getElementById('navigation-bar');
             const headerBackButton = document.getElementById('header-back-button');
             const pageHeader = document.getElementById('page-header');
-            const pageHeaderTitle = document.getElementById('page-header-title');
             const pageHeaderCenterContent = document.getElementById('page-header-center-content');
             const openSheetButton = document.getElementById('open-sheet-button');
             const headerRefreshButton = document.getElementById('header-refresh-button');
+            const mainHeaderRefreshButton = document.getElementById('main-header-refresh-button');
             const themeToggle = document.getElementById('theme-toggle');
-            const lastUpdatedEl = document.getElementById('last-updated-text');
-            const refreshButton = document.getElementById('refresh-button');
 
             const parseCSV = (csv) => {
                 if (!csv) return { parsed: [], raw: [] };
@@ -326,6 +355,64 @@
                 return metrics;
             };
 
+            const parseLmsStatsCSV = (csv) => {
+                if (!csv) return null;
+                const lines = csv.replace(/\r/g, '').split('\n');
+                const getValue = (lineIndex, colIndex) => {
+                    if (lines.length > lineIndex) {
+                        const values = lines[lineIndex].match(/(?:"[^"]*"|[^,]+)/g) || [];
+                        if (values.length > colIndex) {
+                            return values[colIndex].trim().replace(/"/g, '').replace(/,/g, '');
+                        }
+                    }
+                    return 'N/A';
+                };
+                return {
+                    totalLearners: parseInt(getValue(7, 1)).toLocaleString(),
+                    testsTaken: parseInt(getValue(8, 1)).toLocaleString(),
+                    avgTimeSpent: getValue(10, 1)
+                };
+            };
+
+            const parseTestsCompletionCSV = (csv) => {
+                if (!csv) return 'N/A';
+                const lines = csv.replace(/\r/g, '').split('\n');
+                if (lines.length > 5) {
+                    const values = lines[5].split(',');
+                    if (values.length > 1) {
+                        return values[1].trim().replace(/"/g, '');
+                    }
+                }
+                return 'N/A';
+            };
+
+            const parseLmsTrendsCSV = (csv) => {
+                if (!csv) return [];
+                const lines = csv.replace(/\r/g, '').split('\n').slice(1); // Skip header
+                const data = [];
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+
+                lines.forEach(line => {
+                    const parts = line.split(',');
+                    if (parts.length >= 3) {
+                        const dateStr = parts[0].trim().replace(/"/g, '');
+                        const date = new Date(dateStr);
+                        const doubts = parseInt(parts[1].trim(), 10);
+                        const tickets = parseInt(parts[2].trim(), 10);
+
+                        if (dateStr && !isNaN(date.getTime()) && date <= today && (!isNaN(doubts) || !isNaN(tickets))) {
+                            data.push({
+                                date: dateStr,
+                                doubts: isNaN(doubts) ? null : doubts,
+                                tickets: isNaN(tickets) ? null : tickets
+                            });
+                        }
+                    }
+                });
+                return data;
+            };
+
             const parseAccaSplitCSV = (csv) => {
                 if (!csv) return null;
                 const lines = csv.replace(/\r/g, '').split('\n');
@@ -347,12 +434,15 @@
                 };
             };
 
-            const fetchAndParseData = async (url, parser = parseCSV, retries = 3, delay = 1000) => {
+            const fetchAndParseData = async (url, parser = parseCSV, retries = 5, delay = 1500) => {
                 for (let i = 0; i < retries; i++) {
                     try {
                         const response = await fetch(`${url}&t=${new Date().getTime()}`);
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         const text = await response.text();
+                        if (text.trim().startsWith('<html') || text.trim().startsWith('<!DOCTYPE')) {
+                            throw new Error("Received an HTML page instead of CSV data. Retrying...");
+                        }
                         if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
                         return parser(text);
                     } catch (error) {
@@ -369,7 +459,7 @@
 
             const getIconForMetric = (label) => {
                 const lowerLabel = label.toLowerCase();
-                if (lowerLabel.includes('enrolled')) return 'fas fa-user-graduate';
+                if (lowerLabel.includes('enrolled') || lowerLabel.includes('learners')) return 'fas fa-user-graduate';
                 if (lowerLabel.includes('attendance')) return 'fas fa-user-check';
                 if (lowerLabel.includes('lps')) return 'fas fa-chart-line';
                 if (lowerLabel.includes('qc batches')) return 'fas fa-clipboard-check';
@@ -383,6 +473,8 @@
                 if (lowerLabel.includes('ticket')) return 'fas fa-ticket-alt';
                 if (lowerLabel.includes('batch')) return 'fas fa-chalkboard-teacher';
                 if (lowerLabel.includes('user')) return 'fas fa-user-friends';
+                if (lowerLabel.includes('tests')) return 'fas fa-tasks';
+                if (lowerLabel.includes('time')) return 'fas fa-clock';
                 return 'fas fa-chart-bar';
             };
 
@@ -411,13 +503,13 @@
             };
 
             const renderOverviewPage = (container, data) => {
-                if (!data) { showError(container, "Could not load overview data."); return; }
+                if (!data || !data.parsed || data.parsed.length === 0) { showError(container, "Could not load overview data. It might be temporarily unavailable. Please try refreshing."); return; }
                 const groupedData = data.parsed.reduce((acc, row) => { const topLevel = row['Top-Level Box']; if (topLevel) { if (!acc[topLevel]) acc[topLevel] = []; acc[topLevel].push(row); } return acc; }, {});
                 
                 let content = '';
                 for (const [title, rows] of Object.entries(groupedData)) {
                     content += `<div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
-                        <h2 class="text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4">
                             <i class="${getIconForMetric(title)}"></i><span>${title}</span>
                         </h2>`;
 
@@ -426,29 +518,29 @@
                         const performanceData = rows.filter(r => r['Sub-Box Header'] === 'Performance Data');
                         content += `
                             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                                <div class="lg:col-span-2 sub-box bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col h-full">
-                                    <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
+                                <div class="lg:col-span-2 sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
+                                    <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
                                     <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
                                         ${generalData.map(metric => `
                                             <div class="metric-card" data-color-state="neutral">
-                                                <div class="flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
                                                     <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                    <div class="metric-value text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                    <div class="metric-value text-2xl md:text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
                                                     <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
                                                 </div>
                                             </div>`).join('')}
                                     </div>
                                 </div>
-                                <div class="lg:col-span-3 sub-box bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col h-full">
-                                    <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
+                                <div class="lg:col-span-3 sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
+                                    <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
                                     <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
                                         ${performanceData.map(metric => {
                                             const colorState = getPerformanceColorState(metric['Data Header'], metric.Value);
                                             const colorClass = getPerformanceColorClass(colorState);
                                             return `<div class="metric-card" data-color-state="${colorState}">
-                                                <div class="flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
                                                     <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                    <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                    <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
                                                     <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
                                                 </div>
                                             </div>`
@@ -469,8 +561,8 @@
                         content += chunkedSubBoxes.map(row => `
                             <div class="grid grid-cols-1 ${row.length > 1 ? 'md:grid-cols-2' : ''} gap-8">
                                 ${row.map(([subTitle, metrics]) => `
-                                    <div class="sub-box bg-black/10 p-6 border border-white/10 rounded-2xl flex flex-col h-full">
-                                        <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
+                                    <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
+                                        <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
                                         <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
                                             ${metrics.sort((a, b) => a.Order - b.Order).map(metric => {
                                                 const val = parseInt(metric.Value, 10);
@@ -481,9 +573,9 @@
                                                     colorClass = getPerformanceColorClass(colorState);
                                                 }
                                                 return `<div class="metric-card" data-color-state="${colorState}">
-                                                    <div class="flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                    <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
                                                         <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                        <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
+                                                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
                                                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
                                                     </div>
                                                 </div>`
@@ -499,7 +591,7 @@
                 container.innerHTML = `<div class="space-y-12">${content}</div>`;
             };
 
-            const renderDailyMetricsPage = (container, data) => {
+            const renderDailyMetricsPage = (container, data, lmsStats) => {
                 if (!data) { showError(container, "Could not load daily metrics data."); return; }
                 const latestData = data.parsed;
                 const getLatestMetric = (metricName) => { const entries = latestData.filter(d => d['Cumulative'] && d['Cumulative'].trim() === metricName); if (entries.length === 0) return { WEB: 'N/A', ANDROID: 'N/A', iOS: 'N/A' }; return entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0]; };
@@ -515,26 +607,48 @@
                 };
 
                 const createPlatformCard = (label, value) => `
-                    <div class="qrf-scorecard bg-black/10 p-3 rounded-lg text-center border border-white/10 flex-1">
+                    <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-3 rounded-lg text-center border border-[var(--card-border)] flex-1">
                         <div class="value text-2xl md:text-3xl font-semibold tracking-tight">${value || 'N/A'}</div>
                         <div class="text-xs text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
                 
                 const createRatingCard = (label, value, icon, colorClass = 'text-[var(--text-color)]') => `
-                    <div class="metric-card flex-grow bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 rounded-3xl" data-color-state="${colorClass.includes('green') ? 'good' : 'neutral'}">
+                    <div class="metric-card flex-grow p-4 flex flex-col items-center text-center space-y-2 rounded-3xl" data-color-state="${colorClass.includes('green') ? 'good' : 'neutral'}">
                         <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
-                        <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${value || 'N/A'}</div>
+                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${value || 'N/A'}</div>
                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
+
+                const createLmsStatCard = (label, value, icon) => `
+                    <div class="metric-card flex-grow p-4 flex flex-col items-center text-center space-y-2 rounded-3xl">
+                        <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
+                        <div class="metric-value text-2xl md:text-3xl font-bold text-[var(--text-color)] tracking-tight">${value || 'N/A'}</div>
+                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
+                    </div>
+                `;
+                
+                let lmsStatsContent = '';
+                if(lmsStats) {
+                    lmsStatsContent = `
+                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-chart-bar"></i>LMS Web Stats</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                ${createLmsStatCard('Total Learners', lmsStats.totalLearners, getIconForMetric('learners'))}
+                                ${createLmsStatCard('Tests Taken', lmsStats.testsTaken, getIconForMetric('tests'))}
+                                ${createLmsStatCard('Avg Time Spent', lmsStats.avgTimeSpent, getIconForMetric('time'))}
+                            </div>
+                        </div>
+                    `;
+                }
 
                 container.innerHTML = `
                     <div class="space-y-8">
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-users"></i>Active Users</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="bg-black/10 p-4 rounded-xl border border-white/10">
+                                <div class="bg-[var(--sub-box-bg)] p-4 rounded-xl border border-[var(--card-border)]">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] mb-4">Daily Active (DAU)</h4>
                                     <div class="flex justify-center gap-4">
                                         ${createPlatformCard('Web', dau.WEB)}
@@ -542,7 +656,7 @@
                                         ${createPlatformCard('iOS', dau.iOS)}
                                     </div>
                                 </div>
-                                <div class="bg-black/10 p-4 rounded-xl border border-white/10">
+                                <div class="bg-[var(--sub-box-bg)] p-4 rounded-xl border border-[var(--card-border)]">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] mb-4">Monthly Active (MAU)</h4>
                                     <div class="flex justify-center gap-4">
                                         ${createPlatformCard('Web', mau.WEB)}
@@ -552,17 +666,18 @@
                                 </div>
                             </div>
                         </div>
+                        ${lmsStatsContent}
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Store Ratings</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
+                                <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('android')}"></i>Android</h4>
                                     <div class="flex justify-center gap-6">
                                         ${createRatingCard('Avg. Rating', rating.ANDROID, 'fas fa-star', getRatingColor(rating.ANDROID))}
                                         ${createRatingCard('# of Ratings', numRatings.ANDROID, 'fas fa-user-edit')}
                                     </div>
                                 </div>
-                                <div class="bg-black/10 p-6 rounded-2xl border border-white/10 space-y-4">
+                                <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('ios')}"></i>iOS</h4>
                                     <div class="flex justify-center gap-6">
                                         ${createRatingCard('Avg. Rating', rating.iOS, 'fas fa-star', getRatingColor(rating.iOS))}
@@ -609,21 +724,21 @@
 
                 container.innerHTML = `
                     <div class="space-y-8">
-                        <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl text-center border border-[var(--card-border)]" data-color-state="${successRateState}">
+                        <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-8 rounded-3xl text-center" data-color-state="${successRateState}">
                             <h3 class="text-lg font-medium text-[var(--text-muted-color)] uppercase tracking-widest">Success Rate</h3>
-                            <div class="text-8xl font-bold my-2 tracking-tighter ${successRateColor}">${successRate}</div>
+                            <div class="text-7xl sm:text-8xl font-bold my-2 tracking-tighter ${successRateColor}">${successRate}</div>
                         </div>
                          <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
-                             <div class="flex justify-center mb-6 items-center gap-4">
+                             <div class="flex flex-col sm:flex-row justify-center mb-6 items-center gap-2 sm:gap-4">
                                  <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
-                                 <div id="timeline-toggle" class="bg-black/20 rounded-full p-1 flex gap-1">
+                                 <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
                                      <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                      <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">10 Days</button>
                                      <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
                                      <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                  </div>
                              </div>
-                             <div class="min-h-[400px]">
+                             <div class="min-h-[300px] sm:min-h-[400px]">
                                  <canvas id="courseChecksChartCanvas"></canvas>
                              </div>
                          </div>
@@ -633,7 +748,7 @@
                 const timelineButtons = container.querySelectorAll('.timeline-btn');
                 timelineButtons.forEach(btn => {
                     if (parseInt(btn.dataset.days) === days) {
-                        btn.classList.add('bg-[var(--nav-active-bg)]', 'text-[var(--nav-active-text)]');
+                        btn.classList.add('active');
                     }
                     btn.addEventListener('click', () => {
                         renderCourseChecksPage(container, data, parseInt(btn.dataset.days));
@@ -663,12 +778,12 @@
                             tension: 0.4,
                             fill: false,
                              segment: {
-                                borderColor: ctx => {
-                                    const y = ctx.p1.parsed.y;
-                                    if (y <= 35) return 'rgb(239, 68, 68)';
-                                    if (y > 35 && y <= 75) return 'rgb(245, 158, 11)';
-                                    return 'rgb(34, 197, 94)';
-                                }
+                                 borderColor: ctx => {
+                                     const y = ctx.p1.parsed.y;
+                                     if (y <= 35) return 'rgb(239, 68, 68)';
+                                     if (y > 35 && y <= 75) return 'rgb(245, 158, 11)';
+                                     return 'rgb(34, 197, 94)';
+                                 }
                              },
                              pointBorderColor: (ctx) => {
                                  const y = ctx.raw;
@@ -782,18 +897,18 @@
                     <div class="space-y-8">
                         <div id="acca-qrf-content" class="qrf-content-section space-y-12">
                             <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
-                               <h2 class="text-3xl font-bold text-[var(--text-color)] text-center">ACCA Question Status</h2>
+                               <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">ACCA Question Status</h2>
                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
                                    <div class="lg:col-span-1 relative h-60 md:h-72"><canvas id="accaPieChartCanvas"></canvas></div>
                                    <div class="flex flex-col justify-center space-y-4">
-                                        <div class="pie-legend-item flex items-center justify-between bg-black/10 p-4 rounded-2xl">
+                                        <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
                                                 <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
                                             </div>
                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${accaDraft.toLocaleString()}</span>
                                         </div>
-                                        <div class="pie-legend-item flex items-center justify-between bg-black/10 p-4 rounded-2xl">
+                                        <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
                                                 <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
@@ -801,16 +916,16 @@
                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${accaApproved.toLocaleString()}</span>
                                         </div>
                                    </div>
-                                   <div class="qrf-scorecard text-center p-6 bg-black/10 rounded-3xl border border-white/5" data-color-state="${getCompletionColorState(accaData.completion)}">
-                                       <div class="value text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(accaData.completion))} tracking-tighter">${accaData.completion || 'N/A'}</div>
+                                   <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(accaData.completion)}">
+                                       <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(accaData.completion))} tracking-tighter">${accaData.completion || 'N/A'}</div>
                                        <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
                                    </div>
                                </div>
-                               <div class="bg-black/10 p-6 border border-white/10 rounded-2xl">
+                               <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
                                    <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
                                        <div class="flex items-center gap-2 md:gap-4">
                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                           <div class="timeline-toggle bg-white/5 backdrop-blur-sm border border-white/10 rounded-full p-1 flex gap-1" data-chart-type="acca">
+                                           <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="acca">
                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -818,41 +933,41 @@
                                        </div>
                                        <div class="md:ml-auto flex items-center gap-2" id="acca-legend-toggle"></div>
                                    </div>
-                                   <div class="min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
+                                   <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
                                </div>
                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
-                                    <h2 class="text-3xl font-bold text-[var(--text-color)] text-center">ACCA Questions Split</h2>
+                                    <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">ACCA Questions Split</h2>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div class="split-box bg-black/10 p-6 rounded-2xl border border-white/10">
+                                        <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
                                             <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
                                             <div class="flex justify-around items-center">
-                                                <div class="text-center">
-                                                    <div class="split-value text-4xl font-bold">${accaSplitData.nonSubjectiveCount}</div>
+                                                <div class="split-box-inner p-4 rounded-xl flex-1 text-center">
+                                                    <div class="split-value text-3xl sm:text-4xl font-bold">${accaSplitData.nonSubjectiveCount}</div>
                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
                                                 </div>
-                                                <div class="text-center">
-                                                    <div class="split-value text-4xl font-bold">${accaSplitData.nonSubjectivePercent}</div>
+                                                <div class="split-box-inner p-4 rounded-xl flex-1 text-center">
+                                                    <div class="split-value text-3xl sm:text-4xl font-bold">${accaSplitData.nonSubjectivePercent}</div>
                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="split-box bg-black/10 p-6 rounded-2xl border border-white/10">
+                                        <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
                                             <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
                                             <div class="flex justify-around items-center">
-                                                <div class="text-center">
-                                                    <div class="split-value text-4xl font-bold">${accaSplitData.subjectiveCount}</div>
+                                                <div class="split-box-inner p-4 rounded-xl flex-1 text-center">
+                                                    <div class="split-value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectiveCount}</div>
                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
                                                 </div>
-                                                <div class="text-center">
-                                                    <div class="split-value text-4xl font-bold">${accaSplitData.subjectivePercent}</div>
+                                                <div class="split-box-inner p-4 rounded-xl flex-1 text-center">
+                                                    <div class="split-value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectivePercent}</div>
                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="bg-black/10 p-6 rounded-2xl border border-white/10 mt-8 flex justify-center items-center gap-6">
-                                        <h3 class="text-2xl font-bold">Total Questions</h3>
-                                        <div class="text-5xl font-bold">${accaSplitData.totalQuestions}</div>
+                                    <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] mt-8 flex justify-center items-center gap-6">
+                                        <h3 class="text-xl sm:text-2xl font-bold">Total Questions</h3>
+                                        <div class="text-4xl sm:text-5xl font-bold">${accaSplitData.totalQuestions}</div>
                                     </div>
                                 </div>
                             </div>
@@ -860,69 +975,69 @@
 
                         <div id="cfa-qrf-content" class="qrf-content-section space-y-12 hidden">
                              <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
-                               <h2 class="text-3xl font-bold text-[var(--text-color)] text-center">CFA Question Status</h2>
-                               <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                                   <div class="lg:col-span-1 relative h-60 md:h-72"><canvas id="cfaPieChartCanvas"></canvas></div>
-                                   <div class="flex flex-col justify-center space-y-4">
-                                        <div class="pie-legend-item flex items-center justify-between bg-black/10 p-4 rounded-2xl">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                                                <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
+                                 <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">CFA Question Status</h2>
+                                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                                     <div class="lg:col-span-1 relative h-60 md:h-72"><canvas id="cfaPieChartCanvas"></canvas></div>
+                                     <div class="flex flex-col justify-center space-y-4">
+                                         <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
+                                             <div class="flex items-center gap-3">
+                                                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                                 <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
+                                             </div>
+                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaDraft.toLocaleString()}</span>
+                                         </div>
+                                         <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
+                                             <div class="flex items-center gap-3">
+                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                                 <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
+                                             </div>
+                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaApproved.toLocaleString()}</span>
+                                         </div>
+                                    </div>
+                                    <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.completion)}">
+                                        <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.completion))} tracking-tighter">${cfaData.completion || 'N/A'}</div>
+                                        <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
+                                    </div>
+                                 </div>
+                                <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
+                                    <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+                                        <div class="flex items-center gap-2 md:gap-4">
+                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                                            <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="cfa">
+                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
+                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                             </div>
-                                            <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaDraft.toLocaleString()}</span>
                                         </div>
-                                        <div class="pie-legend-item flex items-center justify-between bg-black/10 p-4 rounded-2xl">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                                <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
-                                            </div>
-                                            <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaApproved.toLocaleString()}</span>
-                                        </div>
-                                   </div>
-                                   <div class="qrf-scorecard text-center p-6 bg-black/10 rounded-3xl border border-white/5" data-color-state="${getCompletionColorState(cfaData.completion)}">
-                                       <div class="value text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.completion))} tracking-tighter">${cfaData.completion || 'N/A'}</div>
-                                       <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
-                                   </div>
-                               </div>
-                               <div class="bg-black/10 p-6 border border-white/10 rounded-2xl">
-                                   <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
-                                       <div class="flex items-center gap-2 md:gap-4">
-                                           <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                           <div class="timeline-toggle bg-white/5 backdrop-blur-sm border border-white/10 rounded-full p-1 flex gap-1" data-chart-type="cfa">
-                                               <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                               <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
-                                               <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
-                                           </div>
-                                       </div>
-                                       <div class="md:ml-auto flex items-center gap-2" id="cfa-legend-toggle"></div>
-                                   </div>
-                                   <div class="min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
-                               </div>
-                            </div>
+                                        <div class="md:ml-auto flex items-center gap-2" id="cfa-legend-toggle"></div>
+                                    </div>
+                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
+                                </div>
+                             </div>
                         </div>
 
                         <div id="overall-qrf-content" class="qrf-content-section space-y-12 hidden">
                             <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
                                 <div class="border-b border-[var(--card-border)] pb-4 mb-6 md:mb-8">
-                                    <h3 class="text-3xl font-bold text-center text-[var(--text-color)]">Overall</h3>
+                                    <h3 class="text-2xl md:text-3xl font-bold text-center text-[var(--text-color)]">Overall</h3>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                                     <div class="space-y-4">
-                                        <div class="qrf-scorecard bg-black/20 p-4 rounded-xl flex justify-between items-center border border-white/10">
+                                        <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--card-border)]">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
-                                            <span class="value text-3xl font-semibold text-[var(--text-color)]">${overallData.draft || 'N/A'}</span>
+                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.draft || 'N/A'}</span>
                                         </div>
-                                        <div class="qrf-scorecard bg-black/20 p-4 rounded-xl flex justify-between items-center border border-white/10">
+                                        <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--card-border)]">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
-                                            <span class="value text-3xl font-semibold text-[var(--text-color)]">${overallData.approved || 'N/A'}</span>
+                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.approved || 'N/A'}</span>
                                         </div>
-                                        <div class="qrf-scorecard bg-black/20 p-4 rounded-xl flex justify-between items-center border border-white/10">
+                                        <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--card-border)]">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Total</span>
-                                            <span class="value text-3xl font-semibold text-[var(--text-color)]">${overallData.total || 'N/A'}</span>
+                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.total || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div class="qrf-scorecard bg-black/20 p-6 rounded-3xl text-center border border-transparent" data-color-state="${getCompletionColorState(overallData.completion)}">
-                                        <div class="value text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(overallData.completion))} tracking-tighter">${overallData.completion || 'N/A'}</div>
+                                    <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-6 rounded-3xl text-center border border-transparent" data-color-state="${getCompletionColorState(overallData.completion)}">
+                                        <div class="value text-6xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(overallData.completion))} tracking-tighter">${overallData.completion || 'N/A'}</div>
                                         <div class="text-xl text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
                                 </div>
@@ -1056,14 +1171,27 @@
                     });
                 };
                 
+                 const calculateNiceStep = (range, targetSteps) => {
+                    if (range === 0) return 1;
+                    const rawStep = range / targetSteps;
+                    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+                    const residual = rawStep / magnitude;
+                    if (residual > 5) return 10 * magnitude;
+                    if (residual > 2) return 5 * magnitude;
+                    if (residual > 1) return 2 * magnitude;
+                    return magnitude;
+                };
+
                 const setupSubPage = (chartType, dailyData) => {
                     const canvasId = `${chartType}LineChartCanvas`;
                     const timelineToggle = document.querySelector(`.timeline-toggle[data-chart-type="${chartType}"]`);
                     const legendContainer = document.getElementById(`${chartType}-legend-toggle`);
                     
                     let chartInstance;
+                    let currentDays = 14;
 
                     const updateChart = (days) => {
+                        currentDays = days;
                         if (chartInstance) chartInstance.destroy();
                         chartInstance = renderLineChart(canvasId, dailyData, days);
                         
@@ -1073,7 +1201,7 @@
                         legendContainer.innerHTML = '';
                         chartInstance.data.datasets.forEach((dataset, index) => {
                             const button = document.createElement('button');
-                            button.className = `flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-300 bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:scale-105`;
+                            button.className = `flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-300 bg-[var(--sub-box-bg)] backdrop-blur-sm border border-[var(--card-border)] hover:bg-[var(--card-hover-bg)] hover:scale-105`;
                             button.innerHTML = `<div class="w-3 h-3 rounded-full" style="background-color: ${dataset.borderColor}"></div> ${dataset.label}`;
                             
                             button.onclick = () => {
@@ -1086,28 +1214,35 @@
 
                                 chartInstance.options.scales.y.min = undefined;
                                 chartInstance.options.scales.y.max = undefined;
+                                chartInstance.options.scales.y.ticks.stepSize = undefined;
 
-                                if (approvedVisible && !draftVisible) {
+                                if (chartType === 'acca' && approvedVisible && !draftVisible && currentDays === 7) {
+                                    const data = datasets[1].data.filter(v => v !== null);
+                                    if (data.length > 0) {
+                                        const dataMin = Math.min(...data);
+                                        const dataMax = Math.max(...data);
+                                        const range = dataMax - dataMin;
+                                        const step = calculateNiceStep(range, 4);
+                                        chartInstance.options.scales.y.ticks.stepSize = step;
+                                        chartInstance.options.scales.y.min = Math.floor(dataMin / step) * step;
+                                        chartInstance.options.scales.y.max = Math.ceil(dataMax / step) * step;
+                                    }
+                                } else if (approvedVisible && !draftVisible) {
                                     const data = datasets[1].data;
                                     if (data.length > 0) {
                                         const dataMin = Math.min(...data);
                                         const dataMax = Math.max(...data);
-                                        if (dataMax - dataMin < 100) {
-                                            const mid = (dataMax + dataMin) / 2;
-                                            chartInstance.options.scales.y.min = Math.floor(mid - 50);
-                                            chartInstance.options.scales.y.max = Math.ceil(mid + 50);
-                                        }
+                                        chartInstance.options.scales.y.ticks.stepSize = 100;
+                                        chartInstance.options.scales.y.min = Math.floor(dataMin / 100) * 100;
+                                        chartInstance.options.scales.y.max = Math.ceil(dataMax / 100) * 100;
                                     }
                                 } else if (draftVisible && !approvedVisible) {
                                     const data = datasets[0].data;
                                     if (data.length > 0) {
-                                        const dataMin = Math.min(...data);
                                         const dataMax = Math.max(...data);
-                                        if (dataMax - dataMin < 50) {
-                                            const mid = (dataMax + dataMin) / 2;
-                                            chartInstance.options.scales.y.min = Math.max(0, Math.floor(mid - 25));
-                                            chartInstance.options.scales.y.max = Math.ceil(mid + 25);
-                                        }
+                                        chartInstance.options.scales.y.ticks.stepSize = 50;
+                                        chartInstance.options.scales.y.min = 0;
+                                        chartInstance.options.scales.y.max = Math.ceil(dataMax / 50) * 50;
                                     }
                                 }
                                 
@@ -1118,35 +1253,45 @@
                         });
                     }
 
-                    timelineToggle.querySelector('[data-days="14"]').classList.add('active');
-                    updateChart(14);
-
-                    timelineToggle.addEventListener('click', (e) => {
-                        if (e.target.classList.contains('timeline-btn')) {
-                            const days = parseInt(e.target.dataset.days);
-                            timelineToggle.querySelectorAll('.timeline-btn').forEach(btn => btn.classList.remove('active'));
+                    timelineToggle.querySelectorAll('.timeline-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            timelineToggle.querySelector('.active')?.classList.remove('active');
                             e.target.classList.add('active');
-                            updateChart(days);
-                        }
+                            updateChart(parseInt(e.target.dataset.days));
+                        });
                     });
+                    
+                    timelineToggle.querySelector('.active')?.classList.remove('active');
+                    timelineToggle.querySelector(`[data-days="${currentDays}"]`)?.classList.add('active');
+                    updateChart(currentDays);
                 };
                 setupSubPage('acca', accaDailyData);
                 setupSubPage('cfa', cfaDailyData);
             };
 
-            const renderBatchReportsPage = (container, data) => {
+            const renderBatchReportsPage = (container, data, testsCompletionData) => {
                 if (!data || !data.parsed) { showError(container, "Could not load Batch Reports data."); return; }
                 
                 const batchSectionData = data.parsed.filter(row => row['Top-Level Box'] && row['Top-Level Box'].trim() === 'Batches Information');
                 const generalData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'General');
-                const performanceData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'Performance Data');
+                let performanceData = batchSectionData.filter(row => row['Sub-Box Header'] && row['Sub-Box Header'].trim() === 'Performance Data');
+
+                // Filter out the 'QC Batch Check' metric
+                performanceData = performanceData.filter(metric => metric['Data Header'].trim() !== 'QC Batches Check %');
+
+                if (testsCompletionData) {
+                    performanceData.push({
+                        'Data Header': 'Tests Completion %',
+                        'Value': testsCompletionData
+                    });
+                }
 
                 const createMetricCard = (metric, isPerformance = false) => {
                     const colorState = isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
                     const colorClass = isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
-                    return `<div class="metric-card bg-black/5 p-6 rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center space-y-2" data-color-state="${colorState}">
-                        <i class="${getIconForMetric(metric['Data Header'])} text-3xl text-[var(--icon-color)] opacity-80"></i>
-                        <div class="text-4xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
+                    return `<div class="metric-card p-6 rounded-2xl flex flex-col items-center justify-center text-center space-y-2" data-color-state="${colorState}">
+                        <i class="${getIconForMetric(metric['Data Header'])} text-2xl md:text-3xl text-[var(--icon-color)] opacity-80"></i>
+                        <div class="text-3xl md:text-4xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
                         <div class="text-sm font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
                     </div>`;
                 };
@@ -1154,13 +1299,13 @@
                 container.innerHTML = `
                     <div class="space-y-10">
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl">
-                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
+                            <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 ${generalData.map(metric => createMetricCard(metric, false)).join('')}
                             </div>
                         </div>
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl">
-                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
+                            <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                 ${performanceData.map(metric => createMetricCard(metric, true)).join('')}
                             </div>
@@ -1169,10 +1314,10 @@
                 `;
             };
 
-            const renderAskADoubtPage = (container, data) => {
-                if (!data) { showError(container, "Could not load Support data."); return; }
+            const renderAskADoubtPage = (container, summaryData, trendsData) => {
+                if (!summaryData) { showError(container, "Could not load Support data."); return; }
                 
-                const metrics = data; 
+                const metrics = summaryData; 
                 
                 const getMetricValue = (key) => metrics[key] || 'N/A';
                 const openDoubts = parseInt(getMetricValue('Open Doubts'), 10);
@@ -1194,31 +1339,168 @@
                 }
 
                 const createMetricCard = (label, value, icon, colorClass = 'text-[var(--text-color)]', state = 'neutral') => `
-                    <div class="metric-card flex-grow flex-shrink-0 bg-black/5 p-4 border border-white/10 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl" data-color-state="${state}">
+                    <div class="metric-card flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl" data-color-state="${state}">
                         <div class="text-2xl ${colorClass}"><i class="${icon}"></i></div>
-                        <div class="metric-value text-3xl font-bold ${colorClass} tracking-tight">${value}</div>
+                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${value}</div>
                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
 
                 container.innerHTML = `
+                    <div class="space-y-8">
                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                               <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
-                                   <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
-                                   <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                       ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
-                                       ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
-                                   </div>
-                               </div>
-                               <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
-                                   <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
-                                   <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
-                                       ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
-                                       ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), getConditionalIcon(openTickets, 'fas fa-exclamation-triangle', 'fas fa-check-circle'), getConditionalColor(openTickets), getConditionalState(openTickets))}
-                                   </div>
-                               </div>
+                             <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
+                                 <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
+                                 <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
+                                     ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
+                                     ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
+                                 </div>
+                             </div>
+                             <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6">
+                                 <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
+                                 <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
+                                     ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
+                                     ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), getConditionalIcon(openTickets, 'fas fa-exclamation-triangle', 'fas fa-check-circle'), getConditionalColor(openTickets), getConditionalState(openTickets))}
+                                 </div>
+                             </div>
                          </div>
+                         <div id="support-trends-section" class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl"></div>
+                    </div>
                 `;
+
+                if (supportLineChart) supportLineChart.destroy();
+                const trendsContainer = container.querySelector('#support-trends-section');
+                if (!trendsData) {
+                    trendsContainer.innerHTML = `<p class="text-center text-[var(--text-muted-color)]">Could not load trends data.</p>`;
+                    return;
+                }
+
+                trendsContainer.innerHTML = `
+                    <div class="flex flex-col items-center mb-6 gap-4">
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Trends for:</h4>
+                            <div id="support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
+                                <button data-type="doubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Ask a Doubt</button>
+                                <button data-type="tickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">LMS Tickets</button>
+                            </div>
+                        </div>
+                        <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1 scale-90">
+                             <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
+                             <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
+                             <button data-days="30" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">30 Days</button>
+                        </div>
+                    </div>
+                    <div class="min-h-[300px] sm:min-h-[400px]">
+                        <canvas id="supportLineChartCanvas"></canvas>
+                    </div>
+                `;
+                
+                let currentDataType = 'doubts';
+                let currentDays = 7;
+
+                const renderSupportTrendChart = () => {
+                    if (supportLineChart) supportLineChart.destroy();
+                    
+                    const chartData = trendsData.map(d => ({
+                        date: d.date,
+                        value: d[currentDataType]
+                    })).filter(d => d.value !== null).slice(-currentDays);
+
+                    const labels = chartData.map(d => new Date(d.date));
+                    const dataPoints = chartData.map(d => d.value);
+
+                    const maxValue = Math.max(...dataPoints, 0);
+                    const yMax = maxValue > 60 ? undefined : 60;
+
+                    const ctx = document.getElementById('supportLineChartCanvas').getContext('2d');
+                    const isLightMode = document.body.classList.contains('light-mode');
+                    const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+                    const tickColor = isLightMode ? '#515154' : '#a1a1a6';
+                    const bodyFont = "'Inter', sans-serif";
+                    const pointColor = currentDataType === 'doubts' ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)';
+                    const bgColor = currentDataType === 'doubts' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
+
+                    supportLineChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: currentDataType === 'doubts' ? 'Open Doubts' : 'Open Tickets',
+                                data: dataPoints,
+                                borderColor: pointColor,
+                                backgroundColor: bgColor,
+                                borderWidth: 3,
+                                pointRadius: 5,
+                                pointHoverRadius: 8,
+                                tension: 0.4,
+                                fill: true,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(0,0,0,0.8)',
+                                    titleFont: { family: bodyFont, size: 14, weight: 'bold' },
+                                    bodyFont: { family: bodyFont, size: 12 },
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                    displayColors: false,
+                                    callbacks: {
+                                        title: (tooltipItems) => {
+                                            const date = new Date(tooltipItems[0].parsed.x);
+                                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+                                        },
+                                        label: (context) => `Count: ${context.raw}`
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    min: 0,
+                                    max: yMax,
+                                    grid: { color: gridColor },
+                                    ticks: { 
+                                        stepSize: 10,
+                                        color: tickColor, 
+                                        font: { family: bodyFont }
+                                    }
+                                },
+                                x: {
+                                    type: 'time',
+                                    time: { unit: 'day', displayFormats: { day: 'd MMM' } },
+                                    grid: { display: false },
+                                    ticks: { color: tickColor, font: { family: bodyFont } }
+                                }
+                            }
+                        }
+                    });
+                };
+                
+                const typeToggleButtons = trendsContainer.querySelectorAll('#support-type-toggle .timeline-btn');
+                typeToggleButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        typeToggleButtons.forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        currentDataType = e.target.dataset.type;
+                        renderSupportTrendChart();
+                    });
+                });
+
+                const timelineToggleButtons = trendsContainer.querySelectorAll('#support-timeline-toggle .timeline-btn');
+                timelineToggleButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        timelineToggleButtons.forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        currentDays = parseInt(e.target.dataset.days);
+                        renderSupportTrendChart();
+                    });
+                });
+
+                renderSupportTrendChart(); // Initial render
             };
             
             const renderReportsPage = (container) => {
@@ -1232,13 +1514,27 @@
                 container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${reports.map(report => {const commonClasses = "report-button group relative bg-[var(--card-bg)] backdrop-blur-md p-8 border border-[var(--card-border)] text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--card-hover-bg)] hover:border-white/20 hover:scale-105 overflow-hidden h-48";const contentHtml = `<div class="relative z-10 report-content flex flex-col items-center justify-center"><i class="${report.icon} text-4xl mb-4 text-[var(--icon-color)] transition-transform duration-300"></i><span class="text-lg font-semibold">${report.title}</span></div><i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-black/5 transition-all duration-500 group-hover:text-black/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>`; if (report.link) { return `<a href="${report.link}" target="_blank" rel="noopener noreferrer" class="${commonClasses}">${contentHtml}</a>`;} else { return `<button id="${report.id}" class="${commonClasses}">${contentHtml}</button>`;}}).join('')}</div>`;
             };
 
+            const updateFooterText = (sectionId) => {
+                const footerContent = document.getElementById('footer-content');
+                if (!footerContent) return;
+
+                const texts = {
+                    'overview-section': 'Showing selected important data from all Product Report Sheets.',
+                    'reports-section': 'Select any report you want to view.',
+                    'daily-section': 'Data here is updated every Friday for the week.',
+                    'course-checks-section': 'Data is updated whenever any batch setup is completed by the Acads Team.',
+                    'question-repo-section': 'Data is usually updated on every weekday by the first half.',
+                    'ask-a-doubt-section': 'Data is updated every weekday by evening.',
+                    'batch-reports-section': 'Data is updated on a weekly basis, usually by every Tuesday.'
+                };
+                footerContent.textContent = texts[sectionId] || '';
+            };
+
             const setPageHeader = (title, sheetUrl) => {
-                // Reset header to default title-displaying state first
-                pageHeaderCenterContent.innerHTML = `<h1 id="page-header-title" class="text-2xl font-bold text-[var(--text-color)]"></h1>`;
-                pageHeaderCenterContent.className = 'bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center px-8 py-3';
+                pageHeaderCenterContent.innerHTML = `<h1 id="page-header-title" class="text-xl md:text-2xl font-bold text-[var(--text-color)] truncate"></h1>`;
+                pageHeaderCenterContent.className = 'bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center px-4 md:px-8 py-3 mx-auto';
                 
-                headerRefreshButton.classList.add('hidden');
-                if (title !== null) { // Allow empty title to show the header frame
+                if (title !== null) { 
                     document.getElementById('page-header-title').textContent = title;
                     pageHeader.classList.remove('hidden');
                     pageHeader.classList.add('flex');
@@ -1247,6 +1543,8 @@
                     const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
                     if (activeSection && activeSection.id !== 'reports-section') {
                         headerRefreshButton.classList.remove('hidden');
+                    } else {
+                        headerRefreshButton.classList.add('hidden');
                     }
 
                     if (sheetUrl) {
@@ -1260,6 +1558,7 @@
                     pageHeader.classList.remove('flex');
                     mainHeader.classList.remove('hidden');
                     openSheetButton.classList.add('hidden');
+                    headerRefreshButton.classList.add('hidden');
                 }
             };
             
@@ -1269,17 +1568,21 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const activeContent = document.getElementById(`${tabId}-section`);
                 activeContent.classList.remove('hidden');
-                if (tabId === 'overview' && !dataCache.overview) {
-                    showLoading(activeContent);
-                    const newData = await fetchAndParseData(OVERVIEW_URL);
-                    if (newData) {
-                        dataCache.overview = newData;
-                        renderOverviewPage(activeContent, dataCache.overview);
+                updateFooterText(`${tabId}-section`);
+
+                if (tabId === 'overview') {
+                    if (!dataCache.overview) {
+                        showLoading(activeContent);
+                        const newData = await fetchAndParseData(OVERVIEW_URL);
+                        if (newData) {
+                            dataCache.overview = newData;
+                            renderOverviewPage(activeContent, dataCache.overview);
+                        } else {
+                            showError(activeContent, "Failed to fetch overview data. Please try again.");
+                        }
                     } else {
-                        showError(activeContent, "Failed to fetch overview data. Please try again.");
+                        renderOverviewPage(activeContent, dataCache.overview);
                     }
-                } else if (tabId === 'overview') {
-                    renderOverviewPage(activeContent, dataCache.overview);
                 }
             };
 
@@ -1287,18 +1590,28 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const dailySection = document.getElementById('daily-section');
                 dailySection.classList.remove('hidden');
-                setPageHeader('Daily Metrics');
-                if (!dataCache.daily) {
+                setPageHeader('Daily Metrics', SHEET_URLS['daily-section']);
+                updateFooterText('daily-section');
+                
+                const needsDailyFetch = !dataCache.daily;
+                const needsLmsFetch = !dataCache.lmsStats;
+
+                if (needsDailyFetch || needsLmsFetch) {
                     showLoading(dailySection);
-                    const newData = await fetchAndParseData(DAILY_METRICS_URL);
-                    if (newData) {
-                        dataCache.daily = newData;
-                        renderDailyMetricsPage(dailySection, dataCache.daily);
+                    const [dailyData, lmsStatsData] = await Promise.all([
+                        needsDailyFetch ? fetchAndParseData(DAILY_METRICS_URL) : Promise.resolve(dataCache.daily),
+                        needsLmsFetch ? fetchAndParseData(DAILY_METRICS_URL, parseLmsStatsCSV) : Promise.resolve(dataCache.lmsStats)
+                    ]);
+                    
+                    if (dailyData && lmsStatsData) {
+                        dataCache.daily = dailyData;
+                        dataCache.lmsStats = lmsStatsData;
+                        renderDailyMetricsPage(dailySection, dataCache.daily, dataCache.lmsStats);
                     } else {
                         showError(dailySection, "Failed to fetch daily metrics data. Please try again.");
                     }
                 } else {
-                    renderDailyMetricsPage(dailySection, dataCache.daily);
+                    renderDailyMetricsPage(dailySection, dataCache.daily, dataCache.lmsStats);
                 }
             };
 
@@ -1307,6 +1620,7 @@
                 const courseChecksSection = document.getElementById('course-checks-section');
                 courseChecksSection.classList.remove('hidden');
                 setPageHeader('LMS Checks', SHEET_URLS['course-checks-section']);
+                updateFooterText('course-checks-section');
                 if (!dataCache.courseChecks) {
                     showLoading(courseChecksSection);
                     const newData = await fetchAndParseData(COURSE_CHECKS_URL);
@@ -1325,16 +1639,17 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const questionRepoSection = document.getElementById('question-repo-section');
                 questionRepoSection.classList.remove('hidden');
+                updateFooterText('question-repo-section');
                 
                 setPageHeader('', SHEET_URLS['question-repo-section']);
                 
                 const qrfNav = document.createElement('nav');
                 qrfNav.id = 'qrf-navigation-bar-sticky';
-                qrfNav.className = 'flex justify-center items-center gap-2';
+                qrfNav.className = 'flex justify-center items-center gap-1';
                 qrfNav.innerHTML = `
-                    <button data-qrf-tab="acca" class="qrf-nav-item px-6 py-2 text-base font-semibold rounded-full transition-colors duration-300">ACCA</button>
-                    <button data-qrf-tab="cfa" class="qrf-nav-item px-6 py-2 text-base font-semibold rounded-full transition-colors duration-300">CFA</button>
-                    <button data-qrf-tab="overall" class="qrf-nav-item px-6 py-2 text-base font-semibold rounded-full transition-colors duration-300">Overall</button>
+                    <button data-qrf-tab="acca" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">ACCA</button>
+                    <button data-qrf-tab="cfa" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">CFA</button>
+                    <button data-qrf-tab="overall" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">Overall</button>
                 `;
                 pageHeaderCenterContent.innerHTML = '';
                 pageHeaderCenterContent.className = 'bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center p-2';
@@ -1390,17 +1705,27 @@
                 const batchReportsSection = document.getElementById('batch-reports-section');
                 batchReportsSection.classList.remove('hidden');
                 setPageHeader('Batch Reports', SHEET_URLS['batch-reports-section']);
-                if (!dataCache.overview) {
+                updateFooterText('batch-reports-section');
+
+                const needsOverviewFetch = !dataCache.overview;
+                const needsTestsFetch = !dataCache.testsCompletion;
+
+                if (needsOverviewFetch || needsTestsFetch) {
                     showLoading(batchReportsSection);
-                    const newData = await fetchAndParseData(OVERVIEW_URL);
-                    if (newData) {
-                        dataCache.overview = newData;
-                        renderBatchReportsPage(batchReportsSection, dataCache.overview);
+                    const [overviewData, testsData] = await Promise.all([
+                        needsOverviewFetch ? fetchAndParseData(OVERVIEW_URL) : Promise.resolve(dataCache.overview),
+                        needsTestsFetch ? fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseTestsCompletionCSV) : Promise.resolve(dataCache.testsCompletion)
+                    ]);
+
+                    if (overviewData && testsData) {
+                        dataCache.overview = overviewData;
+                        dataCache.testsCompletion = testsData;
+                        renderBatchReportsPage(batchReportsSection, dataCache.overview, dataCache.testsCompletion);
                     } else {
                         showError(batchReportsSection, "Failed to fetch batch reports data. Please try again.");
                     }
                 } else {
-                    renderBatchReportsPage(batchReportsSection, dataCache.overview);
+                    renderBatchReportsPage(batchReportsSection, dataCache.overview, dataCache.testsCompletion);
                 }
             };
 
@@ -1409,17 +1734,27 @@
                 const askADoubtSection = document.getElementById('ask-a-doubt-section');
                 askADoubtSection.classList.remove('hidden');
                 setPageHeader('LMS Support', SHEET_URLS['ask-a-doubt-section']);
-                if (!dataCache.lmsSupport) {
+                updateFooterText('ask-a-doubt-section');
+                
+                const needsSummaryFetch = !dataCache.lmsSupport;
+                const needsTrendsFetch = !dataCache.lmsTrends;
+
+                if (needsSummaryFetch || needsTrendsFetch) {
                     showLoading(askADoubtSection);
-                    const newData = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
-                    if (newData) {
-                        dataCache.lmsSupport = newData;
-                        renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport);
+                    const [summaryData, trendsData] = await Promise.all([
+                        needsSummaryFetch ? fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV) : Promise.resolve(dataCache.lmsSupport),
+                        needsTrendsFetch ? fetchAndParseData(LMS_TRENDS_URL, parseLmsTrendsCSV) : Promise.resolve(dataCache.lmsTrends)
+                    ]);
+                    
+                    if (summaryData && trendsData) {
+                        dataCache.lmsSupport = summaryData;
+                        dataCache.lmsTrends = trendsData;
+                        renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport, dataCache.lmsTrends);
                     } else {
                         showError(askADoubtSection, "Failed to fetch LMS support data. Please try again.");
                     }
                 } else {
-                    renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport);
+                    renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport, dataCache.lmsTrends);
                 }
             };
             
@@ -1427,60 +1762,34 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 document.getElementById('reports-section').classList.remove('hidden');
                 setPageHeader(null);
+                updateFooterText('reports-section');
             };
 
             const refreshData = async () => {
                 const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
                 if (!activeSection) return;
-
-                const sectionId = activeSection.id;
                 
-                if (sectionId === 'question-repo-section') {
-                    dataCache.questionRepo = null; // Force refetch
-                    dataCache.accaDaily = null;
-                    dataCache.cfaDaily = null;
-                    dataCache.accaSplit = null;
-                    showQuestionRepo();
-                    return;
-                }
+                const activeTabButton = document.querySelector('.nav-item.active');
+                const mainTabId = activeTabButton ? activeTabButton.dataset.tab : null;
 
-                showLoading(activeSection);
-                
-                let newData;
-                if (sectionId === 'overview-section') {
-                    newData = await fetchAndParseData(OVERVIEW_URL);
-                    if (newData) { dataCache.overview = newData; renderOverviewPage(activeSection, newData); } 
-                    else { showError(activeSection, "Failed to refresh data."); }
-                } else if (sectionId === 'batch-reports-section') {
-                    newData = await fetchAndParseData(OVERVIEW_URL);
-                    if (newData) { dataCache.overview = newData; renderBatchReportsPage(activeSection, newData); }
-                    else { showError(activeSection, "Failed to refresh data."); }
-                } else if (sectionId === 'ask-a-doubt-section') {
-                    newData = await fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV);
-                    if (newData) { dataCache.lmsSupport = newData; renderAskADoubtPage(activeSection, newData); }
-                    else { showError(activeSection, "Failed to refresh data."); }
-                } else if (sectionId === 'daily-section') {
-                    newData = await fetchAndParseData(DAILY_METRICS_URL);
-                    if (newData) { dataCache.daily = newData; renderDailyMetricsPage(activeSection, newData); }
-                    else { showError(activeSection, "Failed to refresh data."); }
-                } else if (sectionId === 'course-checks-section') {
-                    newData = await fetchAndParseData(COURSE_CHECKS_URL);
-                    if (newData) { dataCache.courseChecks = newData; renderCourseChecksPage(activeSection, newData); }
-                    else { showError(activeSection, "Failed to refresh data."); }
+                if (mainTabId === 'overview' || activeSection.id === 'overview-section') {
+                    dataCache.overview = null;
+                    await switchTab('overview');
+                } else if (mainTabId === 'reports') {
+                    switch(activeSection.id) {
+                        case 'batch-reports-section': dataCache.overview = null; dataCache.testsCompletion = null; await showBatchReportsPage(); break;
+                        case 'daily-section': dataCache.daily = null; dataCache.lmsStats = null; await showDailyMetrics(); break;
+                        case 'course-checks-section': dataCache.courseChecks = null; await showCourseChecksPage(); break;
+                        case 'question-repo-section': dataCache.questionRepo = null; dataCache.accaDaily = null; dataCache.cfaDaily = null; dataCache.accaSplit = null; await showQuestionRepo(); break;
+                        case 'ask-a-doubt-section': dataCache.lmsSupport = null; dataCache.lmsTrends = null; await showAskADoubtPage(); break;
+                    }
                 }
             };
             
-            const updateLastUpdatedTime = () => {
-                const now = new Date();
-                const options = { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-                const formattedTime = now.toLocaleString('en-IN', options);
-                lastUpdatedEl.textContent = `Data last synced at ${formattedTime}.`;
-            };
-
             const initialLoad = () => {
                 switchTab('overview'); 
                 renderReportsPage(document.getElementById('reports-section'));
-                updateLastUpdatedTime();
+                updateFooterText('overview-section');
             };
 
             navButtons.forEach(button => {
@@ -1498,6 +1807,9 @@
                 if (activeSectionId === 'question-repo-section' && dataCache.questionRepo) {
                     renderQuestionRepoPage(document.getElementById('question-repo-section'), dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.accaSplit);
                 }
+                if (activeSectionId === 'ask-a-doubt-section' && dataCache.lmsSupport) {
+                    renderAskADoubtPage(document.getElementById('ask-a-doubt-section'), dataCache.lmsSupport, dataCache.lmsTrends);
+                }
             });
             
             headerBackButton.addEventListener('click', showReportsList);
@@ -1514,19 +1826,23 @@
             });
             
             const handleRefreshClick = () => {
-                const refreshIcon = refreshButton.querySelector('i');
+                const mainRefreshIcon = mainHeaderRefreshButton.querySelector('i');
                 const headerRefreshIcon = headerRefreshButton.querySelector('i');
-                refreshIcon?.classList.add('animate-spin');
-                headerRefreshIcon?.classList.add('animate-spin');
-                refreshData().then(() => {
-                    updateLastUpdatedTime();
-                    refreshIcon?.classList.remove('animate-spin');
-                    headerRefreshIcon?.classList.remove('animate-spin');
+                const activeIcon = mainRefreshIcon?.offsetParent ? mainRefreshIcon : headerRefreshIcon;
+
+                if (!activeIcon || activeIcon.classList.contains('animate-spin')) return;
+                
+                activeIcon.classList.add('animate-spin');
+
+                const minSpinTime = new Promise(resolve => setTimeout(resolve, 750));
+
+                Promise.all([refreshData(), minSpinTime]).finally(() => {
+                    activeIcon.classList.remove('animate-spin');
                 });
             };
 
-            refreshButton.addEventListener('click', handleRefreshClick);
             headerRefreshButton.addEventListener('click', handleRefreshClick);
+            mainHeaderRefreshButton.addEventListener('click', handleRefreshClick);
             
             mainContent.addEventListener('scroll', () => {
                 const { scrollTop, scrollHeight, clientHeight } = mainContent;
@@ -1538,9 +1854,6 @@
             });
 
             initialLoad();
-            setInterval(() => {
-                refreshData().then(updateLastUpdatedTime);
-            }, 14400000);
         });
     </script>
 </body>
