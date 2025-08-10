@@ -192,6 +192,15 @@
             pointer-events: auto;
         }
         
+        #refresh-prompt {
+            transform: translateY(-150%);
+            transition: transform 0.5s ease-in-out;
+        }
+
+        #refresh-prompt.visible {
+            transform: translateY(0);
+        }
+
         @media (max-width: 768px) {
             .header-container {
                 min-height: 3.5rem; /* 56px */
@@ -272,7 +281,12 @@
         </div>
     </header>
     
-    <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content">
+    <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content relative">
+        <div id="refresh-prompt" class="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-[var(--card-bg)] backdrop-blur-lg border border-[var(--card-border)] rounded-full shadow-lg p-2 flex items-center gap-4">
+            <span class="text-sm font-medium text-[var(--text-muted-color)] pl-2">Some data is still loading...</span>
+            <button id="prompt-refresh-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-sm hover:bg-blue-500 transition-colors">Refresh</button>
+        </div>
+
         <div id="overview-section" class="page-content pt-8 pb-16"></div>
         <div id="daily-section" class="page-content hidden pt-8 pb-16"></div>
         <div id="reports-section" class="page-content hidden pt-8 pb-16"></div>
@@ -323,6 +337,8 @@
             const headerRefreshButton = document.getElementById('header-refresh-button');
             const mainHeaderRefreshButton = document.getElementById('main-header-refresh-button');
             const themeToggle = document.getElementById('theme-toggle');
+            const refreshPrompt = document.getElementById('refresh-prompt');
+            const promptRefreshBtn = document.getElementById('prompt-refresh-btn');
 
             const parseCSV = (csv) => {
                 if (!csv) return { parsed: [], raw: [] };
@@ -508,6 +524,24 @@
             const showLoading = (container) => { container.innerHTML = `<div class="flex justify-center items-center h-64"><div class="w-16 h-16 border-4 border-[var(--text-muted-color)] border-t-[var(--text-color)] rounded-full animate-spin"></div></div>`; };
             const showError = (container, message) => { container.innerHTML = `<div class="bg-red-900/50 border border-red-500/50 text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto"><h3 class="font-bold text-lg mb-2">Error Loading Data</h3><p>${message}</p></div>`; };
 
+            const showRefreshPrompt = () => {
+                refreshPrompt.classList.add('visible');
+            };
+
+            const hideRefreshPrompt = () => {
+                refreshPrompt.classList.remove('visible');
+            };
+
+            const checkForLoadingData = (dataObject) => {
+                for (const key in dataObject) {
+                    if (dataObject[key] === '...') {
+                        showRefreshPrompt();
+                        return;
+                    }
+                }
+                hideRefreshPrompt();
+            };
+
             const getPerformanceColorState = (label, valueStr) => {
                 const value = parseFloat(valueStr);
                 if (isNaN(value)) return 'neutral';
@@ -533,6 +567,8 @@
                 if (!data || !data.parsed || data.parsed.length === 0) { showError(container, "Could not load overview data. It might be temporarily unavailable. Please try refreshing."); return; }
                 
                 const batchData = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
+                if (batchData) checkForLoadingData(batchData);
+
 
                 const groupedData = data.parsed.reduce((acc, row) => { const topLevel = row['Top-Level Box']; if (topLevel) { if (!acc[topLevel]) acc[topLevel] = []; acc[topLevel].push(row); } return acc; }, {});
                 
@@ -786,7 +822,7 @@
                                  <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
                                  <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
                                      <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                     <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">10 Days</button>
+                                     <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">10 Days</button>
                                      <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
                                      <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                  </div>
@@ -798,12 +834,14 @@
                     </div>
                 `;
 
-                const timelineButtons = container.querySelectorAll('.timeline-btn');
+                const timelineButtons = container.querySelectorAll('#timeline-toggle .timeline-btn');
                 timelineButtons.forEach(btn => {
                     if (parseInt(btn.dataset.days) === days) {
                         btn.classList.add('active');
                     }
                     btn.addEventListener('click', () => {
+                        // FIX: Correctly remove active class from all buttons before re-rendering
+                        timelineButtons.forEach(b => b.classList.remove('active'));
                         renderCourseChecksPage(container, data, parseInt(btn.dataset.days));
                     });
                 });
@@ -1254,24 +1292,30 @@
                     
                     let chartInstance;
                     let currentDays = 14;
+                    let visibleDatasets = [0, 1]; // Initially both are visible
 
-                    const updateChart = (days) => {
-                        currentDays = days;
+                    const updateChart = () => {
                         if (chartInstance) chartInstance.destroy();
-                        chartInstance = renderLineChart(canvasId, dailyData, days);
+                        chartInstance = renderLineChart(canvasId, dailyData, currentDays);
                         
+                        visibleDatasets.forEach((val, index) => {
+                            chartInstance.setDatasetVisibility(index, val === 1);
+                        });
+                        chartInstance.update();
+
                         if (chartType === 'acca') accaLineChart = chartInstance;
                         else cfaLineChart = chartInstance;
 
                         legendContainer.innerHTML = '';
                         chartInstance.data.datasets.forEach((dataset, index) => {
                             const button = document.createElement('button');
-                            button.className = `flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-300 bg-[var(--sub-box-bg)] backdrop-blur-sm border border-[var(--card-border)] hover:bg-[var(--card-hover-bg)] hover:scale-105`;
+                            const isVisible = visibleDatasets[index] === 1;
+                            button.className = `flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-300 bg-[var(--sub-box-bg)] backdrop-blur-sm border border-[var(--card-border)] hover:bg-[var(--card-hover-bg)] hover:scale-105 ${!isVisible ? 'opacity-40' : ''}`;
                             button.innerHTML = `<div class="w-3 h-3 rounded-full" style="background-color: ${dataset.borderColor}"></div> ${dataset.label}`;
                             
                             button.onclick = () => {
-                                const isVisible = chartInstance.isDatasetVisible(index);
-                                chartInstance.setDatasetVisibility(index, !isVisible);
+                                visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
+                                chartInstance.setDatasetVisibility(index, visibleDatasets[index] === 1);
                                 
                                 const { datasets } = chartInstance.data;
                                 const approvedVisible = chartInstance.isDatasetVisible(1);
@@ -1312,7 +1356,7 @@
                                 }
                                 
                                 chartInstance.update();
-                                button.classList.toggle('opacity-40', isVisible);
+                                button.classList.toggle('opacity-40', !visibleDatasets[index]);
                             };
                             legendContainer.appendChild(button);
                         });
@@ -1322,13 +1366,14 @@
                         btn.addEventListener('click', (e) => {
                             timelineToggle.querySelector('.active')?.classList.remove('active');
                             e.target.classList.add('active');
-                            updateChart(parseInt(e.target.dataset.days));
+                            currentDays = parseInt(e.target.dataset.days);
+                            updateChart();
                         });
                     });
                     
                     timelineToggle.querySelector('.active')?.classList.remove('active');
                     timelineToggle.querySelector(`[data-days="${currentDays}"]`)?.classList.add('active');
-                    updateChart(currentDays);
+                    updateChart();
                 };
                 setupSubPage('acca', accaDailyData);
                 setupSubPage('cfa', cfaDailyData);
@@ -1337,6 +1382,8 @@
             const renderBatchReportsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Batch Reports data."); return; }
                 
+                checkForLoadingData(data);
+
                 const generalData = [
                     { 'Data Header': 'Total Enrolled Students', 'Value': data.totalEnrolled },
                     { 'Data Header': 'Live Batches Count', 'Value': data.liveBatches }
@@ -1378,6 +1425,8 @@
 
             const renderAskADoubtPage = (container, summaryData, trendsData) => {
                 if (!summaryData) { showError(container, "Could not load Support data."); return; }
+                
+                checkForLoadingData(summaryData);
                 
                 const metrics = summaryData; 
                 
@@ -1645,12 +1694,12 @@
                         const newData = await fetchAndParseData(OVERVIEW_URL);
                         if (newData) {
                             dataCache.overview = newData;
-                            renderOverviewPage(activeContent, dataCache.overview);
+                            await renderOverviewPage(activeContent, dataCache.overview);
                         } else {
                             showError(activeContent, "Failed to fetch overview data. Please try again.");
                         }
                     } else {
-                        renderOverviewPage(activeContent, dataCache.overview);
+                        await renderOverviewPage(activeContent, dataCache.overview);
                     }
                 }
             };
@@ -1905,6 +1954,7 @@
 
             headerRefreshButton.addEventListener('click', handleRefreshClick);
             mainHeaderRefreshButton.addEventListener('click', handleRefreshClick);
+            promptRefreshBtn.addEventListener('click', handleRefreshClick);
             
             mainContent.addEventListener('scroll', () => {
                 const { scrollTop, scrollHeight, clientHeight } = mainContent;
