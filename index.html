@@ -93,12 +93,18 @@
         #loading-overlay {
             transition: opacity 0.5s ease-in-out;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.05); }
+        
+        #loading-text-container span {
+            opacity: 0;
+            animation: fadeInOut 2s ease-in-out infinite;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-muted-color);
         }
-        .animate-pulse-logo {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
 
 
@@ -243,10 +249,9 @@
 </head>
 <body class="h-screen flex flex-col">
     <div id="loading-overlay" class="fixed inset-0 bg-[var(--bg-color)] flex items-center justify-center z-[100]">
-        <svg class="w-16 h-16 animate-pulse-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 M50 20 A 30 30 0 1 0 50 80 A 30 30 0 1 0 50 20" fill="none" stroke="var(--text-color)" stroke-width="4"/>
-            <circle cx="50" cy="50" r="10" fill="var(--text-color)"/>
-        </svg>
+        <div id="loading-text-container">
+            <span>Loading...</span>
+        </div>
     </div>
 
     <header class="w-full z-50 p-2 md:p-4 flex-shrink-0">
@@ -797,7 +802,7 @@
                                  <canvas id="courseChecksChartCanvas"></canvas>
                              </div>
                              <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                                <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
                             </div>
                          </div>
                     </div>
@@ -999,7 +1004,7 @@
                                    </div>
                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
                                     </div>
                                </div>
                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
@@ -1080,7 +1085,7 @@
                                     </div>
                                     <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
                                      <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
                                     </div>
                                 </div>
                              </div>
@@ -1434,7 +1439,7 @@
                         <canvas id="supportLineChartCanvas"></canvas>
                     </div>
                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                        <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
                     </div>
                 `;
                 
