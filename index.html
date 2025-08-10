@@ -192,15 +192,6 @@
             pointer-events: auto;
         }
         
-        #refresh-prompt {
-            transform: translateY(-150%);
-            transition: transform 0.5s ease-in-out;
-        }
-
-        #refresh-prompt.visible {
-            transform: translateY(0);
-        }
-
         @media (max-width: 768px) {
             .header-container {
                 min-height: 3.5rem; /* 56px */
@@ -244,7 +235,8 @@
         <div class="w-full max-w-7xl mx-auto flex items-center justify-center header-container relative">
             
             <div id="main-header" class="w-full h-full flex items-center justify-between md:justify-center relative">
-                <div class="w-12 h-12 flex-shrink-0 md:absolute md:left-0"></div>
+                <div class="w-12 h-12 flex-shrink-0 md:absolute md:left-0">
+                </div>
                 <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
                     <button data-tab="overview" class="nav-item">Overview</button>
                     <button data-tab="reports" class="nav-item">Reports</button>
@@ -282,11 +274,6 @@
     </header>
     
     <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content relative">
-        <div id="refresh-prompt" class="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-[var(--card-bg)] backdrop-blur-lg border border-[var(--card-border)] rounded-full shadow-lg p-2 flex items-center gap-4">
-            <span class="text-sm font-medium text-[var(--text-muted-color)] pl-2">Some data is still loading...</span>
-            <button id="prompt-refresh-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-sm hover:bg-blue-500 transition-colors">Refresh</button>
-        </div>
-
         <div id="overview-section" class="page-content pt-8 pb-16"></div>
         <div id="daily-section" class="page-content hidden pt-8 pb-16"></div>
         <div id="reports-section" class="page-content hidden pt-8 pb-16"></div>
@@ -337,8 +324,6 @@
             const headerRefreshButton = document.getElementById('header-refresh-button');
             const mainHeaderRefreshButton = document.getElementById('main-header-refresh-button');
             const themeToggle = document.getElementById('theme-toggle');
-            const refreshPrompt = document.getElementById('refresh-prompt');
-            const promptRefreshBtn = document.getElementById('prompt-refresh-btn');
 
             const parseCSV = (csv) => {
                 if (!csv) return { parsed: [], raw: [] };
@@ -477,7 +462,7 @@
                 };
             };
 
-            const fetchAndParseData = async (url, parser = parseCSV, retries = 5, delay = 1500) => {
+            const fetchAndParseData = async (url, parser = parseCSV, retries = 3, delay = 1500) => {
                 for (let i = 0; i < retries; i++) {
                     try {
                         const response = await fetch(`${url}&t=${new Date().getTime()}`);
@@ -487,7 +472,26 @@
                             throw new Error("Received an HTML page instead of CSV data. Retrying...");
                         }
                         if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
-                        return parser(text);
+                        
+                        const parsedData = parser(text);
+
+                        // Intelligent retry for sheets that are still calculating
+                        if (parser === parseBatchReportsCSV) {
+                            let needsRetry = false;
+                            for (const key in parsedData) {
+                                if (parsedData[key] === '...') {
+                                    needsRetry = true;
+                                    break;
+                                }
+                            }
+                            if (needsRetry && i < retries - 1) {
+                                console.warn(`Batch data still calculating, retrying in ${delay/1000}s...`);
+                                await new Promise(res => setTimeout(res, delay));
+                                continue; // Go to next iteration of the loop
+                            }
+                        }
+                        
+                        return parsedData;
                     } catch (error) {
                         console.error(`Attempt ${i + 1} to fetch from ${url} failed:`, error.message);
                         if (i < retries - 1) {
@@ -522,26 +526,8 @@
             };
 
             const showLoading = (container) => { container.innerHTML = `<div class="flex justify-center items-center h-64"><div class="w-16 h-16 border-4 border-[var(--text-muted-color)] border-t-[var(--text-color)] rounded-full animate-spin"></div></div>`; };
-            const showError = (container, message) => { container.innerHTML = `<div class="bg-red-900/50 border border-red-500/50 text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto"><h3 class="font-bold text-lg mb-2">Error Loading Data</h3><p>${message}</p></div>`; };
-
-            const showRefreshPrompt = () => {
-                refreshPrompt.classList.add('visible');
-            };
-
-            const hideRefreshPrompt = () => {
-                refreshPrompt.classList.remove('visible');
-            };
-
-            const checkForLoadingData = (dataObject) => {
-                for (const key in dataObject) {
-                    if (dataObject[key] === '...') {
-                        showRefreshPrompt();
-                        return;
-                    }
-                }
-                hideRefreshPrompt();
-            };
-
+            const showError = (container, message) => { container.innerHTML = `<div class="bg-red-900/50 border border-[var(--card-border)] text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto"><h3 class="font-bold text-lg mb-2">Error Loading Data</h3><p>${message}</p></div>`; };
+            
             const getPerformanceColorState = (label, valueStr) => {
                 const value = parseFloat(valueStr);
                 if (isNaN(value)) return 'neutral';
@@ -563,13 +549,9 @@
                 return 'text-[var(--text-color)]';
             };
 
-            const renderOverviewPage = async (container, data) => {
+            const renderOverviewPage = async (container, data, batchData) => {
                 if (!data || !data.parsed || data.parsed.length === 0) { showError(container, "Could not load overview data. It might be temporarily unavailable. Please try refreshing."); return; }
                 
-                const batchData = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
-                if (batchData) checkForLoadingData(batchData);
-
-
                 const groupedData = data.parsed.reduce((acc, row) => { const topLevel = row['Top-Level Box']; if (topLevel) { if (!acc[topLevel]) acc[topLevel] = []; acc[topLevel].push(row); } return acc; }, {});
                 
                 let content = '';
@@ -1305,8 +1287,6 @@
             const renderBatchReportsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Batch Reports data."); return; }
                 
-                checkForLoadingData(data);
-
                 const generalData = [
                     { 'Data Header': 'Total Enrolled Students', 'Value': data.totalEnrolled },
                     { 'Data Header': 'Live Batches Count', 'Value': data.liveBatches }
@@ -1348,8 +1328,6 @@
 
             const renderAskADoubtPage = (container, summaryData, trendsData) => {
                 if (!summaryData) { showError(container, "Could not load Support data."); return; }
-                
-                checkForLoadingData(summaryData);
                 
                 const metrics = summaryData; 
                 
@@ -1421,7 +1399,7 @@
                         <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1 scale-90">
                              <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
                              <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
-                             <button data-days="30" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">30 Days</button>
+                             <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                         </div>
                     </div>
                     <div class="min-h-[300px] sm:min-h-[400px]">
@@ -1614,15 +1592,16 @@
                 if (tabId === 'overview') {
                     if (!dataCache.overview) {
                         showLoading(activeContent);
-                        const newData = await fetchAndParseData(OVERVIEW_URL);
-                        if (newData) {
-                            dataCache.overview = newData;
-                            await renderOverviewPage(activeContent, dataCache.overview);
+                        const overviewData = await fetchAndParseData(OVERVIEW_URL);
+                        
+                        if (overviewData && dataCache.batchReports) {
+                            dataCache.overview = overviewData;
+                            await renderOverviewPage(activeContent, dataCache.overview, dataCache.batchReports);
                         } else {
                             showError(activeContent, "Failed to fetch overview data. Please try again.");
                         }
                     } else {
-                        await renderOverviewPage(activeContent, dataCache.overview);
+                        await renderOverviewPage(activeContent, dataCache.overview, dataCache.batchReports);
                     }
                 }
             };
@@ -1800,7 +1779,6 @@
             };
 
             const refreshData = async () => {
-                hideRefreshPrompt();
                 const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
                 if (!activeSection) return;
                 
@@ -1809,6 +1787,7 @@
 
                 if (mainTabId === 'overview' || activeSection.id === 'overview-section') {
                     dataCache.overview = null;
+                    dataCache.batchReports = null;
                     await switchTab('overview');
                 } else if (mainTabId === 'reports') {
                     switch(activeSection.id) {
@@ -1821,7 +1800,10 @@
                 }
             };
             
-            const initialLoad = () => {
+            const initialLoad = async () => {
+                // Pre-fetch critical data
+                dataCache.batchReports = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
+                
                 switchTab('overview'); 
                 renderReportsPage(document.getElementById('reports-section'));
                 updateFooterText('overview-section');
@@ -1878,7 +1860,6 @@
 
             headerRefreshButton.addEventListener('click', handleRefreshClick);
             mainHeaderRefreshButton.addEventListener('click', handleRefreshClick);
-            promptRefreshBtn.addEventListener('click', handleRefreshClick);
             
             mainContent.addEventListener('scroll', () => {
                 const { scrollTop, scrollHeight, clientHeight } = mainContent;
