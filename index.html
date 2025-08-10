@@ -321,7 +321,7 @@
             const COURSE_CHECKS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo2_1ighNkAxsTHM-9kCcKcOaMHRdojOqI_5wVVHTjJA_K80HdvzHtga5XRwStdlK7sYCbYRxRhGbV/pub?gid=1674961572&single=true&output=csv';
             const LMS_SUPPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=1975801635&single=true&output=csv';
             const LMS_TRENDS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=420305713&single=true&output=csv';
-            const WEEKLY_BATCH_REPORTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK-8xEDVQIGw4xhw-5jY0NvHYi0OEYB0iJiUERycG8bvwyImE3LnEoEqYgTNBlFNjcsA7VI8-cAU0q/pub?gid=746074448&single=true&output=csv';
+            const WEEKLY_BATCH_REPORTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=647223292&single=true&output=csv';
 
             const SHEET_URLS = {
                 'daily-section': 'https://docs.google.com/spreadsheets/d/17_clxpnwRjQ7qEiR6taISN9eLblZQ-4fr9WB2EqyQeE/edit?usp=sharing',
@@ -428,11 +428,11 @@
                 };
 
                 return {
-                    totalEnrolled: getValue(1, 1),      // Cell B2
-                    liveBatches: getValue(2, 1),      // Cell B3
-                    avgAttendance: getValue(3, 1),      // Cell B4
-                    avgLPS: getValue(4, 1),           // Cell B5
-                    testsCompletion: getValue(5, 1)   // Cell B6
+                    totalEnrolled: getValue(0, 1),      // Cell B1
+                    liveBatches: getValue(1, 1),      // Cell B2
+                    avgAttendance: getValue(2, 1),      // Cell B3
+                    avgLPS: getValue(3, 1),           // Cell B4
+                    testsCompletion: getValue(4, 1)   // Cell B5
                 };
             };
 
