@@ -580,62 +580,27 @@
                         </h2>`;
 
                     if (title.trim() === 'Batches Information' && batchData) {
-                        const generalData = [
-                            { 'Data Header': 'Total Enrolled Students', 'Value': batchData.totalEnrolled },
-                            { 'Data Header': 'Live Batches Count', 'Value': batchData.liveBatches }
-                        ];
-                        const performanceData = [
-                             { 'Data Header': 'Average Attendance %', 'Value': batchData.avgAttendance },
-                             { 'Data Header': 'Average LPS', 'Value': batchData.avgLPS },
-                             { 'Data Header': 'Tests Completion %', 'Value': batchData.testsCompletion }
+                        const allMetrics = [
+                            { 'Data Header': 'Total Enrolled Students', 'Value': batchData.totalEnrolled, isPerformance: false },
+                            { 'Data Header': 'Live Batches Count', 'Value': batchData.liveBatches, isPerformance: false },
+                            { 'Data Header': 'Average Attendance %', 'Value': batchData.avgAttendance, isPerformance: true },
+                            { 'Data Header': 'Average LPS', 'Value': batchData.avgLPS, isPerformance: true },
+                            { 'Data Header': 'Tests Completion %', 'Value': batchData.testsCompletion, isPerformance: true }
                         ];
 
                         content += `
-                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                                <div class="lg:col-span-2 sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
-                                    <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
-                                    <div class="card-grid force-row flex flex-wrap justify-center gap-4 mt-auto">
-                                        ${generalData.map(metric => `
-                                            <div class="metric-card" data-color-state="neutral">
-                                                <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
-                                                    <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                    <div class="metric-value text-2xl md:text-3xl font-bold text-[var(--text-color)] tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                    <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                                </div>
-                                            </div>`).join('')}
-                                    </div>
-                                </div>
-                                <div class="lg:col-span-3 sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
-                                    <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
-                                    <div class="flex flex-wrap justify-center gap-4 mt-auto">
-                                        <div class="flex justify-center gap-4 w-full">
-                                            ${performanceData.slice(0, 2).map(metric => {
-                                                const colorState = getPerformanceColorState(metric['Data Header'], metric.Value);
-                                                const colorClass = getPerformanceColorClass(colorState);
-                                                return `<div class="metric-card flex-1" data-color-state="${colorState}">
-                                                    <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
-                                                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                                    </div>
-                                                </div>`
-                                            }).join('')}
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                ${allMetrics.map(metric => {
+                                    const colorState = metric.isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
+                                    const colorClass = metric.isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
+                                    return `<div class="metric-card" data-color-state="${colorState}">
+                                        <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
+                                            <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                            <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
+                                            <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
                                         </div>
-                                        <div class="flex justify-center gap-4 w-full">
-                                             ${performanceData.slice(2).map(metric => {
-                                                const colorState = getPerformanceColorState(metric['Data Header'], metric.Value);
-                                                const colorClass = getPerformanceColorClass(colorState);
-                                                return `<div class="metric-card flex-1 max-w-[calc(50%-0.5rem)]" data-color-state="${colorState}">
-                                                    <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
-                                                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                                    </div>
-                                                </div>`
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                </div>
+                                    </div>`
+                                }).join('')}
                             </div>
                         `;
                     } else if (title.trim() !== 'Batches Information') {
@@ -840,7 +805,6 @@
                         btn.classList.add('active');
                     }
                     btn.addEventListener('click', () => {
-                        // FIX: Correctly remove active class from all buttons before re-rendering
                         timelineButtons.forEach(b => b.classList.remove('active'));
                         renderCourseChecksPage(container, data, parseInt(btn.dataset.days));
                     });
@@ -1292,7 +1256,7 @@
                     
                     let chartInstance;
                     let currentDays = 14;
-                    let visibleDatasets = [0, 1]; // Initially both are visible
+                    let visibleDatasets = [1, 1]; // Initially both are visible
 
                     const updateChart = () => {
                         if (chartInstance) chartInstance.destroy();
@@ -1315,48 +1279,7 @@
                             
                             button.onclick = () => {
                                 visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
-                                chartInstance.setDatasetVisibility(index, visibleDatasets[index] === 1);
-                                
-                                const { datasets } = chartInstance.data;
-                                const approvedVisible = chartInstance.isDatasetVisible(1);
-                                const draftVisible = chartInstance.isDatasetVisible(0);
-
-                                chartInstance.options.scales.y.min = undefined;
-                                chartInstance.options.scales.y.max = undefined;
-                                chartInstance.options.scales.y.ticks.stepSize = undefined;
-
-                                if (chartType === 'acca' && approvedVisible && !draftVisible && currentDays === 7) {
-                                    const data = datasets[1].data.filter(v => v !== null);
-                                    if (data.length > 0) {
-                                        const dataMin = Math.min(...data);
-                                        const dataMax = Math.max(...data);
-                                        const range = dataMax - dataMin;
-                                        const step = calculateNiceStep(range, 4);
-                                        chartInstance.options.scales.y.ticks.stepSize = step;
-                                        chartInstance.options.scales.y.min = Math.floor(dataMin / step) * step;
-                                        chartInstance.options.scales.y.max = Math.ceil(dataMax / step) * step;
-                                    }
-                                } else if (approvedVisible && !draftVisible) {
-                                    const data = datasets[1].data;
-                                    if (data.length > 0) {
-                                        const dataMin = Math.min(...data);
-                                        const dataMax = Math.max(...data);
-                                        chartInstance.options.scales.y.ticks.stepSize = 100;
-                                        chartInstance.options.scales.y.min = Math.floor(dataMin / 100) * 100;
-                                        chartInstance.options.scales.y.max = Math.ceil(dataMax / 100) * 100;
-                                    }
-                                } else if (draftVisible && !approvedVisible) {
-                                    const data = datasets[0].data;
-                                    if (data.length > 0) {
-                                        const dataMax = Math.max(...data);
-                                        chartInstance.options.scales.y.ticks.stepSize = 50;
-                                        chartInstance.options.scales.y.min = 0;
-                                        chartInstance.options.scales.y.max = Math.ceil(dataMax / 50) * 50;
-                                    }
-                                }
-                                
-                                chartInstance.update();
-                                button.classList.toggle('opacity-40', !visibleDatasets[index]);
+                                updateChart();
                             };
                             legendContainer.appendChild(button);
                         });
@@ -1877,6 +1800,7 @@
             };
 
             const refreshData = async () => {
+                hideRefreshPrompt();
                 const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
                 if (!activeSection) return;
                 
