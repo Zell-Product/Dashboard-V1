@@ -90,6 +90,17 @@
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        #loading-overlay {
+            transition: opacity 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        .animate-pulse-logo {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
 
         #navigation-bar { max-width: 48rem; }
         .nav-item {
@@ -231,6 +242,13 @@
     </style>
 </head>
 <body class="h-screen flex flex-col">
+    <div id="loading-overlay" class="fixed inset-0 bg-[var(--bg-color)] flex items-center justify-center z-[100]">
+        <svg class="w-16 h-16 animate-pulse-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 M50 20 A 30 30 0 1 0 50 80 A 30 30 0 1 0 50 20" fill="none" stroke="var(--text-color)" stroke-width="4"/>
+            <circle cx="50" cy="50" r="10" fill="var(--text-color)"/>
+        </svg>
+    </div>
+
     <header class="w-full z-50 p-2 md:p-4 flex-shrink-0">
         <div class="w-full max-w-7xl mx-auto flex items-center justify-center header-container relative">
             
@@ -324,6 +342,7 @@
             const headerRefreshButton = document.getElementById('header-refresh-button');
             const mainHeaderRefreshButton = document.getElementById('main-header-refresh-button');
             const themeToggle = document.getElementById('theme-toggle');
+            const loadingOverlay = document.getElementById('loading-overlay');
 
             const parseCSV = (csv) => {
                 if (!csv) return { parsed: [], raw: [] };
@@ -777,6 +796,9 @@
                              <div class="min-h-[300px] sm:min-h-[400px]">
                                  <canvas id="courseChecksChartCanvas"></canvas>
                              </div>
+                             <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                            </div>
                          </div>
                     </div>
                 `;
@@ -976,6 +998,9 @@
                                        <div class="md:ml-auto flex items-center gap-2" id="acca-legend-toggle"></div>
                                    </div>
                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
+                                    <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                                    </div>
                                </div>
                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
                                     <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">ACCA Questions Split</h2>
@@ -1054,6 +1079,9 @@
                                         <div class="md:ml-auto flex items-center gap-2" id="cfa-legend-toggle"></div>
                                     </div>
                                     <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
+                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
+                                    </div>
                                 </div>
                              </div>
                         </div>
@@ -1286,7 +1314,7 @@
 
             const renderBatchReportsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Batch Reports data."); return; }
-                
+
                 const generalData = [
                     { 'Data Header': 'Total Enrolled Students', 'Value': data.totalEnrolled },
                     { 'Data Header': 'Live Batches Count', 'Value': data.liveBatches }
@@ -1404,6 +1432,9 @@
                     </div>
                     <div class="min-h-[300px] sm:min-h-[400px]">
                         <canvas id="supportLineChartCanvas"></canvas>
+                    </div>
+                    <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                        <i class="fas fa-info-circle mr-2"></i>For a more detailed view, try a larger screen.
                     </div>
                 `;
                 
@@ -1804,9 +1835,15 @@
                 // Pre-fetch critical data
                 dataCache.batchReports = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
                 
-                switchTab('overview'); 
+                await switchTab('overview'); 
                 renderReportsPage(document.getElementById('reports-section'));
                 updateFooterText('overview-section');
+
+                // Hide loading overlay after everything is ready
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
             };
 
             navButtons.forEach(button => {
