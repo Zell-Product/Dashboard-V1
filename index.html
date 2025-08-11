@@ -222,7 +222,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 11rem); /* Increased spacing for buttons */
+                max-width: calc(100% - 10rem); /* Increased spacing for buttons */
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -1510,11 +1510,9 @@
                         ctx.fillText("No data available for this period.", canvas.width / 2, canvas.height / 2);
                         return;
                     }
-
-                    const formattedData = chartDataPoints.map(d => ({
-                        x: d.date,
-                        y: d[currentDataType]
-                    }));
+                    
+                    const labels = chartDataPoints.map(d => d.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+                    const dataPoints = chartDataPoints.map(d => d[currentDataType]);
 
                     const isMobile = window.innerWidth < 768;
                     const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
@@ -1522,15 +1520,13 @@
                     const pointColor = currentDataType === 'doubts' ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)';
                     const bgColor = currentDataType === 'doubts' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
                     
-                    const minDate = chartDataPoints[0].date;
-                    const maxDate = chartDataPoints[chartDataPoints.length - 1].date;
-
                     supportLineChart = new Chart(ctx, {
                         type: 'line',
                         data: {
+                            labels: labels,
                             datasets: [{
                                 label: currentDataType === 'doubts' ? 'Open Doubts' : 'Open Tickets',
-                                data: formattedData,
+                                data: dataPoints,
                                 borderColor: pointColor,
                                 backgroundColor: bgColor,
                                 borderWidth: isMobile ? 2 : 3,
@@ -1555,10 +1551,9 @@
                                     displayColors: false,
                                     callbacks: {
                                         title: (tooltipItems) => {
-                                            const date = new Date(tooltipItems[0].parsed.x);
-                                            return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                                            return tooltipItems[0].label;
                                         },
-                                        label: (context) => `Count: ${context.raw.y}`
+                                        label: (context) => `Count: ${context.raw}`
                                     }
                                 }
                             },
@@ -1575,14 +1570,7 @@
                                     }
                                 },
                                 x: {
-                                    type: 'time',
-                                    min: minDate,
-                                    max: maxDate,
-                                    time: {
-                                        unit: 'day',
-                                        tooltipFormat: 'MMM d, yyyy',
-                                        displayFormats: { day: 'MMM d' }
-                                    },
+                                    type: 'category', // Use category to ensure all labels are shown
                                     grid: { display: false },
                                     ticks: { 
                                         color: tickColor, 
