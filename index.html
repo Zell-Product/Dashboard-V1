@@ -220,9 +220,9 @@
             #page-header-center-content {
                 position: absolute;
                 left: 50%;
-                transform: translateX(-55%); /* Nudge further left for more space on the right */
+                transform: translateX(-58%); /* Nudge further left for more space on the right */
                 width: auto;
-                max-width: calc(100% - 10.5rem); /* Add a bit more buffer */
+                max-width: calc(100% - 11.5rem); /* Add a bit more buffer for right side buttons */
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -834,7 +834,7 @@
                                  <canvas id="courseChecksChartCanvas"></canvas>
                              </div>
                              <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                 <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
+                                 <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
                              </div>
                          </div>
                     </div>
@@ -1036,7 +1036,7 @@
                                    </div>
                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
+                                        <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
                                     </div>
                                </div>
                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
@@ -1117,7 +1117,7 @@
                                      </div>
                                      <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
                                       <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                          <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
+                                          <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
                                       </div>
                                  </div>
                              </div>
@@ -1475,7 +1475,7 @@
                         <canvas id="supportLineChartCanvas"></canvas>
                     </div>
                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
+                        <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
                     </div>
                 `;
                 
@@ -1560,17 +1560,15 @@
                             scales: {
                                 y: {
                                     min: 0,
-                                    max: 70,
                                     grid: { color: gridColor },
                                     ticks: { 
-                                        stepSize: 10,
                                         color: tickColor, 
                                         font: { family: bodyFont },
                                         callback: function(value) { if (Number.isInteger(value)) { return value; } }
                                     }
                                 },
                                 x: {
-                                    type: 'category', // Use category to ensure all labels are shown
+                                    type: 'category',
                                     grid: { display: false },
                                     ticks: { 
                                         color: tickColor, 
