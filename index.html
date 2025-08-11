@@ -222,7 +222,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                /* FIX 3: Adjusted max-width for better spacing */
+                /* FIX 2: Adjusted max-width for better spacing */
                 max-width: calc(100% - 11rem);
             }
             #page-header-title {
@@ -241,7 +241,7 @@
             .card-grid .flex-grow { min-width: 0; }
 
             .qrf-nav-item {
-                /* FIX 3: Reduced padding to prevent clash */
+                /* FIX 2: Reduced padding to prevent clash */
                 padding-left: 0.5rem;
                 padding-right: 0.5rem;
                 font-size: 0.75rem; /* Slightly smaller font */
@@ -450,7 +450,7 @@
                     if (parts.length >= 3) {
                         const dateStr = parts[0].trim().replace(/"/g, '');
                         
-                        // FIX 1: Robust date parsing
+                        // FIX 3: Robust date parsing
                         const dateParts = dateStr.split('/');
                         // Assuming MM/DD/YYYY format from Google Sheets
                         const date = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
@@ -664,7 +664,7 @@
                                                     colorClass = getPerformanceColorClass(colorState);
                                                 }
                                                 return `<div class="metric-card ${isSupportCard ? 'flex-1' : ''}" data-color-state="${colorState}">
-                                                    <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
+                                                    <div class="p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
                                                         <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
                                                         <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
                                                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
@@ -833,7 +833,7 @@
                                  <canvas id="courseChecksChartCanvas"></canvas>
                              </div>
                              <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                 <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
+                                 <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
                              </div>
                          </div>
                     </div>
@@ -1035,7 +1035,7 @@
                                    </div>
                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
+                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
                                     </div>
                                </div>
                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
@@ -1116,7 +1116,7 @@
                                      </div>
                                      <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
                                       <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                          <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
+                                          <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
                                       </div>
                                  </div>
                              </div>
@@ -1477,7 +1477,7 @@
                         <canvas id="supportLineChartCanvas"></canvas>
                     </div>
                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
+                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on PC.
                     </div>
                 `;
                 
@@ -1495,7 +1495,8 @@
 
                     const labels = chartData.map(d => {
                         const dateParts = d.date.split('/');
-                        return new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
+                        const date = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
+                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                     });
                     const dataPoints = chartData.map(d => d.value);
 
@@ -1541,8 +1542,7 @@
                                     displayColors: false,
                                     callbacks: {
                                         title: (tooltipItems) => {
-                                            const date = new Date(tooltipItems[0].parsed.x);
-                                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+                                            return tooltipItems[0].label;
                                         },
                                         label: (context) => `Count: ${context.raw}`
                                     }
@@ -1560,8 +1560,6 @@
                                     }
                                 },
                                 x: {
-                                    type: 'time',
-                                    time: { unit: 'day', displayFormats: { day: 'd MMM' } },
                                     grid: { display: false },
                                     ticks: { 
                                         color: tickColor, 
