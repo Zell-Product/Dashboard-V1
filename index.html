@@ -107,7 +107,6 @@
             50% { opacity: 1; }
         }
 
-
         #navigation-bar { max-width: 48rem; }
         .nav-item {
             padding: 0.75rem 1.5rem;
@@ -1638,7 +1637,7 @@
             
             const renderReportsPage = (container) => {
                 const reports = [
-                    { title: 'Daily Metrics', icon: 'fas fa-chart-line', id: 'show-daily-metrics-btn' },
+                    { title: 'LMS Web & App Metrics', icon: 'fas fa-chart-line', id: 'show-daily-metrics-btn' },
                     { title: 'LMS Checks', icon: 'fas fa-clipboard-check', id: 'show-course-checks-btn' },
                     { title: 'Question Repository', icon: 'fas fa-book-open', id: 'show-question-repo-btn' },
                     { title: 'Ask a Doubt + LMS Tickets', icon: 'fas fa-headset', id: 'show-ask-a-doubt-btn' },
@@ -1730,7 +1729,7 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const dailySection = document.getElementById('daily-section');
                 dailySection.classList.remove('hidden');
-                setPageHeader('Daily Metrics', SHEET_URLS['daily-section']);
+                setPageHeader('LMS Web & App Metrics', SHEET_URLS['daily-section']);
                 updateFooterText('daily-section');
                 
                 const needsDailyFetch = !dataCache.daily;
@@ -1923,6 +1922,7 @@
             };
             
             const initialLoad = async () => {
+                loadingOverlay.classList.remove('hidden');
                 dataCache.batchReports = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
                 
                 await switchTab('overview'); 
