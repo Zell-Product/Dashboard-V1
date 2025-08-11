@@ -237,12 +237,6 @@
             .card-grid { flex-direction: column; }
             .sub-box .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; }
             .card-grid .flex-grow { min-width: 0; }
-
-            .qrf-nav-item {
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
-                font-size: 0.75rem; /* Slightly smaller font */
-            }
         }
     </style>
 </head>
@@ -427,10 +421,10 @@
                 };
 
                 return {
-                    totalEnrolled: getValue(0, 1),      // Cell B1
-                    liveBatches: getValue(1, 1),        // Cell B2
-                    avgAttendance: getValue(2, 1),      // Cell B3
-                    avgLPS: getValue(3, 1),             // Cell B4
+                    totalEnrolled: getValue(0, 1),     // Cell B1
+                    liveBatches: getValue(1, 1),       // Cell B2
+                    avgAttendance: getValue(2, 1),     // Cell B3
+                    avgLPS: getValue(3, 1),            // Cell B4
                     testsCompletion: getValue(4, 1)     // Cell B5
                 };
             };
@@ -654,7 +648,7 @@
                                     return `
                                     <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
                                         <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
-                                        <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto ${isUserAnalytics ? 'grid-cols-3' : ''} ${isStudentSupport ? 'grid grid-cols-2' : ''}">
+                                        <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto ${isUserAnalytics ? 'force-row' : ''} ${isStudentSupport ? 'grid grid-cols-2' : ''}">
                                             ${metrics.sort((a, b) => a.Order - b.Order).map(metric => {
                                                 const val = parseInt(metric.Value, 10);
                                                 let colorState = 'neutral';
@@ -673,7 +667,7 @@
                                             }).join('')}
                                         </div>
                                     </div>
-                                `
+                                    `
                                 }).join('')}
                             </div>
                         `).join('');
@@ -1284,14 +1278,14 @@
                 };
                 
                  const calculateNiceStep = (range, targetSteps) => {
-                       if (range === 0) return 1;
-                       const rawStep = range / targetSteps;
-                       const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-                       const residual = rawStep / magnitude;
-                       if (residual > 5) return 10 * magnitude;
-                       if (residual > 2) return 5 * magnitude;
-                       if (residual > 1) return 2 * magnitude;
-                       return magnitude;
+                         if (range === 0) return 1;
+                         const rawStep = range / targetSteps;
+                         const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+                         const residual = rawStep / magnitude;
+                         if (residual > 5) return 10 * magnitude;
+                         if (residual > 2) return 5 * magnitude;
+                         if (residual > 1) return 2 * magnitude;
+                         return magnitude;
                  };
 
                 const setupSubPage = (chartType, dailyData) => {
@@ -1492,12 +1486,12 @@
                     const tickColor = isLightMode ? '#515154' : '#a1a1a6';
 
                     if (allData.length === 0) {
-                         ctx.clearRect(0, 0, canvas.width, canvas.height);
-                         ctx.font = "16px 'Inter', sans-serif";
-                         ctx.fillStyle = tickColor;
-                         ctx.textAlign = "center";
-                         ctx.fillText("No data available to display.", canvas.width / 2, canvas.height / 2);
-                         return;
+                          ctx.clearRect(0, 0, canvas.width, canvas.height);
+                          ctx.font = "16px 'Inter', sans-serif";
+                          ctx.fillStyle = tickColor;
+                          ctx.textAlign = "center";
+                          ctx.fillText("No data available to display.", canvas.width / 2, canvas.height / 2);
+                          return;
                     }
 
                     const chartDataPoints = allData.slice(-currentDays);
@@ -1758,9 +1752,9 @@
                 qrfNav.id = 'qrf-navigation-bar-sticky';
                 qrfNav.className = 'flex justify-center items-center gap-1';
                 qrfNav.innerHTML = `
-                    <button data-qrf-tab="acca" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">ACCA</button>
-                    <button data-qrf-tab="cfa" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">CFA</button>
-                    <button data-qrf-tab="overall" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">Overall</button>
+                    <button data-qrf-tab="acca" class="qrf-nav-item px-2 md:px-6 py-2 text-xs md:text-base font-semibold rounded-full transition-colors duration-300">ACCA</button>
+                    <button data-qrf-tab="cfa" class="qrf-nav-item px-2 md:px-6 py-2 text-xs md:text-base font-semibold rounded-full transition-colors duration-300">CFA</button>
+                    <button data-qrf-tab="overall" class="qrf-nav-item px-2 md:px-6 py-2 text-xs md:text-base font-semibold rounded-full transition-colors duration-300">Overall</button>
                 `;
                 pageHeaderCenterContent.innerHTML = '';
                 pageHeaderCenterContent.className = 'bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center p-2';
