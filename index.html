@@ -236,7 +236,8 @@
             #theme-toggle { flex-shrink: 0; padding-left: 1rem; padding-right: 1rem; }
             .page-content { padding-top: 1rem; }
             .card-grid { flex-direction: column; }
-            .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; } /* FIX 2: Added flex-nowrap */
+            /* FIX 1: Increased specificity to ensure row layout is applied */
+            .sub-box .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; }
             .card-grid .flex-grow { min-width: 0; }
 
             .qrf-nav-item {
@@ -647,7 +648,7 @@
                         content += chunkedSubBoxes.map(row => `
                             <div class="grid grid-cols-1 ${row.length > 1 ? 'md:grid-cols-2' : ''} gap-8">
                                 ${row.map(([subTitle, metrics]) => {
-                                    // FIX 2: Add conditional classes for specific sub-boxes
+                                    // FIX 1: Add conditional classes for specific sub-boxes
                                     const isUserActivity = subTitle.toLowerCase().includes('user activity');
                                     const isSupportCard = subTitle.toLowerCase().includes('student support');
                                     return `
