@@ -310,6 +310,7 @@
             const QUESTION_REPO_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1254961431&single=true&output=csv';
             const ACCA_DAILY_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=652498444&single=true&output=csv';
             const CFA_DAILY_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1749523224&single=true&output=csv';
+            const OVERALL_DAILY_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1953325823&single=true&output=csv';
             const ACCA_SPLIT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1011528086&single=true&output=csv';
             const COURSE_CHECKS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo2_1ighNkAxsTHM-9kCcKcOaMHRdojOqI_5wVVHTjJA_K80HdvzHtga5XRwStdlK7sYCbYRxRhGbV/pub?gid=1674961572&single=true&output=csv';
             const LMS_SUPPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=1975801635&single=true&output=csv';
@@ -324,9 +325,9 @@
                 'batch-reports-section': 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing'
             };
 
-            const dataCache = { overview: null, daily: null, lmsStats: null, questionRepo: null, accaDaily: null, cfaDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null, lmsTrends: null, batchReports: null };
+            const dataCache = { overview: null, daily: null, lmsStats: null, questionRepo: null, accaDaily: null, cfaDaily: null, overallDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null, lmsTrends: null, batchReports: null };
             let courseChecksChart = null;
-            let accaPieChart = null, accaLineChart = null, cfaPieChart = null, cfaLineChart = null;
+            let accaPieChart = null, accaLineChart = null, cfaPieChart = null, cfaLineChart = null, overallLineChart = null;
             let supportLineChart = null;
 
             const mainContent = document.getElementById('main-content');
@@ -941,8 +942,8 @@
                 });
             };
 
-            const renderQuestionRepoPage = (container, summaryData, accaDailyData, cfaDailyData, accaSplitData) => {
-                if (!summaryData || !accaDailyData || !cfaDailyData || !accaSplitData) {
+            const renderQuestionRepoPage = (container, summaryData, accaDailyData, cfaDailyData, overallDailyData, accaSplitData) => {
+                if (!summaryData || !accaDailyData || !cfaDailyData || !overallDailyData || !accaSplitData) {
                     showError(container, "Could not load all necessary Question Repository data. Please try refreshing.");
                     return;
                 }
@@ -952,6 +953,7 @@
                     if (accaLineChart) accaLineChart.destroy();
                     if (cfaPieChart) cfaPieChart.destroy();
                     if (cfaLineChart) cfaLineChart.destroy();
+                    if (overallLineChart) overallLineChart.destroy();
                 };
                 destroyCharts();
 
@@ -1148,6 +1150,23 @@
                                         <div class="text-xl text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
                                 </div>
+                                <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl mt-8">
+                                   <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+                                       <div class="flex items-center gap-2 md:gap-4">
+                                           <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                                           <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="overall">
+                                               <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                               <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
+                                               <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                                           </div>
+                                       </div>
+                                       <div class="md:ml-auto flex items-center gap-2" id="overall-legend-toggle"></div>
+                                   </div>
+                                   <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="overallLineChartCanvas"></canvas></div>
+                                    <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                        <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
+                                    </div>
+                               </div>
                             </div>
                         </div>
                     </div>
@@ -1204,7 +1223,7 @@
                 accaPieChart = renderPieChart('accaPieChartCanvas', [accaDraft, accaApproved], accaDraft + accaApproved);
                 cfaPieChart = renderPieChart('cfaPieChartCanvas', [cfaDraft, cfaApproved], cfaDraft + cfaApproved);
                 
-                const renderLineChart = (canvasId, dailyData, days) => {
+                const renderLineChart = (canvasId, dailyData, days, visibleDatasets) => {
                     const isMobile = window.innerWidth < 768;
                     
                     const chartData = dailyData.parsed
@@ -1219,6 +1238,15 @@
                         const date = new Date(d.Date);
                         return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                     });
+
+                    const yAxisConfig = { 
+                        grid: { color: gridColor }, 
+                        ticks: { color: tickColor, font: { family: bodyFont } } 
+                    };
+
+                    if (visibleDatasets[0] === 1 && visibleDatasets[1] === 0) {
+                        yAxisConfig.min = 0;
+                    }
 
                     const ctx = document.getElementById(canvasId).getContext('2d');
                     return new Chart(ctx, {
@@ -1267,7 +1295,7 @@
                                 }
                             },
                             scales: { 
-                                y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { family: bodyFont } } }, 
+                                y: yAxisConfig, 
                                 x: { 
                                     grid: { display: false }, 
                                     ticks: { 
@@ -1305,7 +1333,7 @@
 
                     const updateChart = () => {
                         if (chartInstance) chartInstance.destroy();
-                        chartInstance = renderLineChart(canvasId, dailyData, currentDays);
+                        chartInstance = renderLineChart(canvasId, dailyData, currentDays, visibleDatasets);
                         
                         visibleDatasets.forEach((val, index) => {
                             chartInstance.setDatasetVisibility(index, val === 1);
@@ -1313,7 +1341,9 @@
                         chartInstance.update();
 
                         if (chartType === 'acca') accaLineChart = chartInstance;
-                        else cfaLineChart = chartInstance;
+                        else if (chartType === 'cfa') cfaLineChart = chartInstance;
+                        else if (chartType === 'overall') overallLineChart = chartInstance;
+
 
                         legendContainer.innerHTML = '';
                         chartInstance.data.datasets.forEach((dataset, index) => {
@@ -1345,6 +1375,7 @@
                 };
                 setupSubPage('acca', accaDailyData);
                 setupSubPage('cfa', cfaDailyData);
+                setupSubPage('overall', overallDailyData);
             };
 
             const renderBatchReportsPage = (container, data) => {
@@ -1784,27 +1815,29 @@
                     }
                 });
 
-                const needsFetch = !dataCache.questionRepo || !dataCache.accaDaily || !dataCache.cfaDaily || !dataCache.accaSplit;
+                const needsFetch = !dataCache.questionRepo || !dataCache.accaDaily || !dataCache.cfaDaily || !dataCache.overallDaily || !dataCache.accaSplit;
                 if (needsFetch) {
                     showLoading(questionRepoSection);
-                    const [summaryData, accaDailyData, cfaDailyData, accaSplitData] = await Promise.all([
+                    const [summaryData, accaDailyData, cfaDailyData, overallDailyData, accaSplitData] = await Promise.all([
                         fetchAndParseData(QUESTION_REPO_URL),
                         fetchAndParseData(ACCA_DAILY_URL),
                         fetchAndParseData(CFA_DAILY_URL),
+                        fetchAndParseData(OVERALL_DAILY_URL),
                         fetchAndParseData(ACCA_SPLIT_URL, parseAccaSplitCSV)
                     ]);
 
-                    if (summaryData && accaDailyData && cfaDailyData && accaSplitData) {
+                    if (summaryData && accaDailyData && cfaDailyData && overallDailyData && accaSplitData) {
                         dataCache.questionRepo = summaryData;
                         dataCache.accaDaily = accaDailyData;
                         dataCache.cfaDaily = cfaDailyData;
+                        dataCache.overallDaily = overallDailyData;
                         dataCache.accaSplit = accaSplitData;
-                        renderQuestionRepoPage(questionRepoSection, summaryData, accaDailyData, cfaDailyData, accaSplitData);
+                        renderQuestionRepoPage(questionRepoSection, summaryData, accaDailyData, cfaDailyData, overallDailyData, accaSplitData);
                     } else {
                         showError(questionRepoSection, "Failed to fetch one or more data sources. Please try again.");
                     }
                 } else {
-                     renderQuestionRepoPage(questionRepoSection, dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.accaSplit);
+                     renderQuestionRepoPage(questionRepoSection, dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.overallDaily, dataCache.accaSplit);
                 }
                 switchQrfTab('acca');
             };
@@ -1883,7 +1916,7 @@
                         case 'batch-reports-section': dataCache.batchReports = null; await showBatchReportsPage(); break;
                         case 'daily-section': dataCache.daily = null; dataCache.lmsStats = null; await showDailyMetrics(); break;
                         case 'course-checks-section': dataCache.courseChecks = null; await showCourseChecksPage(); break;
-                        case 'question-repo-section': dataCache.questionRepo = null; dataCache.accaDaily = null; dataCache.cfaDaily = null; dataCache.accaSplit = null; await showQuestionRepo(); break;
+                        case 'question-repo-section': dataCache.questionRepo = null; dataCache.accaDaily = null; dataCache.cfaDaily = null; dataCache.overallDaily = null; dataCache.accaSplit = null; await showQuestionRepo(); break;
                         case 'ask-a-doubt-section': dataCache.lmsSupport = null; dataCache.lmsTrends = null; await showAskADoubtPage(); break;
                     }
                 }
@@ -1915,7 +1948,7 @@
                     renderCourseChecksPage(document.getElementById('course-checks-section'), dataCache.courseChecks);
                 }
                 if (activeSectionId === 'question-repo-section' && dataCache.questionRepo) {
-                    renderQuestionRepoPage(document.getElementById('question-repo-section'), dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.accaSplit);
+                    renderQuestionRepoPage(document.getElementById('question-repo-section'), dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.overallDaily, dataCache.accaSplit);
                 }
                 if (activeSectionId === 'ask-a-doubt-section' && dataCache.lmsSupport) {
                     renderAskADoubtPage(document.getElementById('ask-a-doubt-section'), dataCache.lmsSupport, dataCache.lmsTrends);
