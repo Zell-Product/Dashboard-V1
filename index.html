@@ -222,7 +222,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 11rem);
+                max-width: calc(100% - 8rem); /* Increased spacing for buttons */
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -415,9 +415,9 @@
                 const lines = csv.replace(/\r/g, '').split('\n');
                 
                 const getValue = (rowIndex, colIndex) => {
-                    if (lines.length > rowIndex) {
+                    if (lines.length > rowIndex && lines[rowIndex]) { 
                         const values = lines[rowIndex].split(',');
-                        if (values.length > colIndex) {
+                        if (values.length > colIndex && values[colIndex]) { 
                             let value = values[colIndex].trim().replace(/"/g, '');
                             if (value === '#NAME?' || value === '#REF!') return '...';
                             return value;
@@ -585,9 +585,8 @@
                 
                 let content = '';
                 for (const [title, rows] of Object.entries(groupedData)) {
-                    // --- START MOBILE FIX ---
-                    const isHorizontalSection = title.toLowerCase().includes('user analytics') || title.toLowerCase().includes('student support');
-                    // --- END MOBILE FIX ---
+                    const isUserAnalytics = title.toLowerCase().includes('user analytics');
+                    const isStudentSupport = title.toLowerCase().includes('student support');
 
                     content += `<div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
                         <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4">
@@ -617,7 +616,6 @@
                             </div>`;
                         };
 
-                        // --- START MOBILE FIX 2: REVERSE TRIANGLE ---
                         content += `
                             <div class="space-y-6">
                                 <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
@@ -642,7 +640,6 @@
                                 </div>
                             </div>
                         `;
-                        // --- END MOBILE FIX 2 ---
                     } else if (title.trim() !== 'Batches Information') {
                         const subBoxes = rows.reduce((acc, row) => { const subHeader = row['Sub-Box Header']; if (subHeader) { if (!acc[subHeader]) acc[subHeader] = []; acc[subHeader].push(row); } return acc; }, {});
                         const chunkedSubBoxes = Object.entries(subBoxes).reduce((resultArray, item, index) => { 
@@ -655,11 +652,10 @@
                         content += chunkedSubBoxes.map(row => `
                             <div class="grid grid-cols-1 ${row.length > 1 ? 'md:grid-cols-2' : ''} gap-8">
                                 ${row.map(([subTitle, metrics]) => {
-                                    // --- START MOBILE FIX 1 & 3 ---
                                     return `
                                     <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
                                         <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
-                                        <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto ${isHorizontalSection ? 'force-row' : ''}">
+                                        <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto ${isUserAnalytics ? 'grid-cols-3' : ''} ${isStudentSupport ? 'grid grid-cols-2' : ''}">
                                             ${metrics.sort((a, b) => a.Order - b.Order).map(metric => {
                                                 const val = parseInt(metric.Value, 10);
                                                 let colorState = 'neutral';
@@ -668,7 +664,7 @@
                                                     colorState = val >= 10 ? 'bad' : 'good';
                                                     colorClass = getPerformanceColorClass(colorState);
                                                 }
-                                                return `<div class="metric-card ${isHorizontalSection ? 'flex-1' : ''}" data-color-state="${colorState}">
+                                                return `<div class="metric-card flex-1" data-color-state="${colorState}">
                                                     <div class="p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
                                                         <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
                                                         <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
@@ -679,7 +675,6 @@
                                         </div>
                                     </div>
                                 `
-                                // --- END MOBILE FIX 1 & 3 ---
                                 }).join('')}
                             </div>
                         `).join('');
@@ -1506,16 +1501,7 @@
                          return;
                     }
 
-                    const latestDateInSheet = allData[allData.length - 1].date;
-                    latestDateInSheet.setHours(23, 59, 59, 999);
-
-                    const startDate = new Date(latestDateInSheet);
-                    startDate.setDate(startDate.getDate() - (currentDays - 1));
-                    startDate.setHours(0, 0, 0, 0);
-
-                    const chartDataPoints = allData.filter(d => {
-                        return d.date >= startDate && d.date <= latestDateInSheet;
-                    });
+                    const chartDataPoints = allData.slice(-currentDays);
                     
                     if (chartDataPoints.length === 0) {
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1536,6 +1522,9 @@
                     const bodyFont = "'Inter', sans-serif";
                     const pointColor = currentDataType === 'doubts' ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)';
                     const bgColor = currentDataType === 'doubts' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
+                    
+                    const minDate = chartDataPoints[0].date;
+                    const maxDate = chartDataPoints[chartDataPoints.length - 1].date;
 
                     supportLineChart = new Chart(ctx, {
                         type: 'line',
@@ -1588,8 +1577,8 @@
                                 },
                                 x: {
                                     type: 'time',
-                                    min: startDate,
-                                    max: latestDateInSheet,
+                                    min: minDate,
+                                    max: maxDate,
                                     time: {
                                         unit: 'day',
                                         tooltipFormat: 'MMM d, yyyy',
