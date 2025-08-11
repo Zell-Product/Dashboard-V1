@@ -222,7 +222,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 8rem); /* Increased spacing for buttons */
+                max-width: calc(100% - 11rem); /* Increased spacing for buttons */
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -449,14 +449,13 @@
                         
                         const dateParts = dateStr.split('/');
                         if (dateParts.length === 3) {
-                            // Correctly parse MM/DD/YYYY
                             const date = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
                             const doubts = parseInt(doubtsStr, 10);
                             const tickets = parseInt(ticketsStr, 10);
 
                             if (!isNaN(date.getTime()) && !isNaN(doubts) && !isNaN(tickets)) {
                                 data.push({
-                                    date: date, // Store as a Date object
+                                    date: date,
                                     doubts: doubts,
                                     tickets: tickets
                                 });
@@ -1588,7 +1587,6 @@
                                     ticks: { 
                                         color: tickColor, 
                                         font: { family: bodyFont },
-                                        maxTicksLimit: isMobile ? 5 : (currentDays > 10 ? 10 : currentDays),
                                         maxRotation: 0,
                                         minRotation: 0
                                     }
