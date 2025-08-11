@@ -43,14 +43,14 @@
 
         body.light-mode {
             /* NEW Light Mode - Apple Inspired */
-            --bg-color: #f5f5f7;
+            --bg-color: #f0f0f5; /* Softer, less glaring background */
             --text-color: #1d1d1f;
             --text-muted-color: #6e6e73;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(0, 0, 0, 0.08);
-            --card-hover-bg: rgba(255, 255, 255, 0.9);
-            --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            --header-bg: rgba(247, 247, 247, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.6); /* Glassier card background */
+            --card-border: rgba(0, 0, 0, 0.07);
+            --card-hover-bg: rgba(255, 255, 255, 0.8);
+            --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --header-bg: rgba(247, 247, 247, 0.7);
             --header-border: rgba(0, 0, 0, 0.1);
             --icon-color: #000000;
             --nav-text-color: #515154;
@@ -1183,7 +1183,7 @@
                         type: 'doughnut',
                         data: {
                             labels: ['Draft', 'Approved'],
-                            datasets: [{ data: data, backgroundColor: ['#ef4444', '#22c55e'], borderColor: 'var(--bg-color)', borderWidth: 4, hoverBorderWidth: 6 }]
+                            datasets: [{ data: data, backgroundColor: ['#ef4444', '#22c55e'], borderColor: 'var(--bg-color)', borderWidth: 2, hoverBorderWidth: 4 }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false, cutout: '70%',
@@ -1352,6 +1352,10 @@
                             button.innerHTML = `<div class="w-3 h-3 rounded-full" style="background-color: ${dataset.borderColor}"></div> ${dataset.label}`;
                             
                             button.onclick = () => {
+                                const currentlyVisible = visibleDatasets.filter(v => v === 1).length;
+                                if (currentlyVisible === 1 && isVisible) {
+                                    return; // Prevent deselecting the last item
+                                }
                                 visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
                                 updateChart();
                             };
@@ -1489,10 +1493,10 @@
                 trendsContainer.innerHTML = `
                     <div class="flex flex-col items-center mb-6 gap-4">
                         <div class="flex items-center gap-2 sm:gap-4">
-                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Trends for:</h4>
+                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Select Trends for:</h4>
                             <div id="support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
-                                <button data-type="doubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Unanswered Doubts</button>
-                                <button data-type="tickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">Open Tickets</button>
+                                <button data-type="doubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Ask a Doubt</button>
+                                <button data-type="tickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">LMS Tickets</button>
                             </div>
                         </div>
                         <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1 scale-90">
@@ -1509,8 +1513,8 @@
                     </div>
                 `;
                 
-                let currentDataType = 'doubts';
                 let currentDays = 7;
+                let visibleSupportDatasets = [1, 1]; // [doubts, tickets]
 
                 const renderSupportTrendChart = () => {
                     if (supportLineChart) supportLineChart.destroy();
@@ -1542,29 +1546,41 @@
                     }
                     
                     const labels = chartDataPoints.map(d => d.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
-                    const dataPoints = chartDataPoints.map(d => d[currentDataType]);
 
                     const isMobile = window.innerWidth < 768;
                     const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
                     const bodyFont = "'Inter', sans-serif";
-                    const pointColor = currentDataType === 'doubts' ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)';
-                    const bgColor = currentDataType === 'doubts' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)';
                     
                     supportLineChart = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: labels,
-                            datasets: [{
-                                label: currentDataType === 'doubts' ? 'Open Doubts' : 'Open Tickets',
-                                data: dataPoints,
-                                borderColor: pointColor,
-                                backgroundColor: bgColor,
-                                borderWidth: isMobile ? 2 : 3,
-                                pointRadius: isMobile ? 3 : 5,
-                                pointHoverRadius: isMobile ? 6 : 8,
-                                tension: 0.4,
-                                fill: true,
-                            }]
+                            datasets: [
+                                {
+                                    label: 'Open Doubts',
+                                    data: chartDataPoints.map(d => d.doubts),
+                                    borderColor: 'rgb(239, 68, 68)',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    hidden: !visibleSupportDatasets[0],
+                                    borderWidth: isMobile ? 2 : 3,
+                                    pointRadius: isMobile ? 3 : 5,
+                                    pointHoverRadius: isMobile ? 6 : 8,
+                                    tension: 0.4,
+                                    fill: true,
+                                },
+                                {
+                                    label: 'Open Tickets',
+                                    data: chartDataPoints.map(d => d.tickets),
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    hidden: !visibleSupportDatasets[1],
+                                    borderWidth: isMobile ? 2 : 3,
+                                    pointRadius: isMobile ? 3 : 5,
+                                    pointHoverRadius: isMobile ? 6 : 8,
+                                    tension: 0.4,
+                                    fill: true,
+                                }
+                            ]
                         },
                         options: {
                             responsive: true,
@@ -1573,17 +1589,19 @@
                                 legend: { display: false },
                                 tooltip: {
                                     enabled: true,
+                                    mode: 'index', 
+                                    intersect: false,
                                     backgroundColor: 'rgba(0,0,0,0.8)',
                                     titleFont: { family: bodyFont, size: 14, weight: 'bold' },
                                     bodyFont: { family: bodyFont, size: 12 },
                                     padding: 12,
                                     cornerRadius: 8,
-                                    displayColors: false,
+                                    displayColors: true,
                                     callbacks: {
                                         title: (tooltipItems) => {
                                             return tooltipItems[0].label;
                                         },
-                                        label: (context) => `Count: ${context.raw}`
+                                        label: (context) => `${context.dataset.label}: ${context.raw}`
                                     }
                                 }
                             },
@@ -1613,11 +1631,14 @@
                 };
                 
                 const typeToggleButtons = trendsContainer.querySelectorAll('#support-type-toggle .timeline-btn');
-                typeToggleButtons.forEach(btn => {
+                typeToggleButtons.forEach((btn, index) => {
                     btn.addEventListener('click', (e) => {
-                        typeToggleButtons.forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                        currentDataType = e.target.dataset.type;
+                        const currentlyVisible = visibleSupportDatasets.filter(v => v === 1).length;
+                        if (currentlyVisible === 1 && btn.classList.contains('active')) {
+                            return; // Prevent deselecting the last item
+                        }
+                        btn.classList.toggle('active');
+                        visibleSupportDatasets[index] = visibleSupportDatasets[index] === 1 ? 0 : 1;
                         renderSupportTrendChart();
                     });
                 });
