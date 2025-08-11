@@ -222,7 +222,8 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 10rem); /* Increased spacing for buttons */
+                /* FIX 8: Increased spacing for buttons to prevent clash */
+                max-width: calc(100% - 12rem);
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -428,11 +429,11 @@
                 };
 
                 return {
-                    totalEnrolled: getValue(0, 1),      // Cell B1
-                    liveBatches: getValue(1, 1),      // Cell B2
-                    avgAttendance: getValue(2, 1),      // Cell B3
-                    avgLPS: getValue(3, 1),           // Cell B4
-                    testsCompletion: getValue(4, 1)   // Cell B5
+                    totalEnrolled: getValue(0, 1),     // Cell B1
+                    liveBatches: getValue(1, 1),       // Cell B2
+                    avgAttendance: getValue(2, 1),     // Cell B3
+                    avgLPS: getValue(3, 1),            // Cell B4
+                    testsCompletion: getValue(4, 1)    // Cell B5
                 };
             };
 
@@ -460,6 +461,8 @@
                         }
                     }
                 });
+                // FIX 1: Ensure data is sorted by date to prevent issues with slicing on graphs
+                data.sort((a, b) => new Date(a.date) - new Date(b.date));
                 return data;
             };
 
@@ -585,28 +588,44 @@
                             <i class="${getIconForMetric(title)}"></i><span>${title}</span>
                         </h2>`;
 
+                    // FIX 5: Restructure "Batches Information" with sub-headers
                     if (title.trim() === 'Batches Information' && batchData) {
-                        const allMetrics = [
+                        const generalMetrics = [
                             { 'Data Header': 'Total Enrolled Students', 'Value': batchData.totalEnrolled, isPerformance: false },
-                            { 'Data Header': 'Live Batches Count', 'Value': batchData.liveBatches, isPerformance: false },
+                            { 'Data Header': 'Live Batches Count', 'Value': batchData.liveBatches, isPerformance: false }
+                        ];
+                        const performanceMetrics = [
                             { 'Data Header': 'Average Attendance %', 'Value': batchData.avgAttendance, isPerformance: true },
                             { 'Data Header': 'Average LPS', 'Value': batchData.avgLPS, isPerformance: true },
                             { 'Data Header': 'Tests Completion %', 'Value': batchData.testsCompletion, isPerformance: true }
                         ];
+                        
+                        const createBatchMetricCard = (metric) => {
+                            const colorState = metric.isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
+                            const colorClass = metric.isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
+                            return `<div class="metric-card" data-color-state="${colorState}">
+                                <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
+                                    <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                    <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
+                                    <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                                </div>
+                            </div>`;
+                        };
 
                         content += `
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                                ${allMetrics.map(metric => {
-                                    const colorState = metric.isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
-                                    const colorClass = metric.isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
-                                    return `<div class="metric-card" data-color-state="${colorState}">
-                                        <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
-                                            <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                            <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
-                                            <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                        </div>
-                                    </div>`
-                                }).join('')}
+                            <div class="space-y-6">
+                                <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
+                                    <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">General Information</h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        ${generalMetrics.map(createBatchMetricCard).join('')}
+                                    </div>
+                                </div>
+                                <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
+                                    <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">Performance Data</h3>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        ${performanceMetrics.map(createBatchMetricCard).join('')}
+                                    </div>
+                                </div>
                             </div>
                         `;
                     } else if (title.trim() !== 'Batches Information') {
@@ -620,10 +639,14 @@
 
                         content += chunkedSubBoxes.map(row => `
                             <div class="grid grid-cols-1 ${row.length > 1 ? 'md:grid-cols-2' : ''} gap-8">
-                                ${row.map(([subTitle, metrics]) => `
+                                ${row.map(([subTitle, metrics]) => {
+                                    // FIX 3 & 7: Add conditional classes for specific sub-boxes
+                                    const isUserActivity = subTitle.toLowerCase().includes('user activity');
+                                    const isSupportCard = subTitle.toLowerCase().includes('student support');
+                                    return `
                                     <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
                                         <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
-                                        <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto">
+                                        <div class="card-grid flex flex-wrap justify-center gap-4 mt-auto ${isUserActivity ? 'force-row' : ''}">
                                             ${metrics.sort((a, b) => a.Order - b.Order).map(metric => {
                                                 const val = parseInt(metric.Value, 10);
                                                 let colorState = 'neutral';
@@ -632,7 +655,7 @@
                                                     colorState = val >= 10 ? 'bad' : 'good';
                                                     colorClass = getPerformanceColorClass(colorState);
                                                 }
-                                                return `<div class="metric-card" data-color-state="${colorState}">
+                                                return `<div class="metric-card ${isSupportCard ? 'flex-1' : ''}" data-color-state="${colorState}">
                                                     <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-[140px] rounded-3xl">
                                                         <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
                                                         <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
@@ -642,7 +665,7 @@
                                             }).join('')}
                                         </div>
                                     </div>
-                                `).join('')}
+                                `}).join('')}
                             </div>
                         `).join('');
                     }
@@ -666,9 +689,10 @@
                     return val >= 4 ? 'text-green-500' : 'text-[var(--text-color)]';
                 };
 
+                // FIX 6: Use metric-card class for consistent styling and hover effects
                 const createPlatformCard = (label, value) => `
-                    <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-3 rounded-lg text-center border border-[var(--card-border)] flex-1">
-                        <div class="value text-2xl md:text-3xl font-semibold tracking-tight">${value || 'N/A'}</div>
+                    <div class="metric-card p-3 rounded-2xl text-center border border-[var(--card-border)] flex-1">
+                        <div class="metric-value text-2xl md:text-3xl font-semibold tracking-tight">${value || 'N/A'}</div>
                         <div class="text-xs text-[var(--text-muted-color)]">${label}</div>
                     </div>
                 `;
@@ -802,8 +826,8 @@
                                  <canvas id="courseChecksChartCanvas"></canvas>
                              </div>
                              <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
-                            </div>
+                                 <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
+                             </div>
                          </div>
                     </div>
                 `;
@@ -1027,13 +1051,13 @@
                                             <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
                                             <div class="flex justify-around items-center gap-4">
                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                    <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectiveCount}</div>
-                                                    <div class="text-sm text-[var(--text-muted-color)]">Count</div>
-                                                </div>
-                                                <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                    <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectivePercent}</div>
-                                                    <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
-                                                </div>
+                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectiveCount}</div>
+                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
+                                                 </div>
+                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectivePercent}</div>
+                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
+                                                 </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1065,29 +1089,29 @@
                                              </div>
                                              <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaApproved.toLocaleString()}</span>
                                          </div>
-                                    </div>
-                                    <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.completion)}">
-                                        <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.completion))} tracking-tighter">${cfaData.completion || 'N/A'}</div>
-                                        <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
-                                    </div>
+                                     </div>
+                                     <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.completion)}">
+                                         <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.completion))} tracking-tighter">${cfaData.completion || 'N/A'}</div>
+                                         <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
+                                     </div>
                                  </div>
-                                <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                    <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
-                                        <div class="flex items-center gap-2 md:gap-4">
-                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                            <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="cfa">
-                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
-                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
-                                            </div>
-                                        </div>
-                                        <div class="md:ml-auto flex items-center gap-2" id="cfa-legend-toggle"></div>
-                                    </div>
-                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
-                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                        <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
-                                    </div>
-                                </div>
+                                 <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
+                                     <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+                                         <div class="flex items-center gap-2 md:gap-4">
+                                             <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                                             <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="cfa">
+                                                 <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                                 <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
+                                                 <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                                             </div>
+                                         </div>
+                                         <div class="md:ml-auto flex items-center gap-2" id="cfa-legend-toggle"></div>
+                                     </div>
+                                     <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
+                                      <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                          <i class="fas fa-info-circle mr-2"></i>For a more detailed analysis, view on a Mac or PC.
+                                      </div>
+                                 </div>
                              </div>
                         </div>
 
@@ -1254,15 +1278,15 @@
                 };
                 
                  const calculateNiceStep = (range, targetSteps) => {
-                    if (range === 0) return 1;
-                    const rawStep = range / targetSteps;
-                    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-                    const residual = rawStep / magnitude;
-                    if (residual > 5) return 10 * magnitude;
-                    if (residual > 2) return 5 * magnitude;
-                    if (residual > 1) return 2 * magnitude;
-                    return magnitude;
-                };
+                     if (range === 0) return 1;
+                     const rawStep = range / targetSteps;
+                     const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+                     const residual = rawStep / magnitude;
+                     if (residual > 5) return 10 * magnitude;
+                     if (residual > 2) return 5 * magnitude;
+                     if (residual > 1) return 2 * magnitude;
+                     return magnitude;
+                 };
 
                 const setupSubPage = (chartType, dailyData) => {
                     const canvasId = `${chartType}LineChartCanvas`;
@@ -1341,18 +1365,25 @@
                     </div>`;
                 };
 
+                // FIX 4: Adjust layout for mobile view
                 container.innerHTML = `
                     <div class="space-y-10">
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl">
                             <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">General</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-2 gap-6">
                                 ${generalData.map(metric => createMetricCard(metric, false)).join('')}
                             </div>
                         </div>
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl">
                             <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Performance Data</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                                ${performanceData.map(metric => createMetricCard(metric, true)).join('')}
+                            <div class="flex flex-col items-center gap-6 md:grid md:grid-cols-3">
+                                <div class="w-full grid grid-cols-2 md:col-span-2 gap-6">
+                                    ${createMetricCard(performanceData[0], true)}
+                                    ${createMetricCard(performanceData[1], true)}
+                                </div>
+                                <div class="w-1/2 md:w-full md:col-span-1">
+                                    ${createMetricCard(performanceData[2], true)}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1384,7 +1415,7 @@
                 }
 
                 const createMetricCard = (label, value, icon, colorClass = 'text-[var(--text-color)]', state = 'neutral') => `
-                    <div class="metric-card flex-grow flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl" data-color-state="${state}">
+                    <div class="metric-card flex-1 flex-shrink-0 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl" data-color-state="${state}">
                         <div class="text-2xl ${colorClass}"><i class="${icon}"></i></div>
                         <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${value}</div>
                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
@@ -1396,14 +1427,15 @@
                          <div class="flex flex-col sm:flex-row gap-8 items-start">
                              <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6 flex-1 w-full">
                                  <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
-                                 <div class="card-grid force-row flex flex-wrap justify-center gap-4 mt-auto">
+                                 <div class="card-grid force-row flex flex-nowrap justify-center gap-4 mt-auto">
                                      ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
                                      ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
                                  </div>
                              </div>
                              <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6 flex-1 w-full">
                                  <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
-                                 <div class="card-grid force-row flex flex-wrap justify-center gap-4 mt-auto">
+                                 <!-- FIX 2: Use flex-nowrap to keep cards in one line on mobile -->
+                                 <div class="card-grid force-row flex flex-nowrap justify-center gap-4 mt-auto">
                                      ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
                                      ${createMetricCard('Open Support Tickets', getMetricValue('Open Support Tickets'), getConditionalIcon(openTickets, 'fas fa-exclamation-triangle', 'fas fa-check-circle'), getConditionalColor(openTickets), getConditionalState(openTickets))}
                                  </div>
@@ -1626,12 +1658,17 @@
                 updateFooterText(`${tabId}-section`);
 
                 if (tabId === 'overview') {
-                    if (!dataCache.overview) {
+                    if (!dataCache.overview || !dataCache.batchReports) {
                         showLoading(activeContent);
-                        const overviewData = await fetchAndParseData(OVERVIEW_URL);
+                        // Fetch both overview and batch reports if either is missing
+                        const [overviewData, batchData] = await Promise.all([
+                            dataCache.overview ? Promise.resolve(dataCache.overview) : fetchAndParseData(OVERVIEW_URL),
+                            dataCache.batchReports ? Promise.resolve(dataCache.batchReports) : fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV)
+                        ]);
                         
-                        if (overviewData && dataCache.batchReports) {
+                        if (overviewData && batchData) {
                             dataCache.overview = overviewData;
+                            dataCache.batchReports = batchData;
                             await renderOverviewPage(activeContent, dataCache.overview, dataCache.batchReports);
                         } else {
                             showError(activeContent, "Failed to fetch overview data. Please try again.");
@@ -1639,6 +1676,8 @@
                     } else {
                         await renderOverviewPage(activeContent, dataCache.overview, dataCache.batchReports);
                     }
+                } else if (tabId === 'reports') {
+                    renderReportsPage(document.getElementById('reports-section'));
                 }
             };
 
@@ -1837,7 +1876,7 @@
             };
             
             const initialLoad = async () => {
-                // Pre-fetch critical data
+                // Pre-fetch critical data for the initial overview page
                 dataCache.batchReports = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
                 
                 await switchTab('overview'); 
