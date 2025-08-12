@@ -812,6 +812,26 @@
                 const successRateColor = getSuccessRateColor(successRate);
                 const successRateState = getSuccessRateColorState(successRate);
 
+                let buttonBgColor, buttonBorderColor, dotColor;
+                switch(successRateState) {
+                    case 'good':
+                        buttonBgColor = 'rgba(34, 197, 94, 0.2)';
+                        buttonBorderColor = 'rgb(34, 197, 94)';
+                        dotColor = '#22c55e';
+                        break;
+                    case 'medium':
+                        buttonBgColor = 'rgba(245, 158, 11, 0.2)';
+                        buttonBorderColor = 'rgb(245, 158, 11)';
+                        dotColor = '#f59e0b';
+                        break;
+                    case 'bad':
+                    default:
+                        buttonBgColor = 'rgba(239, 68, 68, 0.2)';
+                        buttonBorderColor = 'rgb(239, 68, 68)';
+                        dotColor = '#ef4444';
+                        break;
+                }
+
                 const allChartData = data.parsed
                     .filter(row => row['Pass %'] && row['Pass %'].trim() !== '' && !isNaN(parseFloat(row['Pass %'])))
                     .map(row => ({
@@ -828,13 +848,20 @@
                             <div class="text-7xl sm:text-8xl font-bold my-2 tracking-tighter ${successRateColor}">${successRate}</div>
                         </div>
                          <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
-                             <div class="flex flex-col sm:flex-row justify-center mb-6 items-center gap-2 sm:gap-4">
-                                 <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
-                                 <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
-                                     <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                     <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">10 Days</button>
-                                     <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
-                                     <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                                 <div class="flex items-center gap-2 md:gap-4">
+                                     <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
+                                     <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
+                                         <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                         <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">10 Days</button>
+                                         <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
+                                         <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                                     </div>
+                                 </div>
+                                 <div class="flex items-center gap-2">
+                                     <button class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-300 backdrop-blur-sm border" style="background-color: ${buttonBgColor}; border-color: ${buttonBorderColor};">
+                                         <div class="w-3 h-3 rounded-full" style="background-color: ${dotColor}"></div> Success Rate
+                                     </button>
                                  </div>
                              </div>
                              <div class="min-h-[300px] sm:min-h-[400px]">
@@ -1031,7 +1058,7 @@
                                    </div>
                                </div>
                                <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                   <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+                                   <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                                        <div class="flex items-center gap-2 md:gap-4">
                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
                                            <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-2" data-chart-type="acca">
@@ -1040,7 +1067,7 @@
                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                            </div>
                                        </div>
-                                       <div class="md:ml-auto flex items-center gap-2" id="acca-legend-toggle"></div>
+                                       <div class="flex items-center gap-2" id="acca-legend-toggle"></div>
                                    </div>
                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
@@ -1112,7 +1139,7 @@
                                      </div>
                                  </div>
                                  <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                     <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+                                     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                                          <div class="flex items-center gap-2 md:gap-4">
                                              <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
                                              <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-2" data-chart-type="cfa">
@@ -1121,7 +1148,7 @@
                                                  <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                              </div>
                                          </div>
-                                         <div class="md:ml-auto flex items-center gap-2" id="cfa-legend-toggle"></div>
+                                         <div class="flex items-center gap-2" id="cfa-legend-toggle"></div>
                                      </div>
                                      <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
                                       <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
@@ -1157,7 +1184,7 @@
                                     </div>
                                 </div>
                                 <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl mt-8">
-                                   <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
+                                   <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                                        <div class="flex items-center gap-2 md:gap-4">
                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
                                            <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-2" data-chart-type="overall">
@@ -1166,7 +1193,7 @@
                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                            </div>
                                        </div>
-                                       <div class="md:ml-auto flex items-center gap-2" id="overall-legend-toggle"></div>
+                                       <div class="flex items-center gap-2" id="overall-legend-toggle"></div>
                                    </div>
                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="overallLineChartCanvas"></canvas></div>
                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
@@ -1503,18 +1530,16 @@
 
                 trendsContainer.innerHTML = `
                     <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Open Doubts & Tickets</h3>
-                    <div class="flex flex-col items-center mb-6 gap-4">
-                        <div class="flex items-center gap-2 sm:gap-4">
-                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Trends for:</h4>
-                            <div id="support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
-                                <button data-type="openDoubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Unanswered Doubts</button>
-                                <button data-type="openTickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Open Tickets</button>
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <div class="flex items-center gap-2 md:gap-4">
+                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                            <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
+                                <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
+                                <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
+                                <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                             </div>
                         </div>
-                        <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2 scale-90">
-                             <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
-                             <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
-                             <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                        <div id="support-type-toggle" class="flex items-center gap-2">
                         </div>
                     </div>
                     <div class="min-h-[300px] sm:min-h-[400px]">
@@ -1527,18 +1552,16 @@
                 
                 totalTrendsContainer.innerHTML = `
                     <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Total Doubts & Tickets</h3>
-                    <div class="flex flex-col items-center mb-6 gap-4">
-                        <div class="flex items-center gap-2 sm:gap-4">
-                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Trends for:</h4>
-                            <div id="total-support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
-                                <button data-type="totalDoubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Total Doubts</button>
-                                <button data-type="totalTickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Total Tickets</button>
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                         <div class="flex items-center gap-2 md:gap-4">
+                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                            <div id="total-support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
+                                 <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
+                                 <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
+                                 <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                             </div>
                         </div>
-                        <div id="total-support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2 scale-90">
-                             <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
-                             <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
-                             <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                        <div id="total-support-type-toggle" class="flex items-center gap-2">
                         </div>
                     </div>
                     <div class="min-h-[300px] sm:min-h-[400px]">
@@ -1667,24 +1690,31 @@
                                 }
                             }
                         });
+
+                        const legendContainer = document.getElementById(typeToggleId);
+                        if(legendContainer) {
+                            legendContainer.innerHTML = '';
+                             chartInstance.data.datasets.forEach((dataset, index) => {
+                                const button = document.createElement('button');
+                                const isVisible = visibleDatasets[index] === 1;
+                                button.className = `flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-300 border`;
+                                button.style.backgroundColor = isVisible ? dataset.backgroundColor : 'var(--sub-box-bg)';
+                                button.style.borderColor = isVisible ? dataset.borderColor : 'var(--card-border)';
+                                button.innerHTML = `<div class="w-3 h-3 rounded-full" style="background-color: ${dataset.borderColor}"></div> ${dataset.label}`;
+                                
+                                button.onclick = () => {
+                                    const currentlyVisible = visibleDatasets.filter(v => v === 1).length;
+                                    if (currentlyVisible === 1 && isVisible) {
+                                        return; 
+                                    }
+                                    visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
+                                    renderChart();
+                                };
+                                legendContainer.appendChild(button);
+                            });
+                        }
                     };
                     
-                    const typeToggleContainer = document.getElementById(typeToggleId);
-                    if(typeToggleContainer) {
-                        const typeToggleButtons = typeToggleContainer.querySelectorAll('.timeline-btn');
-                        typeToggleButtons.forEach((btn, index) => {
-                            btn.addEventListener('click', (e) => {
-                                const currentlyVisible = visibleDatasets.filter(v => v === 1).length;
-                                if (currentlyVisible === 1 && btn.classList.contains('active')) {
-                                    return; // Prevent deselecting the last item
-                                }
-                                btn.classList.toggle('active');
-                                visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
-                                renderChart();
-                            });
-                        });
-                    }
-
                     const timelineToggleContainer = document.getElementById(timelineToggleId);
                     if(timelineToggleContainer){
                         const timelineToggleButtons = timelineToggleContainer.querySelectorAll('.timeline-btn');
@@ -1708,7 +1738,7 @@
                     'support-type-toggle',
                     'support-timeline-toggle',
                     [{label: 'Open Doubts', key: 'openDoubts'}, {label: 'Open Tickets', key: 'openTickets'}],
-                    [{border: 'rgb(239, 68, 68)', bg: 'rgba(239, 68, 68, 0.1)'}, {border: 'rgb(59, 130, 246)', bg: 'rgba(59, 130, 246, 0.1)'}]
+                    [{border: 'rgb(239, 68, 68)', bg: 'rgba(239, 68, 68, 0.2)'}, {border: 'rgb(59, 130, 246)', bg: 'rgba(59, 130, 246, 0.2)'}]
                 );
 
                 totalSupportLineChart = setupTrendChart(
@@ -1717,7 +1747,7 @@
                     'total-support-type-toggle',
                     'total-support-timeline-toggle',
                     [{label: 'Total Doubts', key: 'totalDoubts'}, {label: 'Total Tickets', key: 'totalTickets'}],
-                    [{border: 'rgb(245, 158, 11)', bg: 'rgba(245, 158, 11, 0.1)'}, {border: 'rgb(34, 197, 94)', bg: 'rgba(34, 197, 94, 0.1)'}]
+                    [{border: 'rgb(245, 158, 11)', bg: 'rgba(245, 158, 11, 0.2)'}, {border: 'rgb(34, 197, 94)', bg: 'rgba(34, 197, 94, 0.2)'}]
                 );
             };
             
