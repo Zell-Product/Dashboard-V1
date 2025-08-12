@@ -328,6 +328,7 @@
             let courseChecksChart = null;
             let accaPieChart = null, accaLineChart = null, cfaPieChart = null, cfaLineChart = null, overallLineChart = null;
             let supportLineChart = null;
+            let totalSupportLineChart = null;
 
             const mainContent = document.getElementById('main-content');
             const navButtons = document.querySelectorAll('.nav-item');
@@ -436,22 +437,28 @@
 
                 lines.forEach(line => {
                     const parts = line.split(',');
-                    if (parts.length >= 3 && parts[0].trim() && parts[1].trim() && parts[2].trim()) {
+                    if (parts.length >= 5 && parts[0].trim()) {
                         const dateStr = parts[0].trim().replace(/"/g, '');
-                        const doubtsStr = parts[1].trim();
-                        const ticketsStr = parts[2].trim();
+                        const openDoubtsStr = parts[1].trim();
+                        const openTicketsStr = parts[2].trim();
+                        const totalDoubtsStr = parts[3].trim();
+                        const totalTicketsStr = parts[4].trim();
                         
                         const dateParts = dateStr.split('/');
                         if (dateParts.length === 3) {
                             const date = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
-                            const doubts = parseInt(doubtsStr, 10);
-                            const tickets = parseInt(ticketsStr, 10);
+                            const openDoubts = parseInt(openDoubtsStr, 10);
+                            const openTickets = parseInt(openTicketsStr, 10);
+                            const totalDoubts = parseInt(totalDoubtsStr, 10);
+                            const totalTickets = parseInt(totalTicketsStr, 10);
 
-                            if (!isNaN(date.getTime()) && !isNaN(doubts) && !isNaN(tickets)) {
+                            if (!isNaN(date.getTime())) {
                                 data.push({
                                     date: date,
-                                    doubts: doubts,
-                                    tickets: tickets
+                                    openDoubts: isNaN(openDoubts) ? 0 : openDoubts,
+                                    openTickets: isNaN(openTickets) ? 0 : openTickets,
+                                    totalDoubts: isNaN(totalDoubts) ? 0 : totalDoubts,
+                                    totalTickets: isNaN(totalTickets) ? 0 : totalTickets,
                                 });
                             }
                         }
@@ -753,7 +760,7 @@
                                     <div class="flex justify-center gap-4">
                                         ${createPlatformCard('Web', mau.WEB)}
                                         ${createPlatformCard('Android', mau.ANDROID)}
-                                        ${createPlatformCard('iOS', mau.iOS)}
+                                        ${createPlatformCard('iOS', dau.iOS)}
                                     </div>
                                 </div>
                             </div>
@@ -823,7 +830,7 @@
                          <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                              <div class="flex flex-col sm:flex-row justify-center mb-6 items-center gap-2 sm:gap-4">
                                  <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
-                                 <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
+                                 <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
                                      <button data-days="7" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                      <button data-days="10" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">10 Days</button>
                                      <button data-days="14" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">14 Days</button>
@@ -1027,7 +1034,7 @@
                                    <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
                                        <div class="flex items-center gap-2 md:gap-4">
                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                           <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="acca">
+                                           <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-2" data-chart-type="acca">
                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1108,7 +1115,7 @@
                                      <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
                                          <div class="flex items-center gap-2 md:gap-4">
                                              <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                             <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="cfa">
+                                             <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-2" data-chart-type="cfa">
                                                  <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                  <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                  <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1153,7 +1160,7 @@
                                    <div class="flex flex-col md:flex-row justify-center items-center mb-6 gap-4">
                                        <div class="flex items-center gap-2 md:gap-4">
                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                           <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="overall">
+                                           <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-2" data-chart-type="overall">
                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1480,26 +1487,31 @@
                              </div>
                          </div>
                          <div id="support-trends-section" class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl"></div>
+                         <div id="total-support-trends-section" class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl"></div>
                     </div>
                 `;
 
                 if (supportLineChart) supportLineChart.destroy();
+                if (totalSupportLineChart) totalSupportLineChart.destroy();
                 const trendsContainer = container.querySelector('#support-trends-section');
+                const totalTrendsContainer = container.querySelector('#total-support-trends-section');
                 if (!trendsData) {
                     trendsContainer.innerHTML = `<p class="text-center text-[var(--text-muted-color)]">Could not load trends data.</p>`;
+                    totalTrendsContainer.innerHTML = '';
                     return;
                 }
 
                 trendsContainer.innerHTML = `
+                    <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Open Doubts & Tickets</h3>
                     <div class="flex flex-col items-center mb-6 gap-4">
                         <div class="flex items-center gap-2 sm:gap-4">
-                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Select Trends for:</h4>
-                            <div id="support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
-                                <button data-type="doubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Open Doubts</button>
-                                <button data-type="tickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Open Tickets</button>
+                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Trends for:</h4>
+                            <div id="support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
+                                <button data-type="openDoubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Open Doubts</button>
+                                <button data-type="openTickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Open Tickets</button>
                             </div>
                         </div>
-                        <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1 scale-90">
+                        <div id="support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2 scale-90">
                              <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
                              <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
                              <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1513,147 +1525,200 @@
                     </div>
                 `;
                 
-                let currentDays = 7;
-                let visibleSupportDatasets = [1, 1]; // [doubts, tickets]
+                totalTrendsContainer.innerHTML = `
+                    <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">Total Doubts & Tickets</h3>
+                    <div class="flex flex-col items-center mb-6 gap-4">
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Trends for:</h4>
+                            <div id="total-support-type-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2">
+                                <button data-type="totalDoubts" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Total Doubts</button>
+                                <button data-type="totalTickets" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full active">Total Tickets</button>
+                            </div>
+                        </div>
+                        <div id="total-support-timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-2 scale-90">
+                             <button data-days="7" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full active">7 Days</button>
+                             <button data-days="14" class="timeline-btn px-4 py-1.5 text-xs font-semibold rounded-full">14 Days</button>
+                             <button data-days="30" class="timeline-btn px-4 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                        </div>
+                    </div>
+                    <div class="min-h-[300px] sm:min-h-[400px]">
+                        <canvas id="totalSupportLineChartCanvas"></canvas>
+                    </div>
+                    <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                        <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
+                    </div>
+                `;
+                
+                const setupTrendChart = (chartId, canvasId, typeToggleId, timelineToggleId, dataKeys, colors) => {
+                    let chartInstance = null;
+                    let currentDays = 7;
+                    let visibleDatasets = [1, 1];
 
-                const renderSupportTrendChart = () => {
-                    if (supportLineChart) supportLineChart.destroy();
+                    const renderChart = () => {
+                        if (chartInstance) chartInstance.destroy();
 
-                    const allData = dataCache.lmsTrends || [];
-                    const canvas = document.getElementById('supportLineChartCanvas');
-                    const ctx = canvas.getContext('2d');
-                    const isLightMode = document.body.classList.contains('light-mode');
-                    const tickColor = isLightMode ? '#515154' : '#a1a1a6';
+                        const allData = dataCache.lmsTrends || [];
+                        const canvas = document.getElementById(canvasId);
+                        if (!canvas) return;
+                        const ctx = canvas.getContext('2d');
+                        const isLightMode = document.body.classList.contains('light-mode');
+                        const tickColor = isLightMode ? '#515154' : '#a1a1a6';
 
-                    if (allData.length === 0) {
-                          ctx.clearRect(0, 0, canvas.width, canvas.height);
-                          ctx.font = "16px 'Inter', sans-serif";
-                          ctx.fillStyle = tickColor;
-                          ctx.textAlign = "center";
-                          ctx.fillText("No data available to display.", canvas.width / 2, canvas.height / 2);
-                          return;
-                    }
+                        if (allData.length === 0) {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.font = "16px 'Inter', sans-serif";
+                            ctx.fillStyle = tickColor;
+                            ctx.textAlign = "center";
+                            ctx.fillText("No data available to display.", canvas.width / 2, canvas.height / 2);
+                            return;
+                        }
 
-                    const chartDataPoints = allData.slice(-currentDays);
-                    
-                    if (chartDataPoints.length === 0) {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.font = "16px 'Inter', sans-serif";
-                        ctx.fillStyle = tickColor;
-                        ctx.textAlign = "center";
-                        ctx.fillText("No data available for this period.", canvas.width / 2, canvas.height / 2);
-                        return;
-                    }
-                    
-                    const labels = chartDataPoints.map(d => d.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+                        const chartDataPoints = allData.slice(-currentDays);
+                        
+                        if (chartDataPoints.length === 0) {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.font = "16px 'Inter', sans-serif";
+                            ctx.fillStyle = tickColor;
+                            ctx.textAlign = "center";
+                            ctx.fillText("No data available for this period.", canvas.width / 2, canvas.height / 2);
+                            return;
+                        }
+                        
+                        const labels = chartDataPoints.map(d => d.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
 
-                    const isMobile = window.innerWidth < 768;
-                    const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
-                    const bodyFont = "'Inter', sans-serif";
-                    
-                    supportLineChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Open Doubts',
-                                    data: chartDataPoints.map(d => d.doubts),
-                                    borderColor: 'rgb(239, 68, 68)',
-                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                    hidden: !visibleSupportDatasets[0],
-                                    borderWidth: isMobile ? 2 : 3,
-                                    pointRadius: isMobile ? 3 : 5,
-                                    pointHoverRadius: isMobile ? 6 : 8,
-                                    tension: 0.4,
-                                    fill: true,
-                                },
-                                {
-                                    label: 'Open Tickets',
-                                    data: chartDataPoints.map(d => d.tickets),
-                                    borderColor: 'rgb(59, 130, 246)',
-                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                    hidden: !visibleSupportDatasets[1],
-                                    borderWidth: isMobile ? 2 : 3,
-                                    pointRadius: isMobile ? 3 : 5,
-                                    pointHoverRadius: isMobile ? 6 : 8,
-                                    tension: 0.4,
-                                    fill: true,
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    enabled: true,
-                                    mode: 'index', 
-                                    intersect: false,
-                                    backgroundColor: 'rgba(0,0,0,0.8)',
-                                    titleFont: { family: bodyFont, size: 14, weight: 'bold' },
-                                    bodyFont: { family: bodyFont, size: 12 },
-                                    padding: 12,
-                                    cornerRadius: 8,
-                                    displayColors: true,
-                                    callbacks: {
-                                        title: (tooltipItems) => {
-                                            return tooltipItems[0].label;
-                                        },
-                                        label: (context) => `${context.dataset.label}: ${context.raw}`
+                        const isMobile = window.innerWidth < 768;
+                        const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+                        const bodyFont = "'Inter', sans-serif";
+                        
+                        chartInstance = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: dataKeys[0].label,
+                                        data: chartDataPoints.map(d => d[dataKeys[0].key]),
+                                        borderColor: colors[0].border,
+                                        backgroundColor: colors[0].bg,
+                                        hidden: !visibleDatasets[0],
+                                        borderWidth: isMobile ? 2 : 3,
+                                        pointRadius: isMobile ? 3 : 5,
+                                        pointHoverRadius: isMobile ? 6 : 8,
+                                        tension: 0.4,
+                                        fill: true,
+                                    },
+                                    {
+                                        label: dataKeys[1].label,
+                                        data: chartDataPoints.map(d => d[dataKeys[1].key]),
+                                        borderColor: colors[1].border,
+                                        backgroundColor: colors[1].bg,
+                                        hidden: !visibleDatasets[1],
+                                        borderWidth: isMobile ? 2 : 3,
+                                        pointRadius: isMobile ? 3 : 5,
+                                        pointHoverRadius: isMobile ? 6 : 8,
+                                        tension: 0.4,
+                                        fill: true,
                                     }
-                                }
+                                ]
                             },
-                            scales: {
-                                y: {
-                                    min: 0,
-                                    grid: { color: gridColor },
-                                    ticks: { 
-                                        color: tickColor, 
-                                        font: { family: bodyFont },
-                                        callback: function(value) { if (Number.isInteger(value)) { return value; } }
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        enabled: true,
+                                        mode: 'index', 
+                                        intersect: false,
+                                        backgroundColor: 'rgba(0,0,0,0.8)',
+                                        titleFont: { family: bodyFont, size: 14, weight: 'bold' },
+                                        bodyFont: { family: bodyFont, size: 12 },
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        displayColors: true,
+                                        callbacks: {
+                                            title: (tooltipItems) => {
+                                                return tooltipItems[0].label;
+                                            },
+                                            label: (context) => `${context.dataset.label}: ${context.raw}`
+                                        }
                                     }
                                 },
-                                x: {
-                                    type: 'category',
-                                    grid: { display: false },
-                                    ticks: { 
-                                        color: tickColor, 
-                                        font: { family: bodyFont },
-                                        maxRotation: 0,
-                                        minRotation: 0
+                                scales: {
+                                    y: {
+                                        min: 0,
+                                        grid: { color: gridColor },
+                                        ticks: { 
+                                            color: tickColor, 
+                                            font: { family: bodyFont },
+                                            callback: function(value) { if (Number.isInteger(value)) { return value; } }
+                                        }
+                                    },
+                                    x: {
+                                        type: 'category',
+                                        grid: { display: false },
+                                        ticks: { 
+                                            color: tickColor, 
+                                            font: { family: bodyFont },
+                                            maxRotation: 0,
+                                            minRotation: 0
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
+                    };
+                    
+                    const typeToggleContainer = document.getElementById(typeToggleId);
+                    if(typeToggleContainer) {
+                        const typeToggleButtons = typeToggleContainer.querySelectorAll('.timeline-btn');
+                        typeToggleButtons.forEach((btn, index) => {
+                            btn.addEventListener('click', (e) => {
+                                const currentlyVisible = visibleDatasets.filter(v => v === 1).length;
+                                if (currentlyVisible === 1 && btn.classList.contains('active')) {
+                                    return; // Prevent deselecting the last item
+                                }
+                                btn.classList.toggle('active');
+                                visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
+                                renderChart();
+                            });
+                        });
+                    }
+
+                    const timelineToggleContainer = document.getElementById(timelineToggleId);
+                    if(timelineToggleContainer){
+                        const timelineToggleButtons = timelineToggleContainer.querySelectorAll('.timeline-btn');
+                        timelineToggleButtons.forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                timelineToggleButtons.forEach(b => b.classList.remove('active'));
+                                e.target.classList.add('active');
+                                currentDays = parseInt(e.target.dataset.days);
+                                renderChart();
+                            });
+                        });
+                    }
+
+                    renderChart();
+                    return chartInstance;
                 };
-                
-                const typeToggleButtons = trendsContainer.querySelectorAll('#support-type-toggle .timeline-btn');
-                typeToggleButtons.forEach((btn, index) => {
-                    btn.addEventListener('click', (e) => {
-                        const currentlyVisible = visibleSupportDatasets.filter(v => v === 1).length;
-                        if (currentlyVisible === 1 && btn.classList.contains('active')) {
-                            return; // Prevent deselecting the last item
-                        }
-                        btn.classList.toggle('active');
-                        visibleSupportDatasets[index] = visibleSupportDatasets[index] === 1 ? 0 : 1;
-                        renderSupportTrendChart();
-                    });
-                });
 
-                const timelineToggleButtons = trendsContainer.querySelectorAll('#support-timeline-toggle .timeline-btn');
-                timelineToggleButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        timelineToggleButtons.forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                        currentDays = parseInt(e.target.dataset.days);
-                        renderSupportTrendChart();
-                    });
-                });
+                supportLineChart = setupTrendChart(
+                    'supportLineChart',
+                    'supportLineChartCanvas',
+                    'support-type-toggle',
+                    'support-timeline-toggle',
+                    [{label: 'Open Doubts', key: 'openDoubts'}, {label: 'Open Tickets', key: 'openTickets'}],
+                    [{border: 'rgb(239, 68, 68)', bg: 'rgba(239, 68, 68, 0.1)'}, {border: 'rgb(59, 130, 246)', bg: 'rgba(59, 130, 246, 0.1)'}]
+                );
 
-                renderSupportTrendChart();
+                totalSupportLineChart = setupTrendChart(
+                    'totalSupportLineChart',
+                    'totalSupportLineChartCanvas',
+                    'total-support-type-toggle',
+                    'total-support-timeline-toggle',
+                    [{label: 'Total Doubts', key: 'totalDoubts'}, {label: 'Total Tickets', key: 'totalTickets'}],
+                    [{border: 'rgb(245, 158, 11)', bg: 'rgba(245, 158, 11, 0.1)'}, {border: 'rgb(34, 197, 94)', bg: 'rgba(34, 197, 94, 0.1)'}]
+                );
             };
             
             const renderReportsPage = (container) => {
@@ -1943,7 +2008,18 @@
             };
             
             const initialLoad = async () => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+                initialLoadDashboard();
+            };
+            
+            const initialLoadDashboard = async () => {
+                document.querySelector('header').classList.remove('hidden');
+                document.querySelector('main').classList.remove('hidden');
                 loadingOverlay.classList.remove('hidden');
+                
                 dataCache.batchReports = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
                 
                 await switchTab('overview'); 
