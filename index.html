@@ -64,7 +64,7 @@
             --nav-text-hover: #000000;
             --nav-active-bg: #ffffff;
             --nav-active-text: #000000;
-            --sub-box-bg: rgba(120, 120, 128, 0.08);
+            --sub-box-bg: rgba(239, 240, 242, 0.7); /* A more silvery, glassy look */
             --footer-bg: transparent;
             --chart-grid-color: rgba(0, 0, 0, 0.08);
             --chart-tick-color: #86868b;
@@ -229,6 +229,82 @@
             opacity: 1;
             pointer-events: auto;
         }
+
+        /* New Bar Chart Styles */
+        .bar-chart-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+            width: 100%;
+            border-radius: 0.5rem; /* 8px */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .bar-chart-row:hover {
+            background-color: rgba(120, 120, 128, 0.12);
+        }
+        .bar-chart-label {
+            flex-shrink: 0;
+            width: 5rem; /* 80px */
+            text-align: right;
+            font-size: 0.875rem; /* 14px */
+            color: var(--text-muted-color);
+        }
+        .bar-chart-bar-container {
+            flex-grow: 1;
+            background-color: var(--sub-box-bg);
+            border-radius: 9999px;
+            height: 1.75rem; /* 28px */
+            position: relative;
+            overflow: hidden;
+        }
+        .bar-chart-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 9999px;
+            background-color: var(--text-muted-color);
+            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.2s ease-in-out;
+            width: 0; /* Start with 0 width for animation */
+        }
+        .bar-chart-row:hover .bar-chart-bar {
+            filter: brightness(1.15);
+        }
+        .bar-chart-bar.animate-in {
+            width: var(--target-width);
+        }
+
+        .bar-chart-value {
+            font-weight: 600;
+            color: var(--text-color);
+            width: 4rem; /* 64px */
+            text-align: left;
+        }
+        
+        /* New Rating Scale Styles */
+        .rating-scale-container {
+            width: 100%;
+        }
+        .rating-scale-track {
+            height: 0.75rem; /* 12px */
+            background-color: var(--sub-box-bg);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+        .rating-scale-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 0; /* Start with 0 width for animation */
+        }
+        .rating-scale-fill.animate-in {
+            width: var(--target-width);
+        }
+        .rating-scale-fill.good { background: linear-gradient(90deg, #34c759, #30d158); }
+        .rating-scale-fill.medium { background: linear-gradient(90deg, #ff9500, #ff9f0a); }
+        .rating-scale-fill.bad { background: linear-gradient(90deg, #ff3b30, #ff453a); }
+
         
         /* --- Passcode Screen Styles --- */
         #passcode-overlay {
@@ -559,6 +635,67 @@
                 return 'text-[var(--text-color)]';
             };
 
+            const triggerAnimations = (container) => {
+                setTimeout(() => {
+                    container.querySelectorAll('.bar-chart-bar').forEach(bar => {
+                        bar.classList.add('animate-in');
+                    });
+                    container.querySelectorAll('.rating-scale-fill').forEach(fill => {
+                        fill.classList.add('animate-in');
+                    });
+                }, 100);
+            };
+
+            // --- NEW UI Component Generators ---
+            const createBarChartCard = (title, data) => {
+                const numberFormatter = new Intl.NumberFormat('en-US');
+                const values = data.map(d => d.value);
+                const maxValue = Math.max(...values, 1); // Avoid division by zero
+                
+                const rowsHtml = data.map(item => `
+                    <div class="bar-chart-row p-1 rounded-lg">
+                        <div class="bar-chart-label">${item.label}</div>
+                        <div class="bar-chart-bar-container">
+                            <div class="bar-chart-bar" style="--target-width: ${ (item.value / maxValue) * 100 }%;"></div>
+                        </div>
+                        <div class="bar-chart-value">${numberFormatter.format(item.value)}</div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
+                        <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">${title}</h3>
+                        <div class="space-y-3 mt-auto">
+                            ${rowsHtml}
+                        </div>
+                    </div>
+                `;
+            };
+
+            const createRatingScaleCard = (title, icon, rating, totalRatings) => {
+                const ratingValue = parseFloat(rating) || 0;
+                const totalRatingsValue = parseInt(String(totalRatings).replace(/,/g, ''), 10) || 0;
+                let ratingColorClass = 'bad';
+                if (ratingValue >= 4.0) ratingColorClass = 'good';
+                else if (ratingValue >= 3.5) ratingColorClass = 'medium';
+
+                return `
+                    <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
+                        <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${icon}"></i>${title}</h4>
+                        <div class="flex items-center gap-4">
+                            <span class="font-bold text-2xl text-[var(--text-color)]">${ratingValue.toFixed(1)}</span>
+                            <div class="rating-scale-container">
+                                <div class="rating-scale-track">
+                                    <div class="rating-scale-fill ${ratingColorClass}" style="--target-width: ${(ratingValue / 5) * 100}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center text-sm text-[var(--text-muted-color)] -mt-1">${new Intl.NumberFormat('en-US').format(totalRatingsValue)} Ratings</p>
+                    </div>
+                `;
+            };
+
+
             // --- Page Rendering Functions ---
             const renderOverviewPage = (container, allData) => {
                 if (!allData || !allData.daily_metrics || !allData.batch_information || !allData.aad_lms_tickets) {
@@ -569,7 +706,15 @@
                 const batchInfoData = allData.batch_information;
                 const supportInfo = allData.aad_lms_tickets;
                 
-                const getCellValue = (data, row, col) => (data && data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
+                const getCellValue = (data, row, col) => {
+                    const val = (data && data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
+                    return String(val).includes('#REF!') ? 'N/A' : val;
+                };
+
+                const parseNumeric = (val) => {
+                    if (val === 'N/A' || val === null || val === undefined) return 0;
+                    return parseInt(String(val).replace(/,/g, ''), 10) || 0;
+                }
                 
                 const batchInfo = {
                     'Total enrolled students': getCellValue(batchInfoData, 0, 1),
@@ -578,154 +723,138 @@
                     'Average LPS': getCellValue(batchInfoData, 3, 1),
                     'Test Completion %': getCellValue(batchInfoData, 4, 1)
                 };
-                const overviewData = {
-                    'User Analytics': {
-                        'Daily Active Users (DAU)': [
-                            { 'Data Header': 'Web', 'Value': getCellValue(dailyMetrics, 5, 1), Order: 1 },
-                            { 'Data Header': 'Android', 'Value': getCellValue(dailyMetrics, 5, 2), Order: 2 },
-                            { 'Data Header': 'iOS', 'Value': getCellValue(dailyMetrics, 5, 3), Order: 3 }
-                        ],
-                        'Monthly Active Users (MAU)': [
-                            { 'Data Header': 'Web', 'Value': getCellValue(dailyMetrics, 6, 1), Order: 1 },
-                            { 'Data Header': 'Android', 'Value': getCellValue(dailyMetrics, 6, 2), Order: 2 },
-                            { 'Data Header': 'iOS', 'Value': getCellValue(dailyMetrics, 6, 3), Order: 3 }
-                        ]
-                    },
-                    'Student Support': {
-                        'Ask a Doubt': [
-                            { 'Data Header': 'Total Doubts', 'Value': getCellValue(supportInfo, 0, 7), Order: 1 },
-                            { 'Data Header': 'Open Doubts', 'Value': getCellValue(supportInfo, 1, 7), Order: 2 }
-                        ],
-                        'LMS Tickets': [
-                            { 'Data Header': 'Total Tickets', 'Value': getCellValue(supportInfo, 2, 7), Order: 1 },
-                            { 'Data Header': 'Open Tickets', 'Value': getCellValue(supportInfo, 3, 7), Order: 2 }
-                        ]
-                    },
-                    'Batches Information': {} // Special handling below
+
+                const dauData = [
+                    { label: 'Web', value: parseNumeric(getCellValue(dailyMetrics, 5, 1)) },
+                    { label: 'Android', value: parseNumeric(getCellValue(dailyMetrics, 5, 2)) },
+                    { label: 'iOS', value: parseNumeric(getCellValue(dailyMetrics, 5, 3)) }
+                ];
+
+                const mauData = [
+                    { label: 'Web', value: parseNumeric(getCellValue(dailyMetrics, 6, 1)) },
+                    { label: 'Android', value: parseNumeric(getCellValue(dailyMetrics, 6, 2)) },
+                    { label: 'iOS', value: parseNumeric(getCellValue(dailyMetrics, 6, 3)) }
+                ];
+
+                const openSupportData = [
+                    { label: 'Open Doubts', value: parseNumeric(getCellValue(supportInfo, 1, 7)) },
+                    { label: 'Open Tickets', value: parseNumeric(getCellValue(supportInfo, 3, 7)) }
+                ];
+
+                const totalSupportData = [
+                    { 'Data Header': 'Total Doubts', 'Value': getCellValue(supportInfo, 0, 7) },
+                    { 'Data Header': 'Total Tickets', 'Value': getCellValue(supportInfo, 2, 7) }
+                ];
+
+                const createSupportMetricCard = (metric) => `
+                    <div class="metric-card flex-1 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
+                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                        <div class="metric-value text-2xl md:text-3xl font-bold tracking-tight">${metric['Value']}</div>
+                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                    </div>`;
+
+                const userAnalyticsContent = createBarChartCard('Daily Active Users (DAU)', dauData) + createBarChartCard('Monthly Active Users (MAU)', mauData);
+                const supportContent = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        ${createBarChartCard('Open Doubts & Tickets', openSupportData)}
+                        <div class="bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
+                             <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">Total Items</h3>
+                             <div class="flex gap-4 mt-auto">
+                                ${totalSupportData.map(createSupportMetricCard).join('')}
+                             </div>
+                        </div>
+                    </div>
+                `;
+
+                const batchInfoContent = () => {
+                    const generalMetrics = [
+                        { 'Data Header': 'Total Enrolled Students', 'Value': batchInfo['Total enrolled students'], isPerformance: false },
+                        { 'Data Header': 'Live Batches Count', 'Value': batchInfo['Live batches count'], isPerformance: false }
+                    ];
+                    const performanceMetrics = [
+                        { 'Data Header': 'Average Attendance %', 'Value': batchInfo['Average Attendance %'], isPerformance: true },
+                        { 'Data Header': 'Average LPS', 'Value': batchInfo['Average LPS'], isPerformance: true },
+                        { 'Data Header': 'Tests Completion %', 'Value': batchInfo['Test Completion %'], isPerformance: true }
+                    ];
+                    
+                    const createBatchMetricCard = (metric) => {
+                        const colorState = metric.isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
+                        const colorClass = metric.isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
+                        return `<div class="metric-card h-full" data-color-state="${colorState}">
+                            <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center justify-center text-center space-y-2 min-w-0 rounded-3xl h-full">
+                                <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
+                                <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
+                                <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
+                            </div>
+                        </div>`;
+                    };
+                    return `
+                        <div class="space-y-6">
+                            <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
+                                <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">General Information</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    ${generalMetrics.map(metric => createBatchMetricCard(metric)).join('')}
+                                </div>
+                            </div>
+                            <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
+                                <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">Performance Data</h3>
+                                <div class="flex flex-wrap justify-center gap-4 sm:grid sm:grid-cols-3">
+                                     <div class="w-[calc(50%-0.5rem)] sm:w-auto">
+                                        ${createBatchMetricCard(performanceMetrics[0])}
+                                    </div>
+                                     <div class="w-[calc(50%-0.5rem)] sm:w-auto">
+                                        ${createBatchMetricCard(performanceMetrics[1])}
+                                    </div>
+                                     <div class="w-full max-w-[180px] sm:max-w-none sm:w-auto mx-auto sm:mx-0">
+                                        ${createBatchMetricCard(performanceMetrics[2])}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 };
-                let content = '';
-                for (const [title, subBoxes] of Object.entries(overviewData)) {
-                    const isUserAnalytics = title.toLowerCase().includes('user analytics');
-                    const isStudentSupport = title.toLowerCase().includes('student support');
-                    content += `<div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
-                        <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4">
-                            <i class="${getIconForMetric(title)}"></i><span>${title}</span>
-                        </h2>`;
-                    if (title.trim() === 'Batches Information' && batchInfo) {
-                        const generalMetrics = [
-                            { 'Data Header': 'Total Enrolled Students', 'Value': batchInfo['Total enrolled students'], isPerformance: false },
-                            { 'Data Header': 'Live Batches Count', 'Value': batchInfo['Live batches count'], isPerformance: false }
-                        ];
-                        const performanceMetrics = [
-                            { 'Data Header': 'Average Attendance %', 'Value': batchInfo['Average Attendance %'], isPerformance: true },
-                            { 'Data Header': 'Average LPS', 'Value': batchInfo['Average LPS'], isPerformance: true },
-                            { 'Data Header': 'Tests Completion %', 'Value': batchInfo['Test Completion %'], isPerformance: true }
-                        ];
-                        
-                        const createBatchMetricCard = (metric) => {
-                            const colorState = metric.isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
-                            const colorClass = metric.isPerformance ? getPerformanceColorClass(colorState) : 'text-[var(--text-color)]';
-                            return `<div class="metric-card h-full" data-color-state="${colorState}">
-                                <div class="flex-grow flex-shrink-0 p-4 flex flex-col items-center justify-center text-center space-y-2 min-w-0 rounded-3xl h-full">
-                                    <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                    <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric.Value || 'N/A'}</div>
-                                    <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                </div>
-                            </div>`;
-                        };
-                        content += `
-                            <div class="space-y-6">
-                                <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                    <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">General Information</h3>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        ${generalMetrics.map(metric => createBatchMetricCard(metric)).join('')}
-                                    </div>
-                                </div>
-                                <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                    <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">Performance Data</h3>
-                                    <div class="flex flex-wrap justify-center gap-4 sm:grid sm:grid-cols-3">
-                                         <div class="w-[calc(50%-0.5rem)] sm:w-auto">
-                                            ${createBatchMetricCard(performanceMetrics[0])}
-                                        </div>
-                                         <div class="w-[calc(50%-0.5rem)] sm:w-auto">
-                                            ${createBatchMetricCard(performanceMetrics[1])}
-                                        </div>
-                                         <div class="w-full max-w-[180px] sm:max-w-none sm:w-auto mx-auto sm:mx-0">
-                                            ${createBatchMetricCard(performanceMetrics[2])}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else if (title.trim() !== 'Batches Information') {
-                        const chunkedSubBoxes = Object.entries(subBoxes).reduce((resultArray, item, index) => { 
-                            const chunkIndex = Math.floor(index/2);
-                            if(!resultArray[chunkIndex]) { resultArray[chunkIndex] = [] }
-                            resultArray[chunkIndex].push(item);
-                            return resultArray;
-                        }, []);
-                        content += chunkedSubBoxes.map(row => `
-                            <div class="grid grid-cols-1 ${row.length > 1 ? 'md:grid-cols-2' : ''} gap-8">
-                                ${row.map(([subTitle, metrics]) => {
-                                    const cardContainerClasses = isUserAnalytics 
-                                        ? 'grid grid-cols-3 gap-4' 
-                                        : isStudentSupport 
-                                            ? 'grid grid-cols-2 gap-4' 
-                                            : 'flex flex-wrap justify-center gap-4';
-                                    return `
-                                    <div class="sub-box bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl flex flex-col h-full">
-                                        <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center">${subTitle}</h3>
-                                        <div class="card-grid ${cardContainerClasses} mt-auto">
-                                            ${metrics.sort((a, b) => a.Order - b.Order).map(metric => {
-                                                const val = parseInt(metric.Value, 10);
-                                                let colorState = 'neutral';
-                                                let colorClass = 'text-[var(--text-color)]';
-                                                if (metric['Data Header'].toLowerCase().includes('unanswered') || metric['Data Header'].toLowerCase().includes('open')) {
-                                                    colorState = val >= 10 ? 'bad' : 'good';
-                                                    colorClass = getPerformanceColorClass(colorState);
-                                                }
-                                                return `<div class="metric-card" data-color-state="${colorState}">
-                                                    <div class="p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
-                                                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                                                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${metric['Value'] || 'N/A'}</div>
-                                                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                                                    </div>
-                                                </div>`
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                    `
-                                }).join('')}
-                            </div>
-                        `).join('');
-                    }
-                    content += '</div>';
-                }
-                container.innerHTML = `<div class="space-y-12">${content}</div>`;
+
+                container.innerHTML = `
+                    <div class="space-y-12">
+                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                            <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4"><i class="fas fa-users"></i>User Analytics</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">${userAnalyticsContent}</div>
+                        </div>
+                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                            <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4"><i class="fas fa-headset"></i>Student Support</h2>
+                            ${supportContent}
+                        </div>
+                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                            <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4"><i class="fas fa-chalkboard-teacher"></i>Batches Information</h2>
+                            ${batchInfoContent()}
+                        </div>
+                    </div>
+                `;
+                triggerAnimations(container);
             };
 
             const renderDailyMetricsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load daily metrics data."); return; }
-                const getCellValue = (row, col) => (data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
-                
-                const getRatingColor = (rating) => {
-                    const val = parseFloat(rating);
-                    if (isNaN(val)) return 'text-[var(--text-color)]';
-                    return val >= 4 ? 'text-green-500' : 'text-[var(--text-color)]';
+                const getCellValue = (row, col) => {
+                    const val = (data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
+                    return String(val).includes('#REF!') ? 'N/A' : val;
                 };
-                const createPlatformCard = (label, value) => `
-                    <div class="metric-card p-3 rounded-2xl text-center border border-[var(--card-border)] flex-1">
-                        <div class="metric-value text-2xl md:text-3xl font-semibold tracking-tight">${value || 'N/A'}</div>
-                        <div class="text-xs text-[var(--text-muted-color)]">${label}</div>
-                    </div>
-                `;
-                
-                const createRatingCard = (label, value, icon, colorClass = 'text-[var(--text-color)]') => `
-                    <div class="metric-card flex-grow p-4 flex flex-col items-center text-center space-y-2 rounded-3xl" data-color-state="${colorClass.includes('green') ? 'good' : 'neutral'}">
-                        <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
-                        <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${value || 'N/A'}</div>
-                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
-                    </div>`;
+                const parseNumeric = (val) => {
+                    if (val === 'N/A' || val === null || val === undefined) return 0;
+                    return parseInt(String(val).replace(/,/g, ''), 10) || 0;
+                }
+
+                const dauData = [
+                    { label: 'Web', value: parseNumeric(getCellValue(5, 1)) },
+                    { label: 'Android', value: parseNumeric(getCellValue(5, 2)) },
+                    { label: 'iOS', value: parseNumeric(getCellValue(5, 3)) }
+                ];
+                const mauData = [
+                    { label: 'Web', value: parseNumeric(getCellValue(6, 1)) },
+                    { label: 'Android', value: parseNumeric(getCellValue(6, 2)) },
+                    { label: 'iOS', value: parseNumeric(getCellValue(6, 3)) }
+                ];
+
                 const createLmsStatCard = (label, value, icon) => `
                     <div class="metric-card flex-grow p-4 flex flex-col items-center text-center space-y-2 rounded-3xl">
                         <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
@@ -747,46 +876,21 @@
                     <div class="space-y-8">
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-users"></i>Active Users</h3>
-                            <div class="flex flex-col sm:flex-row gap-8">
-                                <div class="bg-[var(--sub-box-bg)] p-4 rounded-xl border border-[var(--card-border)] flex-1">
-                                    <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] mb-4">Daily Active (DAU)</h4>
-                                    <div class="flex justify-center gap-4">
-                                        ${createPlatformCard('Web', getCellValue(5, 1))}
-                                        ${createPlatformCard('Android', getCellValue(5, 2))}
-                                        ${createPlatformCard('iOS', getCellValue(5, 3))}
-                                    </div>
-                                </div>
-                                <div class="bg-[var(--sub-box-bg)] p-4 rounded-xl border border-[var(--card-border)] flex-1">
-                                    <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] mb-4">Monthly Active (MAU)</h4>
-                                    <div class="flex justify-center gap-4">
-                                        ${createPlatformCard('Web', getCellValue(6, 1))}
-                                        ${createPlatformCard('Android', getCellValue(6, 2))}
-                                        ${createPlatformCard('iOS', getCellValue(6, 3))}
-                                    </div>
-                                </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                ${createBarChartCard('Daily Active (DAU)', dauData)}
+                                ${createBarChartCard('Monthly Active (MAU)', mauData)}
                             </div>
                         </div>
                         ${lmsStatsContent}
                         <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Store Ratings</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
-                                    <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('android')}"></i>Android</h4>
-                                    <div class="flex justify-center gap-6">
-                                        ${createRatingCard('Avg. Rating', getCellValue(1, 2), 'fas fa-star', getRatingColor(getCellValue(1, 2)))}
-                                        ${createRatingCard('# of Ratings', getCellValue(2, 2), 'fas fa-user-edit')}
-                                    </div>
-                                </div>
-                                <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
-                                    <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('ios')}"></i>iOS</h4>
-                                    <div class="flex justify-center gap-6">
-                                        ${createRatingCard('Avg. Rating', getCellValue(1, 3), 'fas fa-star', getRatingColor(getCellValue(1, 3)))}
-                                        ${createRatingCard('# of Ratings', getCellValue(2, 3), 'fas fa-user-edit')}
-                                    </div>
-                                </div>
+                                ${createRatingScaleCard('Android', getIconForMetric('android'), getCellValue(1, 2), getCellValue(2, 2))}
+                                ${createRatingScaleCard('iOS', getIconForMetric('ios'), getCellValue(1, 3), getCellValue(2, 3))}
                             </div>
                         </div>
                     </div>`;
+                triggerAnimations(container);
             };
 
             const getSuccessRateColor = (rateStr) => {
@@ -947,7 +1051,6 @@
             };
 
             const renderQuestionRepoPage = (container, accaData, cfaData, overallData) => {
-                // This function now receives separated, pre-processed data objects
                 if (!accaData || !cfaData || !overallData) {
                     showError(container, "Could not load all necessary Question Repository data. Please try refreshing.");
                     return;
@@ -1097,6 +1200,41 @@
                                      <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
                                      <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
                                          <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
+                                     </div>
+                                 </div>
+                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
+                                     <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">CFA Questions Split</h2>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                         <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
+                                             <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
+                                             <div class="flex justify-around items-center gap-4">
+                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                     <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.nonSubjectiveCount}</div>
+                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
+                                                 </div>
+                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                     <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.nonSubjectivePercent}</div>
+                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                         <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
+                                             <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
+                                             <div class="flex justify-around items-center gap-4">
+                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                      <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.subjectiveCount}</div>
+                                                      <div class="text-sm text-[var(--text-muted-color)]">Count</div>
+                                                  </div>
+                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                      <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.subjectivePercent}</div>
+                                                      <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
+                                                  </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                     <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] mt-8 flex justify-center items-center gap-6">
+                                         <h3 class="text-xl sm:text-2xl font-bold">Total Questions</h3>
+                                         <div class="text-4xl sm:text-5xl font-bold">${cfaData.summary.totalQuestions}</div>
                                      </div>
                                  </div>
                              </div>
@@ -1765,7 +1903,8 @@
                     };
                     const cfaData = {
                         summary: {
-                            draft: cfaSheetData[1][7], approved: cfaSheetData[3][7], total: cfaSheetData[4][7], completion: cfaSheetData[5][7]
+                            draft: cfaSheetData[1][7], approved: cfaSheetData[3][7], total: cfaSheetData[4][7], completion: cfaSheetData[5][7],
+                            nonSubjectiveCount: cfaSheetData[7][7], nonSubjectivePercent: cfaSheetData[8][7], subjectiveCount: cfaSheetData[9][7], subjectivePercent: cfaSheetData[10][7], totalQuestions: cfaSheetData[11][7]
                         },
                         daily: parseAsHeaders(cfaSheetData)
                     };
