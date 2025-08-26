@@ -369,14 +369,6 @@
                 justify-content: space-between;
                 gap: 0.5rem;
             }
-            #main-header > div:first-child, #main-header > div:last-child {
-                flex-grow: 0;
-                flex-shrink: 1;
-            }
-            #main-header > div.flex-shrink-0 {
-                flex-grow: 1;
-                margin: 0;
-            }
             #page-header {
                 gap: 0.5rem; /* 8px */
                 justify-content: space-between;
@@ -467,23 +459,26 @@
             <!-- Main Header for Overview/Reports List -->
             <div id="main-header" class="w-full h-full flex items-center justify-between md:justify-center relative">
                 <div class="flex-1 flex justify-start">
-                    <div id="header-greeting" class="opacity-0 transition-opacity duration-500">
+                    <div id="header-greeting" class="hidden md:block opacity-0 transition-opacity duration-500">
                         <h2 id="greeting-text" class="text-xl font-bold text-[var(--text-color)] whitespace-nowrap"></h2>
                         <p id="date-text" class="text-sm text-[var(--text-muted-color)] whitespace-nowrap"></p>
                     </div>
+                    <button id="theme-toggle-mobile" class="md:hidden bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                        <i class="fas fa-sun"></i>
+                    </button>
                 </div>
 
-                <div class="flex-shrink-0 mx-4">
+                <div class="flex-shrink-0 mx-2 md:mx-4">
                      <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
                         <button data-tab="overview" class="nav-item">Overview</button>
                         <button data-tab="reports" class="nav-item">Reports</button>
+                        <button id="theme-toggle-desktop" class="hidden md:flex px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
+                            <i class="fas fa-sun"></i>
+                        </button>
                     </nav>
                 </div>
 
                 <div class="flex-1 flex justify-end items-center gap-2">
-                     <button id="theme-toggle" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
-                         <i class="fas fa-sun"></i>
-                     </button>
                      <button id="main-header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
                          <i class="fas fa-sync-alt"></i>
                      </button>
@@ -558,7 +553,8 @@
             const openSheetButton = document.getElementById('open-sheet-button');
             const headerRefreshButton = document.getElementById('header-refresh-button');
             const mainHeaderRefreshButton = document.getElementById('main-header-refresh-button');
-            const themeToggle = document.getElementById('theme-toggle');
+            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
             const loadingOverlay = document.getElementById('loading-overlay');
             const passcodeOverlay = document.getElementById('passcode-overlay');
             const passcodeContainer = document.getElementById('passcode-container');
@@ -2056,7 +2052,7 @@
                 loadingOverlay.style.display = 'flex';
                 updateGreeting();
 
-                const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500));
+                const minLoadTime = new Promise(resolve => setTimeout(resolve, 2000));
                 const dataFetch = fetchAllData();
 
                 const [_, data] = await Promise.all([minLoadTime, dataFetch]);
@@ -2081,9 +2077,8 @@
                 }
             });
 
-            themeToggle.addEventListener('click', () => {
+            const handleThemeToggle = () => {
                 document.body.classList.toggle('light-mode');
-                // Re-render the current view to update charts with new theme colors
                 const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
                 if (!activeSection) return;
                 const activeTabButton = document.querySelector('.nav-item.active');
@@ -2097,7 +2092,11 @@
                         case 'ask-a-doubt-section': showAskADoubtPage(); break;
                     }
                 }
-            });
+            };
+
+            themeToggleDesktop.addEventListener('click', handleThemeToggle);
+            themeToggleMobile.addEventListener('click', handleThemeToggle);
+
             
             headerBackButton.addEventListener('click', showReportsList);
             
