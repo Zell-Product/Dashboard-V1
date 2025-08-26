@@ -739,12 +739,14 @@
                 const supportInfo = allData.aad_lms_tickets;
                 
                 const getCellValue = (data, row, col) => {
-                    const val = (data && data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
-                    return String(val).includes('#REF!') ? 'N/A' : val;
+                    const val = (data && data[row] && data[row][col] != null) ? data[row][col] : '--';
+                    const valStr = String(val);
+                    if (valStr.includes('#REF!') || valStr.includes('#NAME?')) return '--';
+                    return val;
                 };
 
                 const parseNumeric = (val) => {
-                    if (val === 'N/A' || val === null || val === undefined) return 0;
+                    if (val === '--' || val === null || val === undefined) return 0;
                     return parseInt(String(val).replace(/,/g, ''), 10) || 0;
                 }
                 
@@ -1986,7 +1988,6 @@
                 updateFooterText('batch-reports-section');
                 const batchData = dataCache.batch_information;
                 if (batchData) {
-                    // FIX: Pass the raw data instead of the parsed object
                     renderBatchReportsPage(batchReportsSection, batchData);
                 } else {
                     showError(batchReportsSection, "Failed to fetch batch reports data. Please try again.");
