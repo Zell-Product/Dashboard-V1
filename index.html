@@ -47,30 +47,32 @@
             --medium-hover-tint: rgba(245, 158, 11, 0.15);
             --bad-hover-tint: rgba(239, 68, 68, 0.15);
         }
+
         body.light-mode {
-            /* NEW Light Mode - Apple Inspired */
-            --bg-color: #f0f0f5;
+            /* Redesigned Light Mode - iOS Inspired Glassmorphism */
+            --bg-color: #f7f7f8; /* Base color if gradient fails */
             --text-color: #1d1d1f;
-            --text-muted-color: #6e6e73;
-            --card-bg: rgba(255, 255, 255, 0.6);
-            --card-border: rgba(0, 0, 0, 0.07);
-            --card-hover-bg: rgba(255, 255, 255, 0.8);
-            --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            --header-bg: rgba(247, 247, 247, 0.7);
-            --header-border: rgba(0, 0, 0, 0.1);
-            --icon-color: #000000;
-            --nav-text-color: #515154;
+            --text-muted-color: #86868b;
+            --card-bg: rgba(252, 252, 253, 0.8);
+            --card-border: rgba(255, 255, 255, 0.8); /* Use a light border to catch light */
+            --card-hover-bg: rgba(255, 255, 255, 0.95);
+            --card-hover-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+            --header-bg: rgba(249, 249, 251, 0.85);
+            --header-border: rgba(0, 0, 0, 0.08);
+            --icon-color: #333;
+            --nav-text-color: #555555;
             --nav-text-hover: #000000;
-            --nav-active-bg: #e5e5e7;
+            --nav-active-bg: #ffffff;
             --nav-active-text: #000000;
-            --sub-box-bg: rgba(0,0,0,0.03);
-            --footer-bg: #e5e5e7;
-            --chart-grid-color: rgba(0, 0, 0, 0.1);
-            --chart-tick-color: #515154;
-            --good-hover-tint: rgba(34, 197, 94, 0.1);
-            --medium-hover-tint: rgba(245, 158, 11, 0.1);
-            --bad-hover-tint: rgba(239, 68, 68, 0.1);
+            --sub-box-bg: rgba(120, 120, 128, 0.08);
+            --footer-bg: transparent;
+            --chart-grid-color: rgba(0, 0, 0, 0.08);
+            --chart-tick-color: #86868b;
+            --good-hover-tint: rgba(52, 199, 89, 0.12);
+            --medium-hover-tint: rgba(255, 159, 10, 0.12);
+            --bad-hover-tint: rgba(255, 69, 58, 0.12);
         }
+
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -78,6 +80,10 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.light-mode {
+            background-image: linear-gradient(180deg, #fbfbfd 0%, #f5f6fa 100%);
         }
         
         .main-content::-webkit-scrollbar { width: 8px; }
@@ -122,20 +128,37 @@
             color: var(--nav-text-hover);
             background-color: rgba(255, 255, 255, 0.05);
         }
-        body.light-mode .nav-item:hover { background-color: rgba(0, 0, 0, 0.03); }
+        body.light-mode .nav-item:hover { background-color: rgba(0, 0, 0, 0.04); }
         .nav-item.active {
             background-color: var(--nav-active-bg);
             color: var(--nav-active-text);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
         }
-        .metric-card { border-radius: 1.5rem; transition: all 0.3s ease; border: 1px solid var(--card-border); background-color: var(--card-bg); backdrop-filter: blur(10px); }
+        body.light-mode .nav-item.active {
+             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        body:not(.light-mode) .nav-item.active {
+             box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .metric-card { 
+            border-radius: 1.5rem; 
+            transition: all 0.3s ease; 
+            border: 1px solid var(--card-border); 
+            background-color: var(--card-bg); 
+            backdrop-filter: blur(20px); 
+        }
+        body.light-mode .metric-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+        }
+
         .metric-card:hover {
             background-color: var(--card-hover-bg);
-            border-color: rgba(255, 255, 255, 0.2);
             transform: translateY(-4px) scale(1.03);
             box-shadow: var(--card-hover-shadow);
         }
-        body.light-mode .metric-card:hover { border-color: rgba(0, 0, 0, 0.2); }
+        body.light-mode .metric-card:hover { border-color: rgba(255, 255, 255, 1); }
+        body:not(.light-mode) .metric-card:hover { border-color: rgba(255, 255, 255, 0.2); }
+
         .metric-value { transition: transform 0.3s ease; }
         .metric-card:hover .metric-value { transform: scale(1.1); }
         
@@ -146,7 +169,8 @@
         
         .qrf-scorecard { transition: all 0.3s ease; }
         .qrf-scorecard .value { transition: transform 0.3s ease; }
-        .qrf-scorecard:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .qrf-scorecard:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        body:not(.light-mode) .qrf-scorecard:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         .qrf-scorecard:hover .value { transform: scale(1.05); }
         .qrf-scorecard[data-color-state="good"]:hover { background-color: var(--good-hover-tint); }
         .qrf-scorecard[data-color-state="medium"]:hover { background-color: var(--medium-hover-tint); }
@@ -177,6 +201,9 @@
             background-color: var(--text-color);
             color: var(--bg-color);
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        body:not(.light-mode) .timeline-toggle .timeline-btn.active {
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         .timeline-toggle .timeline-btn:not(.active):hover {
