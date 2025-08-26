@@ -46,7 +46,6 @@
             --good-hover-tint: rgba(34, 197, 94, 0.15);
             --medium-hover-tint: rgba(245, 158, 11, 0.15);
             --bad-hover-tint: rgba(239, 68, 68, 0.15);
-            --bar-chart-bar-color: var(--text-muted-color);
         }
 
         body.light-mode {
@@ -72,7 +71,6 @@
             --good-hover-tint: rgba(52, 199, 89, 0.12);
             --medium-hover-tint: rgba(255, 159, 10, 0.12);
             --bad-hover-tint: rgba(255, 69, 58, 0.12);
-            --bar-chart-bar-color: #333333;
         }
 
         body {
@@ -265,7 +263,7 @@
             top: 0;
             height: 100%;
             border-radius: 9999px;
-            background-color: var(--bar-chart-bar-color);
+            background-color: var(--text-muted-color);
             transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.2s ease-in-out;
             width: 0; /* Start with 0 width for animation */
         }
@@ -367,6 +365,9 @@
             .header-container {
                 min-height: 3.5rem; /* 56px */
             }
+            #main-header {
+                justify-content: space-between;
+            }
             #page-header {
                 gap: 0.5rem; /* 8px */
                 justify-content: space-between;
@@ -374,9 +375,9 @@
             #page-header-center-content {
                 position: absolute;
                 left: 50%;
-                transform: translateX(-58%); /* Nudge further left for more space on the right */
+                transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 11.5rem); /* Add a bit more buffer for right side buttons */
+                max-width: calc(100% - 10rem);
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -384,9 +385,24 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            #navigation-bar { width: auto; flex-grow: 1; margin: 0 0.5rem; }
-            .nav-item { padding: 0.75rem 0.25rem; font-size: 0.8rem; flex-grow: 1; text-align: center; }
-            #theme-toggle { flex-shrink: 0; padding-left: 1rem; padding-right: 1rem; }
+            #navigation-bar { 
+                flex-grow: 1; 
+                margin: 0 0.5rem; 
+            }
+            .nav-item { 
+                padding: 0.75rem 0.25rem; 
+                font-size: 0.8rem; 
+                flex-grow: 1; 
+                text-align: center; 
+            }
+            #theme-toggle, #main-header-refresh-button { 
+                width: 2.75rem; /* 44px */
+                height: 2.75rem; /* 44px */
+                flex-shrink: 0;
+            }
+            #theme-toggle > i {
+                font-size: 1rem;
+            }
             .page-content { padding-top: 1rem; }
             .card-grid { flex-direction: column; }
             .sub-box .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; }
@@ -438,26 +454,32 @@
 
     <!-- Header -->
     <header class="w-full z-50 p-2 md:p-4 flex-shrink-0 hidden">
-        <div class="w-full max-w-7xl mx-auto flex items-center justify-center header-container relative">
+        <div class="w-full max-w-7xl mx-auto flex items-center header-container relative h-full">
             
             <!-- Main Header for Overview/Reports List -->
-            <div id="main-header" class="w-full h-full flex items-center justify-center relative">
-                <div id="header-greeting" class="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-500">
-                    <h2 id="greeting-text" class="text-xl font-bold text-[var(--text-color)]"></h2>
-                    <p id="date-text" class="text-sm text-[var(--text-muted-color)]"></p>
+            <div id="main-header" class="w-full h-full flex items-center justify-between md:justify-center relative">
+                <div class="flex-1 flex justify-start">
+                    <div id="header-greeting" class="opacity-0 transition-opacity duration-500">
+                        <h2 id="greeting-text" class="text-xl font-bold text-[var(--text-color)] whitespace-nowrap"></h2>
+                        <p id="date-text" class="text-sm text-[var(--text-muted-color)] whitespace-nowrap"></p>
+                    </div>
                 </div>
-                <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
-                    <button data-tab="overview" class="nav-item">Overview</button>
-                    <button data-tab="reports" class="nav-item">Reports</button>
-                    <button id="theme-toggle" class="px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
-                        <i class="fas fa-sun"></i>
-                    </button>
-                </nav>
-                 <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
+
+                <div class="flex-shrink-0 mx-4">
+                     <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
+                        <button data-tab="overview" class="nav-item">Overview</button>
+                        <button data-tab="reports" class="nav-item">Reports</button>
+                    </nav>
+                </div>
+
+                <div class="flex-1 flex justify-end items-center gap-2">
+                     <button id="theme-toggle" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                         <i class="fas fa-sun"></i>
+                     </button>
                      <button id="main-header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
                          <i class="fas fa-sync-alt"></i>
                      </button>
-                 </div>
+                </div>
             </div>
 
             <!-- Page-specific Header -->
@@ -939,7 +961,7 @@
                             <h3 class="text-lg font-medium text-[var(--text-muted-color)] uppercase tracking-widest">Success Rate</h3>
                             <div class="text-7xl sm:text-8xl font-bold my-2 tracking-tighter ${successRateColor}">${successRate}</div>
                         </div>
-                         <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                         <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                              <div class="flex flex-col sm:flex-row justify-center mb-6 items-center gap-2 sm:gap-4">
                                  <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">View Previous:</h4>
                                  <div id="timeline-toggle" class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex flex-wrap justify-center gap-1">
@@ -1166,7 +1188,7 @@
                             </div>
                         </div>
                         <div id="cfa-qrf-content" class="qrf-content-section space-y-12 hidden">
-                             <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
+                             <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
                                  <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">CFA Question Status</h2>
                                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
                                      <div class="lg:col-span-1 relative h-60 md:h-72"><canvas id="cfaPieChartCanvas"></canvas></div>
@@ -1246,7 +1268,7 @@
                              </div>
                         </div>
                         <div id="overall-qrf-content" class="qrf-content-section space-y-12 hidden">
-                            <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
+                            <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
                                 <div class="border-b border-[var(--card-border)] pb-4 mb-6 md:mb-8">
                                     <h3 class="text-2xl md:text-3xl font-bold text-center text-[var(--text-color)]">Overall</h3>
                                 </div>
@@ -1563,15 +1585,15 @@
                 `;
                 container.innerHTML = `
                     <div class="space-y-8">
-                         <div class="flex flex-col sm:flex-row gap-8 items-start">
-                             <div class="metric-card sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6 flex-1 w-full">
+                         <div class="metric-card flex flex-col sm:flex-row gap-8 items-start p-6 rounded-3xl">
+                             <div class="sub-box bg-[var(--sub-box-bg)] p-8 border border-[var(--card-border)] rounded-2xl space-y-6 flex-1 w-full">
                                  <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">Ask a Doubt</h3>
                                  <div class="card-grid force-row flex flex-nowrap justify-center gap-4 mt-auto">
                                      ${createMetricCard('Total Doubts', getMetricValue('Total Doubts'), 'fas fa-question-circle')}
                                      ${createMetricCard('Open Doubts', getMetricValue('Open Doubts'), getConditionalIcon(openDoubts, 'fas fa-exclamation-circle', 'fas fa-check-circle'), getConditionalColor(openDoubts), getConditionalState(openDoubts))}
                                  </div>
                              </div>
-                             <div class="metric-card sub-box bg-[var(--card-bg)] backdrop-blur-xl p-8 border border-[var(--card-border)] rounded-3xl space-y-6 flex-1 w-full">
+                             <div class="sub-box bg-[var(--sub-box-bg)] p-8 border border-[var(--card-border)] rounded-2xl space-y-6 flex-1 w-full">
                                  <h3 class="text-xl md:text-2xl font-bold text-[var(--text-color)] opacity-90 text-center flex items-center justify-center gap-3">LMS Tickets</h3>
                                  <div class="card-grid force-row flex flex-nowrap justify-center gap-4 mt-auto">
                                      ${createMetricCard('Total Support Tickets', getMetricValue('Total Support Tickets'), 'fas fa-ticket-alt')}
