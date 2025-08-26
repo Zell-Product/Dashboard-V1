@@ -277,24 +277,24 @@
         @media (max-width: 768px) {
              .header-container {
                  min-height: 3.5rem; /* 56px */
-            }
+           }
              #page-header {
                  gap: 0.5rem; /* 8px */
                  justify-content: space-between;
-            }
+           }
              #page-header-center-content {
                  position: absolute;
                  left: 50%;
                  transform: translateX(-58%); /* Nudge further left for more space on the right */
                  width: auto;
                  max-width: calc(100% - 11.5rem); /* Add a bit more buffer for right side buttons */
-            }
+           }
              #page-header-title {
                  font-size: 1rem; /* text-base */
                  white-space: nowrap;
                  overflow: hidden;
                  text-overflow: ellipsis;
-            }
+           }
              #navigation-bar { width: auto; flex-grow: 1; margin: 0 0.5rem; }
              .nav-item { padding: 0.75rem 0.25rem; font-size: 0.8rem; flex-grow: 1; text-align: center; }
              #theme-toggle { flex-shrink: 0; padding-left: 1rem; padding-right: 1rem; }
@@ -344,7 +344,7 @@
         </div>
     </div>
 
-    <header class="w-full z-50 p-2 md:p-4 flex-shrink-0">
+    <header class="w-full z-50 p-2 md:p-4 flex-shrink-0 hidden">
         <div class="w-full max-w-7xl mx-auto flex items-center justify-center header-container relative">
             
             <div id="main-header" class="w-full h-full flex items-center justify-between md:justify-center relative">
@@ -402,17 +402,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const OVERVIEW_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=2143739256&single=true&output=csv';
-            const DAILY_METRICS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR5ve6vqp96t9mWt-s2DF1vzLPlamk3JskBjjrvEwB-K3HgaVpmYZcnPN11nzKSeFJ0QGa9AsCvGWyE/pub?gid=0&single=true&output=csv';
-            const QUESTION_REPO_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1254961431&single=true&output=csv';
-            const ACCA_DAILY_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=652498444&single=true&output=csv';
-            const CFA_DAILY_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1749523224&single=true&output=csv';
-            const OVERALL_DAILY_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1953325823&single=true&output=csv';
-            const ACCA_SPLIT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQXN3EV-fPaGnr3lC43rx1yFopzMYd4LKV70JA0J_9R-gEbsHJSbNvze-7pKRh199bOU2MIlCPwpiWl/pub?gid=1011528086&single=true&output=csv';
-            const COURSE_CHECKS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo2_1ighNkAxsTHM-9kCcKcOaMHRdojOqI_5wVVHTjJA_K80HdvzHtga5XRwStdlK7sYCbYRxRhGbV/pub?gid=1674961572&single=true&output=csv';
-            const LMS_SUPPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=1975801635&single=true&output=csv';
-            const LMS_TRENDS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSvkNoYVgY9VQ1IjrVblaFTGHt_gOveQHDXmgQcR0o8uF1M7O7iaJdBp6LQf8_h0pjDS8qGhpc4P08e/pub?gid=420305713&single=true&output=csv';
-            const WEEKLY_BATCH_REPORTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9p5Y3pAPNizOEYtkCm4afSajXjCIleDobCAbzQ3-VfSAMD3Mn2VsyCXDQgCZ-RpGtRVqhnxBgU8hE/pub?gid=647223292&single=true&output=csv';
+            const API_URL = "https://script.google.com/macros/s/AKfycbw3af1hFqZ-P9rxaWw4P7eUY47yHC1Iz6lWlHL3PkMRGDSGA3Kmoiy18v5aoaF3MBRjwg/exec";
+            const CORRECT_PASSCODE = '2020';
 
             const SHEET_URLS = {
                 'daily-section': 'https://docs.google.com/spreadsheets/d/17_clxpnwRjQ7qEiR6taISN9eLblZQ-4fr9WB2EqyQeE/edit?usp=sharing',
@@ -422,15 +413,14 @@
                 'batch-reports-section': 'https://docs.google.com/spreadsheets/d/1QjRDyvdsDLTqo2wVuv9nF125z7nxaN2htTh-3o5HQ8A/edit?usp=sharing'
             };
 
-            const dataCache = { overview: null, daily: null, lmsStats: null, questionRepo: null, accaDaily: null, cfaDaily: null, overallDaily: null, accaSplit: null, courseChecks: null, lmsSupport: null, lmsTrends: null, totalLmsTrends: null, batchReports: null };
-            let courseChecksChart = null;
-            let accaPieChart = null, accaLineChart = null, cfaPieChart = null, cfaLineChart = null, overallLineChart = null;
-            let supportLineChart = null;
-            let totalSupportLineChart = null; 
+            const dataCache = {};
+            let chartInstances = {};
+            let chartVisibilityState = {};
 
             const mainContent = document.getElementById('main-content');
             const navButtons = document.querySelectorAll('.nav-item');
             const pageContents = document.querySelectorAll('.page-content');
+            const header = document.querySelector('header');
             const mainHeader = document.getElementById('main-header');
             const headerBackButton = document.getElementById('header-back-button');
             const pageHeader = document.getElementById('page-header');
@@ -446,225 +436,67 @@
             const passcodeDots = document.getElementById('passcode-dots');
             const passcodeError = document.getElementById('passcode-error');
 
-            const parseCSV = (csv) => {
-                if (!csv) return { parsed: [], raw: [] };
-                const lines = csv.replace(/\r/g, '').split('\n').filter(line => line.trim() !== '');
-                if (lines.length < 1) return { parsed: [], raw: lines };
-                const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
-                const data = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i];
-                    const values = line.match(/(?:"[^"]*"|[^,]+)/g) || [];
-                     if (values.length > 0) {
+            async function fetchAllData(forceRefresh = false) {
+                if (Object.keys(dataCache).length > 0 && !forceRefresh) {
+                    console.log("Using cached data.");
+                    return dataCache;
+                }
+                console.log("Fetching new data from API...");
+                
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+                    const data = await response.json();
+                    if (data.error) throw new Error(`API script returned an error: ${data.details || data.error}`);
+                    
+                    Object.keys(dataCache).forEach(key => delete dataCache[key]);
+                    Object.assign(dataCache, data);
+
+                    console.log("Data fetched and cached:", dataCache);
+                    return dataCache;
+                } catch (error) {
+                    console.error("Fatal Error: Could not fetch from Apps Script.", error);
+                    mainContent.innerHTML = `<div class="bg-red-900/50 border border-[var(--card-border)] text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto mt-8"><h3 class="font-bold text-lg mb-2">Connection Error</h3><p>${error.message}</p></div>`;
+                    return null;
+                }
+            }
+
+            function parseAsObject(dataArray, keyColumn = 0, valueColumn = 1) {
+                if (!dataArray || !Array.isArray(dataArray)) return {};
+                return dataArray.reduce((obj, row) => {
+                    if (row && row[keyColumn] && String(row[keyColumn]).trim() !== '') {
+                        obj[String(row[keyColumn]).trim()] = row[valueColumn];
+                    }
+                    return obj;
+                }, {});
+            }
+
+            function parseAsHeaders(dataArray) {
+                 if (!dataArray || !Array.isArray(dataArray) || dataArray.length < 1) return [];
+                let headerRowIndex = -1;
+                for(let i = 0; i < dataArray.length; i++) {
+                    if(Array.isArray(dataArray[i]) && dataArray[i].some(cell => cell !== null && cell !== '')) {
+                        headerRowIndex = i;
+                        break;
+                    }
+                }
+                if(headerRowIndex === -1) return [];
+                const headers = dataArray[headerRowIndex].map(h => String(h).trim());
+                const dataRows = dataArray.slice(headerRowIndex + 1);
+                return dataRows.map(row => {
+                    if(Array.isArray(row) && row.some(cell => cell !== null && cell !== '')) {
                         const obj = {};
                         headers.forEach((header, index) => {
-                            let value = values[index] ? values[index].trim().replace(/"/g, '') : '';
-                            if (value === '#NAME?' || value === '#REF!') value = '...';
-                            obj[header] = value;
+                            if (header) obj[header] = row[index];
                         });
-                        data.push(obj);
+                        return obj;
                     }
-                }
-                return { parsed: data, raw: lines };
-            };
-            
-            const parseSimpleCSV = (csv) => {
-                if (!csv) return {};
-                const metrics = {};
-                const lines = csv.replace(/\r/g, '').split('\n');
-                lines.forEach(line => {
-                    const parts = line.split(',');
-                    if (parts.length >= 2) {
-                        const key = parts[0].trim().replace(/"/g, '');
-                        let value = parts[1].trim().replace(/"/g, '');
-                        if (value === '#NAME?' || value === '#REF!') value = '...';
-                        if (key) metrics[key] = value;
-                    }
-                });
-                return metrics;
-            };
-
-            const parseLmsStatsCSV = (csv) => {
-                if (!csv) return null;
-                const lines = csv.replace(/\r/g, '').split('\n');
-                const getValue = (lineIndex, colIndex) => {
-                    if (lines.length > lineIndex) {
-                        const values = lines[lineIndex].match(/(?:"[^"]*"|[^,]+)/g) || [];
-                        if (values.length > colIndex) {
-                            let value = values[colIndex].trim().replace(/"/g, '').replace(/,/g, '');
-                             if (value === '#NAME?' || value === '#REF!') return '...';
-                            return value;
-                        }
-                    }
-                    return 'N/A';
-                };
-                const totalLearners = getValue(7, 1);
-                const testsTaken = getValue(8, 1);
-
-                return {
-                    totalLearners: !isNaN(parseInt(totalLearners)) ? parseInt(totalLearners).toLocaleString() : totalLearners,
-                    testsTaken: !isNaN(parseInt(testsTaken)) ? parseInt(testsTaken).toLocaleString() : testsTaken,
-                    avgTimeSpent: getValue(10, 1)
-                };
-            };
-
-            const parseBatchReportsCSV = (csv) => {
-                if (!csv) return null;
-                const lines = csv.replace(/\r/g, '').split('\n');
-                
-                const getValue = (rowIndex, colIndex) => {
-                    if (lines.length > rowIndex && lines[rowIndex]) { 
-                        const values = lines[rowIndex].split(',');
-                        if (values.length > colIndex && values[colIndex]) { 
-                            let value = values[colIndex].trim().replace(/"/g, '');
-                            if (value === '#NAME?' || value === '#REF!') return '...';
-                            return value;
-                        }
-                    }
-                    return 'N/A';
-                };
-
-                return {
-                    totalEnrolled: getValue(0, 1),      // Cell B1
-                    liveBatches: getValue(1, 1),        // Cell B2
-                    avgAttendance: getValue(2, 1),      // Cell B3
-                    avgLPS: getValue(3, 1),             // Cell B4
-                    testsCompletion: getValue(4, 1)     // Cell B5
-                };
-            };
-
-            const parseLmsTrendsCSV = (csv) => {
-                if (!csv) return [];
-                const lines = csv.replace(/\r/g, '').split('\n').slice(1);
-                const data = [];
-
-                lines.forEach(line => {
-                    const parts = line.split(',');
-                    if (parts.length >= 3 && parts[0].trim() && parts[1].trim() && parts[2].trim()) {
-                        const dateStr = parts[0].trim().replace(/"/g, '');
-                        const doubtsStr = parts[1].trim();
-                        const ticketsStr = parts[2].trim();
-                        
-                        const dateParts = dateStr.split('/');
-                        if (dateParts.length === 3) {
-                            const date = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
-                            const doubts = parseInt(doubtsStr, 10);
-                            const tickets = parseInt(ticketsStr, 10);
-
-                            if (!isNaN(date.getTime()) && !isNaN(doubts) && !isNaN(tickets)) {
-                                data.push({
-                                    date: date,
-                                    doubts: doubts,
-                                    tickets: tickets
-                                });
-                            }
-                        }
-                    }
-                });
-                
-                data.sort((a, b) => a.date - b.date);
-                return data;
-            };
-
-            const parseTotalLmsTrendsCSV = (csv) => {
-                if (!csv) return [];
-                const lines = csv.replace(/\r/g, '').split('\n').slice(1); 
-                const data = [];
-
-                lines.forEach(line => {
-                    const parts = line.split(',');
-                    if (parts.length >= 5 && parts[0].trim() && parts[3].trim() && parts[4].trim()) {
-                        const dateStr = parts[0].trim().replace(/"/g, '');
-                        const totalDoubtsStr = parts[3].trim();
-                        const totalTicketsStr = parts[4].trim();
-                        
-                        const dateParts = dateStr.split('/');
-                        if (dateParts.length === 3) {
-                            const date = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
-                            const totalDoubts = parseInt(totalDoubtsStr, 10);
-                            const totalTickets = parseInt(totalTicketsStr, 10);
-
-                            if (!isNaN(date.getTime()) && !isNaN(totalDoubts) && !isNaN(totalTickets)) {
-                                data.push({
-                                    date: date,
-                                    totalDoubts: totalDoubts,
-                                    totalTickets: totalTickets
-                                });
-                            }
-                        }
-                    }
-                });
-                
-                data.sort((a, b) => a.date - b.date);
-                return data;
-            };
-
-            const parseAccaSplitCSV = (csv) => {
-                if (!csv) return null;
-                const lines = csv.replace(/\r/g, '').split('\n');
-                const getValue = (lineIndex, colIndex) => {
-                    if (lines.length > lineIndex) {
-                        const values = lines[lineIndex].match(/(?:"[^"]*"|[^,]+)/g) || [];
-                        if (values.length > colIndex) {
-                             let value = values[colIndex].trim().replace(/"/g, '');
-                             if (value === '#NAME?' || value === '#REF!') return '...';
-                             return value;
-                        }
-                    }
-                    return 'N/A';
-                };
-                return {
-                    subjectiveCount: getValue(0, 4),
-                    subjectivePercent: getValue(1, 4),
-                    nonSubjectiveCount: getValue(2, 4),
-                    nonSubjectivePercent: getValue(3, 4),
-                    totalQuestions: getValue(4, 4)
-                };
-            };
-
-            const fetchAndParseData = async (url, parser = parseCSV, retries = 3, delay = 1500) => {
-                for (let i = 0; i < retries; i++) {
-                    try {
-                       const response = await fetch(url);
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        const text = await response.text();
-                        if (text.trim().startsWith('<html') || text.trim().startsWith('<!DOCTYPE')) {
-                            throw new Error("Received an HTML page instead of CSV data. Retrying...");
-                        }
-                        if (text.includes("Sorry, the file you have requested does not exist.")) throw new Error("Data source not found.");
-                        
-                        const parsedData = parser(text);
-
-                        if (parser === parseBatchReportsCSV) {
-                            let needsRetry = false;
-                            for (const key in parsedData) {
-                                if (parsedData[key] === '...') {
-                                    needsRetry = true;
-                                    break;
-                                }
-                            }
-                            if (needsRetry && i < retries - 1) {
-                                console.warn(`Batch data still calculating, retrying in ${delay/1000}s...`);
-                                await new Promise(res => setTimeout(res, delay));
-                                continue;
-                            }
-                        }
-                        
-                        return parsedData;
-                    } catch (error) {
-                        console.error(`Attempt ${i + 1} to fetch from ${url} failed:`, error.message);
-                        if (i < retries - 1) {
-                            await new Promise(res => setTimeout(res, delay * (i + 1)));
-                        } else {
-                            console.error("Could not fetch or parse data after multiple attempts:", error);
-                            return null;
-                        }
-                    }
-                }
-            };
+                    return null;
+                }).filter(Boolean);
+            }
 
             const getIconForMetric = (label) => {
-                const lowerLabel = label.toLowerCase();
+                const lowerLabel = String(label).toLowerCase();
                 if (lowerLabel.includes('enrolled') || lowerLabel.includes('learners')) return 'fas fa-user-graduate';
                 if (lowerLabel.includes('attendance')) return 'fas fa-user-check';
                 if (lowerLabel.includes('lps')) return 'fas fa-chart-line';
@@ -692,7 +524,7 @@
                 if (isNaN(value)) return 'neutral';
                 
                 let thresholds = { bad: 35, medium: 70 };
-                if (label.includes('LPS')) {
+                if (String(label).includes('LPS')) {
                     thresholds = { bad: 35, medium: 75 };
                 }
 
@@ -708,13 +540,54 @@
                 return 'text-[var(--text-color)]';
             };
 
-            const renderOverviewPage = async (container, data, batchData) => {
-                if (!data || !data.parsed || data.parsed.length === 0) { showError(container, "Could not load overview data. It might be temporarily unavailable. Please try refreshing."); return; }
+            const renderOverviewPage = (container, allData) => {
+                if (!allData || !allData.daily_metrics || !allData.batch_information || !allData.aad_lms_tickets) {
+                    showError(container, "Could not load all necessary data for the overview. Please try refreshing or check the individual reports.");
+                    return;
+                }
+
+                const dailyMetrics = allData.daily_metrics;
+                const batchInfoData = allData.batch_information;
+                const supportInfo = allData.aad_lms_tickets;
                 
-                const groupedData = data.parsed.reduce((acc, row) => { const topLevel = row['Top-Level Box']; if (topLevel) { if (!acc[topLevel]) acc[topLevel] = []; acc[topLevel].push(row); } return acc; }, {});
+                const getCellValue = (data, row, col) => (data && data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
                 
+                const batchInfo = {
+                    'Total enrolled students': getCellValue(batchInfoData, 0, 1),
+                    'Live batches count': getCellValue(batchInfoData, 1, 1),
+                    'Average Attendance %': getCellValue(batchInfoData, 2, 1),
+                    'Average LPS': getCellValue(batchInfoData, 3, 1),
+                    'Test Completion %': getCellValue(batchInfoData, 4, 1)
+                };
+
+                const overviewData = {
+                    'User Analytics': {
+                        'Daily Active Users (DAU)': [
+                            { 'Data Header': 'Web', 'Value': getCellValue(dailyMetrics, 5, 1), Order: 1 },
+                            { 'Data Header': 'Android', 'Value': getCellValue(dailyMetrics, 5, 2), Order: 2 },
+                            { 'Data Header': 'iOS', 'Value': getCellValue(dailyMetrics, 5, 3), Order: 3 }
+                        ],
+                        'Monthly Active Users (MAU)': [
+                            { 'Data Header': 'Web', 'Value': getCellValue(dailyMetrics, 6, 1), Order: 1 },
+                            { 'Data Header': 'Android', 'Value': getCellValue(dailyMetrics, 6, 2), Order: 2 },
+                            { 'Data Header': 'iOS', 'Value': getCellValue(dailyMetrics, 6, 3), Order: 3 }
+                        ]
+                    },
+                    'Student Support': {
+                        'Ask a Doubt': [
+                            { 'Data Header': 'Total Doubts', 'Value': getCellValue(supportInfo, 0, 7), Order: 1 },
+                            { 'Data Header': 'Open Doubts', 'Value': getCellValue(supportInfo, 1, 7), Order: 2 }
+                        ],
+                        'LMS Tickets': [
+                            { 'Data Header': 'Total Tickets', 'Value': getCellValue(supportInfo, 2, 7), Order: 1 },
+                            { 'Data Header': 'Open Tickets', 'Value': getCellValue(supportInfo, 3, 7), Order: 2 }
+                        ]
+                    },
+                    'Batches Information': {} // Special handling below
+                };
+
                 let content = '';
-                for (const [title, rows] of Object.entries(groupedData)) {
+                for (const [title, subBoxes] of Object.entries(overviewData)) {
                     const isUserAnalytics = title.toLowerCase().includes('user analytics');
                     const isStudentSupport = title.toLowerCase().includes('student support');
 
@@ -723,15 +596,15 @@
                             <i class="${getIconForMetric(title)}"></i><span>${title}</span>
                         </h2>`;
 
-                    if (title.trim() === 'Batches Information' && batchData) {
+                    if (title.trim() === 'Batches Information' && batchInfo) {
                         const generalMetrics = [
-                            { 'Data Header': 'Total Enrolled Students', 'Value': batchData.totalEnrolled, isPerformance: false },
-                            { 'Data Header': 'Live Batches Count', 'Value': batchData.liveBatches, isPerformance: false }
+                            { 'Data Header': 'Total Enrolled Students', 'Value': batchInfo['Total enrolled students'], isPerformance: false },
+                            { 'Data Header': 'Live Batches Count', 'Value': batchInfo['Live batches count'], isPerformance: false }
                         ];
                         const performanceMetrics = [
-                            { 'Data Header': 'Average Attendance %', 'Value': batchData.avgAttendance, isPerformance: true },
-                            { 'Data Header': 'Average LPS', 'Value': batchData.avgLPS, isPerformance: true },
-                            { 'Data Header': 'Tests Completion %', 'Value': batchData.testsCompletion, isPerformance: true }
+                            { 'Data Header': 'Average Attendance %', 'Value': batchInfo['Average Attendance %'], isPerformance: true },
+                            { 'Data Header': 'Average LPS', 'Value': batchInfo['Average LPS'], isPerformance: true },
+                            { 'Data Header': 'Tests Completion %', 'Value': batchInfo['Test Completion %'], isPerformance: true }
                         ];
                         
                         const createBatchMetricCard = (metric) => {
@@ -771,7 +644,6 @@
                             </div>
                         `;
                     } else if (title.trim() !== 'Batches Information') {
-                        const subBoxes = rows.reduce((acc, row) => { const subHeader = row['Sub-Box Header']; if (subHeader) { if (!acc[subHeader]) acc[subHeader] = []; acc[subHeader].push(row); } return acc; }, {});
                         const chunkedSubBoxes = Object.entries(subBoxes).reduce((resultArray, item, index) => { 
                             const chunkIndex = Math.floor(index/2);
                             if(!resultArray[chunkIndex]) { resultArray[chunkIndex] = [] }
@@ -820,15 +692,11 @@
                 container.innerHTML = `<div class="space-y-12">${content}</div>`;
             };
 
-            const renderDailyMetricsPage = (container, data, lmsStats) => {
+            const renderDailyMetricsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load daily metrics data."); return; }
-                const latestData = data.parsed;
-                const getLatestMetric = (metricName) => { const entries = latestData.filter(d => d['Cumulative'] && d['Cumulative'].trim() === metricName); if (entries.length === 0) return { WEB: 'N/A', ANDROID: 'N/A', iOS: 'N/A' }; return entries.sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0]; };
-                const dau = getLatestMetric('DAU');
-                const mau = getLatestMetric('MAU');
-                const rating = getLatestMetric('Rating');
-                const numRatings = getLatestMetric('Number of Ratings');
 
+                const getCellValue = (row, col) => (data[row] && data[row][col] != null) ? data[row][col] : 'N/A';
+                
                 const getRatingColor = (rating) => {
                     const val = parseFloat(rating);
                     if (isNaN(val)) return 'text-[var(--text-color)]';
@@ -847,8 +715,7 @@
                         <div class="text-2xl text-[var(--icon-color)]"><i class="${icon}"></i></div>
                         <div class="metric-value text-2xl md:text-3xl font-bold ${colorClass} tracking-tight">${value || 'N/A'}</div>
                         <div class="text-xs font-medium text-[var(--text-muted-color)]">${label}</div>
-                    </div>
-                `;
+                    </div>`;
 
                 const createLmsStatCard = (label, value, icon) => `
                     <div class="metric-card flex-grow p-4 flex flex-col items-center text-center space-y-2 rounded-3xl">
@@ -858,19 +725,15 @@
                     </div>
                 `;
                 
-                let lmsStatsContent = '';
-                if(lmsStats) {
-                    lmsStatsContent = `
-                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
-                            <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-chart-bar"></i>LMS Web Stats</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                ${createLmsStatCard('Total Learners', lmsStats.totalLearners, getIconForMetric('learners'))}
-                                ${createLmsStatCard('Tests Taken', lmsStats.testsTaken, getIconForMetric('tests'))}
-                                ${createLmsStatCard('Avg Time Spent', lmsStats.avgTimeSpent, getIconForMetric('time'))}
-                            </div>
+                const lmsStatsContent = `
+                    <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                        <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-chart-bar"></i>LMS Web Stats</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            ${createLmsStatCard('Total Learners', getCellValue(7, 1), getIconForMetric('learners'))}
+                            ${createLmsStatCard('Tests Taken', getCellValue(8, 1), getIconForMetric('tests'))}
+                            ${createLmsStatCard('Avg Time Spent', getCellValue(10, 1), getIconForMetric('time'))}
                         </div>
-                    `;
-                }
+                    </div>`;
 
                 container.innerHTML = `
                     <div class="space-y-8">
@@ -880,17 +743,17 @@
                                 <div class="bg-[var(--sub-box-bg)] p-4 rounded-xl border border-[var(--card-border)] flex-1">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] mb-4">Daily Active (DAU)</h4>
                                     <div class="flex justify-center gap-4">
-                                        ${createPlatformCard('Web', dau.WEB)}
-                                        ${createPlatformCard('Android', dau.ANDROID)}
-                                        ${createPlatformCard('iOS', dau.iOS)}
+                                        ${createPlatformCard('Web', getCellValue(5, 1))}
+                                        ${createPlatformCard('Android', getCellValue(5, 2))}
+                                        ${createPlatformCard('iOS', getCellValue(5, 3))}
                                     </div>
                                 </div>
                                 <div class="bg-[var(--sub-box-bg)] p-4 rounded-xl border border-[var(--card-border)] flex-1">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] mb-4">Monthly Active (MAU)</h4>
                                     <div class="flex justify-center gap-4">
-                                        ${createPlatformCard('Web', mau.WEB)}
-                                        ${createPlatformCard('Android', mau.ANDROID)}
-                                        ${createPlatformCard('iOS', mau.iOS)}
+                                        ${createPlatformCard('Web', getCellValue(6, 1))}
+                                        ${createPlatformCard('Android', getCellValue(6, 2))}
+                                        ${createPlatformCard('iOS', getCellValue(6, 3))}
                                     </div>
                                 </div>
                             </div>
@@ -902,15 +765,15 @@
                                 <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('android')}"></i>Android</h4>
                                     <div class="flex justify-center gap-6">
-                                        ${createRatingCard('Avg. Rating', rating.ANDROID, 'fas fa-star', getRatingColor(rating.ANDROID))}
-                                        ${createRatingCard('# of Ratings', numRatings.ANDROID, 'fas fa-user-edit')}
+                                        ${createRatingCard('Avg. Rating', getCellValue(1, 2), 'fas fa-star', getRatingColor(getCellValue(1, 2)))}
+                                        ${createRatingCard('# of Ratings', getCellValue(2, 2), 'fas fa-user-edit')}
                                     </div>
                                 </div>
                                 <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
                                     <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${getIconForMetric('ios')}"></i>iOS</h4>
                                     <div class="flex justify-center gap-6">
-                                        ${createRatingCard('Avg. Rating', rating.iOS, 'fas fa-star', getRatingColor(rating.iOS))}
-                                        ${createRatingCard('# of Ratings', numRatings.iOS, 'fas fa-user-edit')}
+                                        ${createRatingCard('Avg. Rating', getCellValue(1, 3), 'fas fa-star', getRatingColor(getCellValue(1, 3)))}
+                                        ${createRatingCard('# of Ratings', getCellValue(2, 3), 'fas fa-user-edit')}
                                     </div>
                                 </div>
                             </div>
@@ -935,19 +798,23 @@
             };
 
             const renderCourseChecksPage = (container, data, days = 10) => {
-                if (!data || !data.raw || data.raw.length < 1) { showError(container, "Could not load Course Checks data."); return; }
+                if (!data || !data.parsed || data.parsed.length === 0) { showError(container, "Could not load Course Checks data."); return; }
                 
-                const firstLine = data.raw[0].split(',');
-                const successRate = firstLine.length > 2 ? firstLine[2].trim().replace(/"/g, '') : 'N/A';
+                const successRate = data.raw[0][2] ? String(data.raw[0][2]).trim() : 'N/A';
                 const successRateColor = getSuccessRateColor(successRate);
                 const successRateState = getSuccessRateColorState(successRate);
 
                 const allChartData = data.parsed
-                    .filter(row => row['Pass %'] && row['Pass %'].trim() !== '' && !isNaN(parseFloat(row['Pass %'])))
+                    .filter(row => row['Date'] && row['Pass %'] && String(row['Pass %']).trim() !== '' && !isNaN(parseFloat(row['Pass %'])))
                     .map(row => ({
                         date: row['Date'],
                         value: parseFloat(row['Pass %'])
                     }));
+
+                if (allChartData.length === 0) {
+                    showError(container, "No valid data found for Course Checks chart.");
+                    return;
+                }
                 
                 const chartData = allChartData.slice(-days);
 
@@ -989,8 +856,8 @@
                 });
 
                 const ctx = document.getElementById('courseChecksChartCanvas').getContext('2d');
-                if (courseChecksChart) {
-                    courseChecksChart.destroy();
+                if (chartInstances.courseChecksChart) {
+                    chartInstances.courseChecksChart.destroy();
                 }
 
                 const isLightMode = document.body.classList.contains('light-mode');
@@ -999,7 +866,7 @@
                 const tickColor = isLightMode ? '#515154' : '#a1a1a6';
                 const bodyFont = "'Inter', sans-serif";
 
-                courseChecksChart = new Chart(ctx, {
+                chartInstances.courseChecksChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: chartData.map(d => d.date),
@@ -1078,51 +945,28 @@
                 });
             };
 
-            const renderQuestionRepoPage = (container, summaryData, accaDailyData, cfaDailyData, overallDailyData, accaSplitData) => {
-                if (!summaryData || !accaDailyData || !cfaDailyData || !overallDailyData || !accaSplitData) {
+            const renderQuestionRepoPage = (container, accaData, cfaData, overallData) => {
+                // This function now receives separated, pre-processed data objects
+                if (!accaData || !cfaData || !overallData) {
                     showError(container, "Could not load all necessary Question Repository data. Please try refreshing.");
                     return;
                 }
 
                 const destroyCharts = () => {
-                    if (accaPieChart) accaPieChart.destroy();
-                    if (accaLineChart) accaLineChart.destroy();
-                    if (cfaPieChart) cfaPieChart.destroy();
-                    if (cfaLineChart) cfaLineChart.destroy();
-                    if (overallLineChart) overallLineChart.destroy();
+                    if (chartInstances.accaPieChart) chartInstances.accaPieChart.destroy();
+                    if (chartInstances.accaLineChart) chartInstances.accaLineChart.destroy();
+                    if (chartInstances.cfaPieChart) chartInstances.cfaPieChart.destroy();
+                    if (chartInstances.cfaLineChart) chartInstances.cfaLineChart.destroy();
+                    if (chartInstances.overallLineChart) chartInstances.overallLineChart.destroy();
                 };
                 destroyCharts();
 
-                const qrfStatusRows = summaryData.parsed.filter(r => r['Top-Level Box'] === 'QRF Status');
-                
-                const getValue = (rows, group, header) => {
-                    const row = rows.find(r => r['Sub-Box Header'] === group && r['Data Header'] === header);
-                    return row ? row['Value'] : '0';
-                };
-
-                const accaData = {
-                    draft: getValue(qrfStatusRows, 'ACCA', 'Draft'),
-                    approved: getValue(qrfStatusRows, 'ACCA', 'Approved'),
-                    completion: getValue(qrfStatusRows, 'ACCA', 'Completion')
-                };
-                const cfaData = {
-                    draft: getValue(qrfStatusRows, 'CFA', 'Draft'),
-                    approved: getValue(qrfStatusRows, 'CFA', 'Approved'),
-                    completion: getValue(qrfStatusRows, 'CFA', 'Completion')
-                };
-                const overallData = {
-                    draft: getValue(qrfStatusRows, 'Overall', 'Draft'),
-                    approved: getValue(qrfStatusRows, 'Overall', 'Approved'),
-                    total: getValue(qrfStatusRows, 'Overall', 'Total'),
-                    completion: getValue(qrfStatusRows, 'Overall', 'Completion')
-                };
-
                 const parseNumericValue = (val) => val ? parseInt(String(val).replace(/,/g, ''), 10) : 0;
 
-                const accaDraft = parseNumericValue(accaData.draft);
-                const accaApproved = parseNumericValue(accaData.approved);
-                const cfaDraft = parseNumericValue(cfaData.draft);
-                const cfaApproved = parseNumericValue(cfaData.approved);
+                const accaDraft = parseNumericValue(accaData.summary.draft);
+                const accaApproved = parseNumericValue(accaData.summary.approved);
+                const cfaDraft = parseNumericValue(cfaData.summary.draft);
+                const cfaApproved = parseNumericValue(cfaData.summary.approved);
                 
                 const getCompletionColorState = (valueStr) => {
                     const value = parseFloat(valueStr);
@@ -1155,8 +999,8 @@
                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${accaApproved.toLocaleString()}</span>
                                         </div>
                                    </div>
-                                   <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(accaData.completion)}">
-                                       <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(accaData.completion))} tracking-tighter">${accaData.completion || 'N/A'}</div>
+                                   <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(accaData.summary.completion)}">
+                                       <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(accaData.summary.completion))} tracking-tighter">${accaData.summary.completion || 'N/A'}</div>
                                        <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
                                    </div>
                                </div>
@@ -1184,11 +1028,11 @@
                                             <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
                                             <div class="flex justify-around items-center gap-4">
                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                    <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.nonSubjectiveCount}</div>
+                                                    <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectiveCount}</div>
                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
                                                 </div>
                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                    <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.nonSubjectivePercent}</div>
+                                                    <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectivePercent}</div>
                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
                                                 </div>
                                             </div>
@@ -1197,11 +1041,11 @@
                                             <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
                                             <div class="flex justify-around items-center gap-4">
                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectiveCount}</div>
+                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectiveCount}</div>
                                                      <div class="text-sm text-[var(--text-muted-color)]">Count</div>
                                                  </div>
                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaSplitData.subjectivePercent}</div>
+                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectivePercent}</div>
                                                      <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
                                                  </div>
                                             </div>
@@ -1209,7 +1053,7 @@
                                     </div>
                                     <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] mt-8 flex justify-center items-center gap-6">
                                         <h3 class="text-xl sm:text-2xl font-bold">Total Questions</h3>
-                                        <div class="text-4xl sm:text-5xl font-bold">${accaSplitData.totalQuestions}</div>
+                                        <div class="text-4xl sm:text-5xl font-bold">${accaData.summary.totalQuestions}</div>
                                     </div>
                                 </div>
                             </div>
@@ -1236,8 +1080,8 @@
                                              <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaApproved.toLocaleString()}</span>
                                          </div>
                                      </div>
-                                     <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.completion)}">
-                                         <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.completion))} tracking-tighter">${cfaData.completion || 'N/A'}</div>
+                                     <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.summary.completion)}">
+                                         <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.summary.completion))} tracking-tighter">${cfaData.summary.completion || 'N/A'}</div>
                                          <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
                                      </div>
                                  </div>
@@ -1270,19 +1114,19 @@
                                     <div class="space-y-4">
                                         <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--card-border)]">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
-                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.draft || 'N/A'}</span>
+                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.summary.draft || 'N/A'}</span>
                                         </div>
                                         <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--card-border)]">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
-                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.approved || 'N/A'}</span>
+                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.summary.approved || 'N/A'}</span>
                                         </div>
                                         <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--card-border)]">
                                             <span class="text-lg font-medium text-[var(--text-muted-color)]">Total</span>
-                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.total || 'N/A'}</span>
+                                            <span class="value text-2xl md:text-3xl font-semibold text-[var(--text-color)]">${overallData.summary.total || 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-6 rounded-3xl text-center border border-transparent" data-color-state="${getCompletionColorState(overallData.completion)}">
-                                        <div class="value text-6xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(overallData.completion))} tracking-tighter">${overallData.completion || 'N/A'}</div>
+                                    <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-6 rounded-3xl text-center border border-transparent" data-color-state="${getCompletionColorState(overallData.summary.completion)}">
+                                        <div class="value text-6xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(overallData.summary.completion))} tracking-tighter">${overallData.summary.completion || 'N/A'}</div>
                                         <div class="text-xl text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
                                 </div>
@@ -1356,15 +1200,15 @@
                         }]
                     });
                 };
-                accaPieChart = renderPieChart('accaPieChartCanvas', [accaDraft, accaApproved], accaDraft + accaApproved);
-                cfaPieChart = renderPieChart('cfaPieChartCanvas', [cfaDraft, cfaApproved], cfaDraft + cfaApproved);
+                chartInstances.accaPieChart = renderPieChart('accaPieChartCanvas', [accaDraft, accaApproved], accaDraft + accaApproved);
+                chartInstances.cfaPieChart = renderPieChart('cfaPieChartCanvas', [cfaDraft, cfaApproved], cfaDraft + cfaApproved);
                 
                 const renderLineChart = (canvasId, dailyData, days, visibleDatasets) => {
                     const isMobile = window.innerWidth < 768;
                     
-                    const chartData = dailyData.parsed
+                    const chartData = dailyData
                         .filter(d => {
-                            if (!d.Date || !d.Draft || !d.Approved) return false;
+                            if (!d.Date || d.Draft == null || d.Approved == null || d.Draft === '' || d.Approved === '') return false;
                             const itemDate = new Date(d.Date);
                             return !isNaN(itemDate.getTime());
                         })
@@ -1448,15 +1292,15 @@
                 };
                 
                  const calculateNiceStep = (range, targetSteps) => {
-                         if (range === 0) return 1;
-                         const rawStep = range / targetSteps;
-                         const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-                         const residual = rawStep / magnitude;
-                         if (residual > 5) return 10 * magnitude;
-                         if (residual > 2) return 5 * magnitude;
-                         if (residual > 1) return 2 * magnitude;
-                         return magnitude;
-                };
+                     if (range === 0) return 1;
+                     const rawStep = range / targetSteps;
+                     const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+                     const residual = rawStep / magnitude;
+                     if (residual > 5) return 10 * magnitude;
+                     if (residual > 2) return 5 * magnitude;
+                     if (residual > 1) return 2 * magnitude;
+                     return magnitude;
+                 };
 
                 const setupSubPage = (chartType, dailyData) => {
                     const canvasId = `${chartType}LineChartCanvas`;
@@ -1476,9 +1320,9 @@
                         });
                         chartInstance.update();
 
-                        if (chartType === 'acca') accaLineChart = chartInstance;
-                        else if (chartType === 'cfa') cfaLineChart = chartInstance;
-                        else if (chartType === 'overall') overallLineChart = chartInstance;
+                        if (chartType === 'acca') chartInstances.accaLineChart = chartInstance;
+                        else if (chartType === 'cfa') chartInstances.cfaLineChart = chartInstance;
+                        else if (chartType === 'overall') chartInstances.overallLineChart = chartInstance;
 
 
                         legendContainer.innerHTML = '';
@@ -1493,7 +1337,7 @@
                                 if (totalVisible === 1 && isCurrentlyVisible) {
                                     return;
                                 }
-                                visibleDatasets[index] = visibleDatasets[index] === 1 ? 0 : 1;
+                                visibleDatasets[index] = isCurrentlyVisible ? 0 : 1;
                                 updateChart();
                             };
                             legendContainer.appendChild(button);
@@ -1513,23 +1357,23 @@
                     timelineToggle.querySelector(`[data-days="${currentDays}"]`)?.classList.add('active');
                     updateChart();
                 };
-                setupSubPage('acca', accaDailyData);
-                setupSubPage('cfa', cfaDailyData);
-                setupSubPage('overall', overallDailyData);
+                setupSubPage('acca', accaData.daily);
+                setupSubPage('cfa', cfaData.daily);
+                setupSubPage('overall', overallData.daily);
             };
 
             const renderBatchReportsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Batch Reports data."); return; }
 
                 const generalData = [
-                    { 'Data Header': 'Total Enrolled Students', 'Value': data.totalEnrolled },
-                    { 'Data Header': 'Live Batches Count', 'Value': data.liveBatches }
+                    { 'Data Header': 'Total Enrolled Students', 'Value': data['Total enrolled students'] },
+                    { 'Data Header': 'Live Batches Count', 'Value': data['Live batches count'] }
                 ];
 
                 const performanceData = [
-                    { 'Data Header': 'Average Attendance %', 'Value': data.avgAttendance },
-                    { 'Data Header': 'Average LPS', 'Value': data.avgLPS },
-                    { 'Data Header': 'Tests Completion %', 'Value': data.testsCompletion }
+                    { 'Data Header': 'Average Attendance %', 'Value': data['Average Attendance %'] },
+                    { 'Data Header': 'Average LPS', 'Value': data['Average LPS'] },
+                    { 'Data Header': 'Tests Completion %', 'Value': data['Test Completion %'] }
                 ];
 
                 const createMetricCard = (metric, isPerformance = false) => {
@@ -1569,9 +1413,7 @@
             const renderAskADoubtPage = (container, summaryData, trendsData, totalTrendsData) => {
                 if (!summaryData) { showError(container, "Could not load Support data."); return; }
                 
-                const metrics = summaryData; 
-                
-                const getMetricValue = (key) => metrics[key] || 'N/A';
+                const getMetricValue = (key) => summaryData[key] || 'N/A';
                 const openDoubts = parseInt(getMetricValue('Open Doubts'), 10);
                 const openTickets = parseInt(getMetricValue('Open Support Tickets'), 10);
 
@@ -1621,8 +1463,8 @@
                     </div>
                 `;
 
-                if (supportLineChart) supportLineChart.destroy();
-                if (totalSupportLineChart) totalSupportLineChart.destroy();
+                if (chartInstances.supportLineChart) chartInstances.supportLineChart.destroy();
+                if (chartInstances.totalSupportLineChart) chartInstances.totalSupportLineChart.destroy();
 
                 const trendsContainer = container.querySelector('#support-trends-section');
                 if (!trendsData) {
@@ -1692,13 +1534,13 @@
 
                 let chartInstance;
                 if (type === 'support') {
-                    if (supportLineChart) supportLineChart.destroy();
+                    if (chartInstances.supportLineChart) chartInstances.supportLineChart.destroy();
                 } else {
-                    if (totalSupportLineChart) totalSupportLineChart.destroy();
+                    if (chartInstances.totalSupportLineChart) chartInstances.totalSupportLineChart.destroy();
                 }
 
                 let currentDays = 7;
-                let visibleDatasets = datasetConfigs.map(() => 1);
+                let visibleDatasets = [1, 1];
 
                 const renderChart = () => {
                     if (chartInstance) chartInstance.destroy();
@@ -1768,8 +1610,8 @@
                         }
                     });
 
-                    if (type === 'support') supportLineChart = chartInstance;
-                    else totalSupportLineChart = chartInstance;
+                    if (type === 'support') chartInstances.supportLineChart = chartInstance;
+                    else chartInstances.totalSupportLineChart = chartInstance;
                 };
 
                 const updateLegend = () => {
@@ -1874,94 +1716,42 @@
                 updateFooterText(`${tabId}-section`);
 
                 if (tabId === 'overview') {
-                    if (!dataCache.overview || !dataCache.batchReports) {
-                        showLoading(activeContent);
-                        const [overviewData, batchData] = await Promise.all([
-                            dataCache.overview ? Promise.resolve(dataCache.overview) : fetchAndParseData(OVERVIEW_URL),
-                            dataCache.batchReports ? Promise.resolve(dataCache.batchReports) : fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV)
-                        ]);
-                        
-                        if (overviewData && batchData) {
-                            dataCache.overview = overviewData;
-                            dataCache.batchReports = batchData;
-                            await renderOverviewPage(activeContent, dataCache.overview, dataCache.batchReports);
-                        } else {
-                            showError(activeContent, "Failed to fetch overview data. Please try again.");
-                        }
-                    } else {
-                        await renderOverviewPage(activeContent, dataCache.overview, dataCache.batchReports);
-                    }
+                    renderOverviewPage(activeContent, dataCache);
                 } else if (tabId === 'reports') {
                     renderReportsPage(document.getElementById('reports-section'));
                 }
             };
 
-            const showDailyMetrics = async () => {
+            const showDailyMetrics = () => {
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const dailySection = document.getElementById('daily-section');
                 dailySection.classList.remove('hidden');
                 setPageHeader('LMS Web & App Metrics', SHEET_URLS['daily-section']);
                 updateFooterText('daily-section');
                 
-                const needsDailyFetch = !dataCache.daily;
-                const needsLmsFetch = !dataCache.lmsStats;
-
-                if (needsDailyFetch || needsLmsFetch || !dataCache.overview) {
-                    showLoading(dailySection);
-                    const [dailyData, lmsStatsData, overviewData] = await Promise.all([
-                        needsDailyFetch ? fetchAndParseData(DAILY_METRICS_URL) : Promise.resolve(dataCache.daily),
-                        needsLmsFetch ? fetchAndParseData(DAILY_METRICS_URL, parseLmsStatsCSV) : Promise.resolve(dataCache.lmsStats),
-                        !dataCache.overview ? fetchAndParseData(OVERVIEW_URL) : Promise.resolve(dataCache.overview)
-                    ]);
-                    
-                    if (dailyData && lmsStatsData && overviewData) {
-                        dataCache.daily = dailyData;
-                        dataCache.lmsStats = lmsStatsData;
-                        dataCache.overview = overviewData; 
-                        
-                        const overviewMauRow = dataCache.overview.parsed.find(row =>
-                            row['Top-Level Box'] === 'User Analytics' &&
-                            row['Sub-Box Header'] === 'Monthly Active Users (MAU)' &&
-                            row['Data Header'] === 'iOS'
-                        );
-
-                        if (overviewMauRow && overviewMauRow['Value']) {
-                            const mauEntry = dataCache.daily.parsed.find(d => d['Cumulative'] && d['Cumulative'].trim() === 'MAU');
-                            if (mauEntry) {
-                                mauEntry.iOS = overviewMauRow['Value'];
-                            }
-                        }
-
-                        renderDailyMetricsPage(dailySection, dataCache.daily, dataCache.lmsStats);
-                    } else {
-                        showError(dailySection, "Failed to fetch daily metrics data. Please try again.");
-                    }
+                const dailyMetricsData = dataCache.daily_metrics;
+                if (dailyMetricsData) {
+                    renderDailyMetricsPage(dailySection, dailyMetricsData);
                 } else {
-                    renderDailyMetricsPage(dailySection, dataCache.daily, dataCache.lmsStats);
+                    showError(dailySection, "Daily metrics data not found.");
                 }
             };
 
-            const showCourseChecksPage = async () => {
+            const showCourseChecksPage = () => {
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const courseChecksSection = document.getElementById('course-checks-section');
                 courseChecksSection.classList.remove('hidden');
                 setPageHeader('LMS Checks', SHEET_URLS['course-checks-section']);
                 updateFooterText('course-checks-section');
-                if (!dataCache.courseChecks) {
-                    showLoading(courseChecksSection);
-                    const newData = await fetchAndParseData(COURSE_CHECKS_URL);
-                     if (newData) {
-                        dataCache.courseChecks = newData;
-                        renderCourseChecksPage(courseChecksSection, dataCache.courseChecks);
-                    } else {
-                        showError(courseChecksSection, "Failed to fetch LMS checks data. Please try again.");
-                    }
+                const courseChecksData = dataCache.lms_course_checks;
+                if (courseChecksData) {
+                    renderCourseChecksPage(courseChecksSection, { parsed: parseAsHeaders(courseChecksData), raw: courseChecksData });
                 } else {
-                    renderCourseChecksPage(courseChecksSection, dataCache.courseChecks);
+                    showError(courseChecksSection, "LMS checks data not found.");
                 }
             };
 
-            const showQuestionRepo = async () => {
+            const showQuestionRepo = () => {
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const questionRepoSection = document.getElementById('question-repo-section');
                 questionRepoSection.classList.remove('hidden');
@@ -2001,84 +1791,71 @@
                     }
                 });
 
-                const needsFetch = !dataCache.questionRepo || !dataCache.accaDaily || !dataCache.cfaDaily || !dataCache.overallDaily || !dataCache.accaSplit;
-                if (needsFetch) {
-                    showLoading(questionRepoSection);
-                    const [summaryData, accaDailyData, cfaDailyData, overallDailyData, accaSplitData] = await Promise.all([
-                        fetchAndParseData(QUESTION_REPO_URL),
-                        fetchAndParseData(ACCA_DAILY_URL),
-                        fetchAndParseData(CFA_DAILY_URL),
-                        fetchAndParseData(OVERALL_DAILY_URL),
-                        fetchAndParseData(ACCA_SPLIT_URL, parseAccaSplitCSV)
-                    ]);
+                const accaSheetData = dataCache.qrf_acca;
+                const cfaSheetData = dataCache.qrf_cfa;
+                const overallSheetData = dataCache.qrf_overall;
 
-                    if (summaryData && accaDailyData && cfaDailyData && overallDailyData && accaSplitData) {
-                        dataCache.questionRepo = summaryData;
-                        dataCache.accaDaily = accaDailyData;
-                        dataCache.cfaDaily = cfaDailyData;
-                        dataCache.overallDaily = overallDailyData;
-                        dataCache.accaSplit = accaSplitData;
-                        renderQuestionRepoPage(questionRepoSection, summaryData, accaDailyData, cfaDailyData, overallDailyData, accaSplitData);
-                    } else {
-                        showError(questionRepoSection, "Failed to fetch one or more data sources. Please try again.");
-                    }
+                if (accaSheetData && cfaSheetData && overallSheetData) {
+                    const accaData = {
+                        summary: {
+                            draft: accaSheetData[1][7], approved: accaSheetData[3][7], total: accaSheetData[4][7], completion: accaSheetData[5][7],
+                            subjectiveCount: accaSheetData[6][7], subjectivePercent: accaSheetData[7][7], nonSubjectiveCount: accaSheetData[8][7], nonSubjectivePercent: accaSheetData[9][7], totalQuestions: accaSheetData[10][7]
+                        },
+                        daily: parseAsHeaders(accaSheetData)
+                    };
+                    const cfaData = {
+                        summary: {
+                            draft: cfaSheetData[1][7], approved: cfaSheetData[3][7], total: cfaSheetData[4][7], completion: cfaSheetData[5][7]
+                        },
+                        daily: parseAsHeaders(cfaSheetData)
+                    };
+                    const overallData = {
+                        summary: {
+                            draft: overallSheetData[1][7], approved: overallSheetData[2][7], total: overallSheetData[3][7], completion: overallSheetData[4][7]
+                        },
+                        daily: parseAsHeaders(overallSheetData)
+                    };
+                    renderQuestionRepoPage(questionRepoSection, accaData, cfaData, overallData);
                 } else {
-                     renderQuestionRepoPage(questionRepoSection, dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.overallDaily, dataCache.accaSplit);
+                    showError(questionRepoSection, "Failed to find QRF data. Please try again.");
                 }
                 switchQrfTab('acca');
             };
 
-            const showBatchReportsPage = async () => {
+            const showBatchReportsPage = () => {
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const batchReportsSection = document.getElementById('batch-reports-section');
                 batchReportsSection.classList.remove('hidden');
                 setPageHeader('Batch Reports', SHEET_URLS['batch-reports-section']);
                 updateFooterText('batch-reports-section');
-
-                if (!dataCache.batchReports) {
-                    showLoading(batchReportsSection);
-                    const batchData = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
-
-                    if (batchData) {
-                        dataCache.batchReports = batchData;
-                        renderBatchReportsPage(batchReportsSection, dataCache.batchReports);
-                    } else {
-                        showError(batchReportsSection, "Failed to fetch batch reports data. Please try again.");
-                    }
+                const batchData = dataCache.batch_information;
+                if (batchData) {
+                    renderBatchReportsPage(batchReportsSection, parseAsObject(batchData));
                 } else {
-                    renderBatchReportsPage(batchReportsSection, dataCache.batchReports);
+                    showError(batchReportsSection, "Failed to fetch batch reports data. Please try again.");
                 }
             };
 
-            const showAskADoubtPage = async () => {
+            const showAskADoubtPage = () => {
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const askADoubtSection = document.getElementById('ask-a-doubt-section');
                 askADoubtSection.classList.remove('hidden');
                 setPageHeader('LMS Support', SHEET_URLS['ask-a-doubt-section']);
                 updateFooterText('ask-a-doubt-section');
                 
-                const needsSummaryFetch = !dataCache.lmsSupport;
-                const needsTrendsFetch = !dataCache.lmsTrends;
-                const needsTotalTrendsFetch = !dataCache.totalLmsTrends; 
+                const supportData = dataCache.aad_lms_tickets;
 
-                if (needsSummaryFetch || needsTrendsFetch || needsTotalTrendsFetch) {
-                    showLoading(askADoubtSection);
-                    const [summaryData, trendsData, totalTrendsData] = await Promise.all([
-                        needsSummaryFetch ? fetchAndParseData(LMS_SUPPORT_URL, parseSimpleCSV) : Promise.resolve(dataCache.lmsSupport),
-                        needsTrendsFetch ? fetchAndParseData(LMS_TRENDS_URL, parseLmsTrendsCSV) : Promise.resolve(dataCache.lmsTrends),
-                        needsTotalTrendsFetch ? fetchAndParseData(LMS_TRENDS_URL, parseTotalLmsTrendsCSV) : Promise.resolve(dataCache.totalLmsTrends)
-                    ]);
-                    
-                    if (summaryData && trendsData && totalTrendsData) {
-                        dataCache.lmsSupport = summaryData;
-                        dataCache.lmsTrends = trendsData;
-                        dataCache.totalLmsTrends = totalTrendsData;
-                        renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport, dataCache.lmsTrends, dataCache.totalLmsTrends);
-                    } else {
-                        showError(askADoubtSection, "Failed to fetch LMS support data. Please try again.");
-                    }
+                if (supportData) {
+                    renderAskADoubtPage(askADoubtSection, 
+                        {
+                            'Total Doubts': supportData[0][7], 'Open Doubts': supportData[1][7],
+                            'Total Support Tickets': supportData[2][7], 'Open Support Tickets': supportData[3][7]
+                        },
+                        supportData.slice(1).map(row => ({ date: new Date(row[0]), doubts: row[1], tickets: row[2] })).filter(d => !isNaN(d.date.getTime()) && d.doubts !== '' && d.tickets !== ''),
+                        supportData.slice(1).map(row => ({ date: new Date(row[0]), totalDoubts: row[3], totalTickets: row[4] })).filter(d => !isNaN(d.date.getTime()) && d.totalDoubts !== '' && d.totalTickets !== '')
+                    );
                 } else {
-                    renderAskADoubtPage(askADoubtSection, dataCache.lmsSupport, dataCache.lmsTrends, dataCache.totalLmsTrends);
+                    showError(askADoubtSection, "Failed to fetch LMS support data. Please try again.");
                 }
             };
             
@@ -2092,40 +1869,46 @@
             const refreshData = async () => {
                 const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
                 if (!activeSection) return;
+
+                showLoading(activeSection);
+                
+                await fetchAllData(true);
                 
                 const activeTabButton = document.querySelector('.nav-item.active');
                 const mainTabId = activeTabButton ? activeTabButton.dataset.tab : null;
 
                 if (mainTabId === 'overview' || activeSection.id === 'overview-section') {
-                    dataCache.overview = null;
-                    dataCache.batchReports = null;
                     await switchTab('overview');
                 } else if (mainTabId === 'reports') {
                     switch(activeSection.id) {
-                        case 'batch-reports-section': dataCache.batchReports = null; await showBatchReportsPage(); break;
-                        case 'daily-section': dataCache.daily = null; dataCache.lmsStats = null; await showDailyMetrics(); break;
-                        case 'course-checks-section': dataCache.courseChecks = null; await showCourseChecksPage(); break;
-                        case 'question-repo-section': dataCache.questionRepo = null; dataCache.accaDaily = null; dataCache.cfaDaily = null; dataCache.overallDaily = null; dataCache.accaSplit = null; await showQuestionRepo(); break;
-                        case 'ask-a-doubt-section': dataCache.lmsSupport = null; dataCache.lmsTrends = null; dataCache.totalLmsTrends = null; await showAskADoubtPage(); break;
+                        case 'batch-reports-section': showBatchReportsPage(); break;
+                        case 'daily-section': showDailyMetrics(); break;
+                        case 'course-checks-section': showCourseChecksPage(); break;
+                        case 'question-repo-section': showQuestionRepo(); break;
+                        case 'ask-a-doubt-section': showAskADoubtPage(); break;
+                        default: showReportsList();
                     }
                 }
             };
             
             const initialLoad = async () => {
                 loadingOverlay.style.opacity = '1';
-                loadingOverlay.classList.remove('pointer-events-none');
-                
-                dataCache.overview = await fetchAndParseData(OVERVIEW_URL);
-                dataCache.batchReports = await fetchAndParseData(WEEKLY_BATCH_REPORTS_URL, parseBatchReportsCSV);
-                
-                await switchTab('overview'); 
-                renderReportsPage(document.getElementById('reports-section'));
-                updateFooterText('overview-section');
+                loadingOverlay.style.pointerEvents = 'auto';
+                loadingOverlay.style.display = 'flex';
 
+                const data = await fetchAllData();
+                if(data){
+                    header.classList.remove('hidden');
+                    await switchTab('overview'); 
+                    renderReportsPage(document.getElementById('reports-section'));
+                    updateFooterText('overview-section');
+                }
+                
                 loadingOverlay.style.opacity = '0';
                 setTimeout(() => {
+                    loadingOverlay.style.pointerEvents = 'none';
                     loadingOverlay.style.display = 'none';
-                }, 300); 
+                }, 500);
             };
 
             navButtons.forEach(button => {
@@ -2136,15 +1919,21 @@
 
             themeToggle.addEventListener('click', () => {
                 document.body.classList.toggle('light-mode');
-                const activeSectionId = Array.from(pageContents).find(s => !s.classList.contains('hidden'))?.id;
-                if (activeSectionId === 'course-checks-section' && dataCache.courseChecks) {
-                    renderCourseChecksPage(document.getElementById('course-checks-section'), dataCache.courseChecks);
-                }
-                if (activeSectionId === 'question-repo-section' && dataCache.questionRepo) {
-                    renderQuestionRepoPage(document.getElementById('question-repo-section'), dataCache.questionRepo, dataCache.accaDaily, dataCache.cfaDaily, dataCache.overallDaily, dataCache.accaSplit);
-                }
-                if (activeSectionId === 'ask-a-doubt-section' && dataCache.lmsSupport) {
-                    renderAskADoubtPage(document.getElementById('ask-a-doubt-section'), dataCache.lmsSupport, dataCache.lmsTrends, dataCache.totalLmsTrends);
+                // Re-render the current view to update charts with new theme colors
+                const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
+                if (!activeSection) return;
+
+                const activeTabButton = document.querySelector('.nav-item.active');
+                const mainTabId = activeTabButton ? activeTabButton.dataset.tab : null;
+
+                if (mainTabId === 'reports') {
+                     switch(activeSection.id) {
+                        case 'batch-reports-section': showBatchReportsPage(); break;
+                        case 'daily-section': showDailyMetrics(); break;
+                        case 'course-checks-section': showCourseChecksPage(); break;
+                        case 'question-repo-section': showQuestionRepo(); break;
+                        case 'ask-a-doubt-section': showAskADoubtPage(); break;
+                    }
                 }
             });
             
@@ -2214,8 +2003,6 @@
                     if (currentPasscode === correctPasscode) {
                         passcodeDots.querySelectorAll('.passcode-dot').forEach(dot => dot.classList.add('success'));
                         
-                        initialLoad();
-
                         setTimeout(() => {
                             passcodeContainer.style.opacity = '0';
                             passcodeContainer.style.transform = 'scale(0.9)';
@@ -2224,6 +2011,7 @@
                         setTimeout(() => {
                             passcodeOverlay.style.opacity = '0';
                             passcodeOverlay.style.pointerEvents = 'none';
+                            initialLoad();
                         }, 400);
 
                     } else {
@@ -2247,7 +2035,7 @@
             });
 
             document.addEventListener('keydown', (e) => {
-                if (passcodeOverlay.style.display !== 'none') {
+                if (passcodeOverlay.style.pointerEvents !== 'none') {
                     if (e.key >= '0' && e.key <= '9') {
                         handlePasscodeEntry(e.key);
                     } else if (e.key === 'Backspace') {
