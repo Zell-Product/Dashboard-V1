@@ -367,6 +367,15 @@
             }
             #main-header {
                 justify-content: space-between;
+                gap: 0.5rem;
+            }
+            #main-header > div:first-child, #main-header > div:last-child {
+                flex-grow: 0;
+                flex-shrink: 1;
+            }
+            #main-header > div.flex-shrink-0 {
+                flex-grow: 1;
+                margin: 0;
             }
             #page-header {
                 gap: 0.5rem; /* 8px */
@@ -386,11 +395,10 @@
                 text-overflow: ellipsis;
             }
             #navigation-bar { 
-                flex-grow: 1; 
-                margin: 0 0.5rem; 
+                width: 100%; 
             }
             .nav-item { 
-                padding: 0.75rem 0.25rem; 
+                padding: 0.75rem 0.5rem; /* Increased horizontal padding */
                 font-size: 0.8rem; 
                 flex-grow: 1; 
                 text-align: center; 
@@ -2047,7 +2055,12 @@
                 loadingOverlay.style.pointerEvents = 'auto';
                 loadingOverlay.style.display = 'flex';
                 updateGreeting();
-                const data = await fetchAllData();
+
+                const minLoadTime = new Promise(resolve => setTimeout(resolve, 1500));
+                const dataFetch = fetchAllData();
+
+                const [_, data] = await Promise.all([minLoadTime, dataFetch]);
+
                 if(data){
                     header.classList.remove('hidden');
                     await switchTab('overview'); 
