@@ -389,6 +389,7 @@
             .card-grid { flex-direction: column; }
             .sub-box .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; }
             .card-grid .flex-grow { min-width: 0; }
+            #header-greeting { display: none; }
         }
     </style>
 </head>
@@ -438,8 +439,10 @@
         <div class="w-full max-w-7xl mx-auto flex items-center justify-center header-container relative">
             
             <!-- Main Header for Overview/Reports List -->
-            <div id="main-header" class="w-full h-full flex items-center justify-between md:justify-center relative">
-                <div class="w-12 h-12 flex-shrink-0 md:absolute md:left-0">
+            <div id="main-header" class="w-full h-full flex items-center justify-center relative">
+                <div id="header-greeting" class="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-500">
+                    <h2 id="greeting-text" class="text-xl font-bold text-[var(--text-color)]"></h2>
+                    <p id="date-text" class="text-sm text-[var(--text-muted-color)]"></p>
                 </div>
                 <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
                     <button data-tab="overview" class="nav-item">Overview</button>
@@ -448,7 +451,7 @@
                         <i class="fas fa-sun"></i>
                     </button>
                 </nav>
-                 <div class="w-12 h-12 flex-shrink-0 md:absolute md:right-0 flex items-center justify-center">
+                 <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center">
                      <button id="main-header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
                          <i class="fas fa-sync-alt"></i>
                      </button>
@@ -530,6 +533,7 @@
             const passcodeKeypad = document.getElementById('passcode-keypad');
             const passcodeDots = document.getElementById('passcode-dots');
             const passcodeError = document.getElementById('passcode-error');
+            const headerGreeting = document.getElementById('header-greeting');
 
             // --- Data Fetching & Processing ---
             async function fetchAllData(forceRefresh = false) {
@@ -663,7 +667,7 @@
                 `).join('');
 
                 return `
-                    <div class="bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
+                    <div class="sub-box bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
                         <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">${title}</h3>
                         <div class="space-y-3 mt-auto">
                             ${rowsHtml}
@@ -816,15 +820,15 @@
 
                 container.innerHTML = `
                     <div class="space-y-12">
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                        <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
                             <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4"><i class="fas fa-users"></i>User Analytics</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">${userAnalyticsContent}</div>
                         </div>
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                        <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
                             <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4"><i class="fas fa-headset"></i>Student Support</h2>
                             ${supportContent}
                         </div>
-                        <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
+                        <div class="metric-card bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-3xl space-y-8">
                             <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center flex justify-center items-center gap-4"><i class="fas fa-chalkboard-teacher"></i>Batches Information</h2>
                             ${batchInfoContent()}
                         </div>
@@ -864,7 +868,7 @@
                 `;
                 
                 const lmsStatsContent = `
-                    <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                    <div class="metric-card sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                         <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-chart-bar"></i>LMS Web Stats</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             ${createLmsStatCard('Total Learners', getCellValue(7, 1), getIconForMetric('learners'))}
@@ -874,7 +878,7 @@
                     </div>`;
                 container.innerHTML = `
                     <div class="space-y-8">
-                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                        <div class="metric-card sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="fas fa-users"></i>Active Users</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 ${createBarChartCard('Daily Active (DAU)', dauData)}
@@ -882,7 +886,7 @@
                             </div>
                         </div>
                         ${lmsStatsContent}
-                        <div class="sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                        <div class="metric-card sub-box bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
                             <h3 class="text-2xl font-bold text-[var(--text-color)] opacity-90 mb-6 text-center flex items-center justify-center gap-3"><i class="${getIconForMetric('rating')}"></i>Store Ratings</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 ${createRatingScaleCard('Android', getIconForMetric('android'), getCellValue(1, 2), getCellValue(2, 2))}
@@ -1764,6 +1768,31 @@
             };
 
             // --- Navigation & UI Flow ---
+            const updateGreeting = () => {
+                const greetingText = document.getElementById('greeting-text');
+                const dateText = document.getElementById('date-text');
+                const hour = new Date().getHours();
+                
+                if (hour < 12) {
+                    greetingText.textContent = 'Good Morning';
+                } else if (hour < 18) {
+                    greetingText.textContent = 'Good Afternoon';
+                } else {
+                    greetingText.textContent = 'Good Evening';
+                }
+
+                dateText.textContent = new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                setTimeout(() => {
+                    headerGreeting.style.opacity = '1';
+                }, 200);
+            };
+
+
             const updateFooterText = (sectionId) => {
                 const footerContent = document.getElementById('footer-content');
                 if (!footerContent) return;
@@ -1993,6 +2022,7 @@
                 loadingOverlay.style.opacity = '1';
                 loadingOverlay.style.pointerEvents = 'auto';
                 loadingOverlay.style.display = 'flex';
+                updateGreeting();
                 const data = await fetchAllData();
                 if(data){
                     header.classList.remove('hidden');
@@ -2065,6 +2095,10 @@
                     document.getElementById('page-footer').classList.add('visible');
                 } else {
                     document.getElementById('page-footer').classList.remove('visible');
+                }
+                // New logic for greeting visibility
+                if (headerGreeting) {
+                    headerGreeting.style.opacity = (scrollTop > 20) ? '0' : '1';
                 }
             });
 
