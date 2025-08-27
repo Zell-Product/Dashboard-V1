@@ -264,7 +264,7 @@
             height: 100%;
             border-radius: 9999px;
             background-color: var(--text-muted-color);
-            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.2s ease-in-out;
+            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.2s ease-in-out, background-color 0.3s ease;
             width: 0; /* Start with 0 width for animation */
         }
         .bar-chart-row:hover .bar-chart-bar {
@@ -273,6 +273,9 @@
         .bar-chart-bar.animate-in {
             width: var(--target-width);
         }
+        .bar-chart-bar.good { background-color: #34c759; }
+        .bar-chart-bar.medium { background-color: #ff9500; }
+        .bar-chart-bar.bad { background-color: #ff3b30; }
 
         .bar-chart-value {
             font-weight: 600;
@@ -703,6 +706,33 @@
                     </div>
                 `;
             };
+            
+            const createSingleBarChartCard = (title, openData, totalData) => {
+                const numberFormatter = new Intl.NumberFormat('en-US');
+                const openValue = openData.value;
+                let barColorClass = 'good';
+                if (openValue >= 10) barColorClass = 'bad';
+                else if (openValue >= 5) barColorClass = 'medium';
+
+                return `
+                    <div class="sub-box bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
+                        <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">${title}</h3>
+                        <div class="space-y-3 mt-auto">
+                            <div class="bar-chart-row p-1 rounded-lg">
+                                <div class="bar-chart-label">${openData.label}</div>
+                                <div class="bar-chart-bar-container">
+                                    <div class="bar-chart-bar ${barColorClass}" style="--target-width: ${openValue > 0 ? (openValue / (openValue + 5)) * 100 : 0}%;"></div>
+                                </div>
+                                <div class="bar-chart-value">${numberFormatter.format(openValue)}</div>
+                            </div>
+                            <div class="text-center pt-2">
+                                <span class="text-sm text-[var(--text-muted-color)]">${totalData.label}: </span>
+                                <span class="font-semibold text-[var(--text-color)]">${numberFormatter.format(totalData.value)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
 
             const createRatingScaleCard = (title, icon, rating, totalRatings) => {
                 const ratingValue = parseFloat(rating) || 0;
@@ -770,33 +800,16 @@
                     { label: 'iOS', value: parseNumeric(getCellValue(dailyMetrics, 6, 3)) }
                 ];
 
-                const openSupportData = [
-                    { label: 'Open Doubts', value: parseNumeric(getCellValue(supportInfo, 1, 7)) },
-                    { label: 'Open Tickets', value: parseNumeric(getCellValue(supportInfo, 3, 7)) }
-                ];
-
-                const totalSupportData = [
-                    { 'Data Header': 'Total Doubts', 'Value': getCellValue(supportInfo, 0, 7) },
-                    { 'Data Header': 'Total Tickets', 'Value': getCellValue(supportInfo, 2, 7) }
-                ];
-
-                const createSupportMetricCard = (metric) => `
-                    <div class="metric-card flex-1 p-4 flex flex-col items-center text-center space-y-2 min-w-0 rounded-3xl">
-                        <div class="text-2xl text-[var(--icon-color)]"><i class="${getIconForMetric(metric['Data Header'])}"></i></div>
-                        <div class="metric-value text-2xl md:text-3xl font-bold tracking-tight">${metric['Value']}</div>
-                        <div class="text-xs font-medium text-[var(--text-muted-color)]">${metric['Data Header']}</div>
-                    </div>`;
+                const openDoubtsData = { label: 'Open', value: parseNumeric(getCellValue(supportInfo, 1, 7)) };
+                const totalDoubtsData = { label: 'Total Doubts', value: parseNumeric(getCellValue(supportInfo, 0, 7)) };
+                const openTicketsData = { label: 'Open', value: parseNumeric(getCellValue(supportInfo, 3, 7)) };
+                const totalTicketsData = { label: 'Total Tickets', value: parseNumeric(getCellValue(supportInfo, 2, 7)) };
 
                 const userAnalyticsContent = createBarChartCard('Daily Active Users (DAU)', dauData) + createBarChartCard('Monthly Active Users (MAU)', mauData);
                 const supportContent = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        ${createBarChartCard('Open Doubts & Tickets', openSupportData)}
-                        <div class="bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
-                             <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">Total Items</h3>
-                             <div class="flex gap-4 mt-auto">
-                                ${totalSupportData.map(createSupportMetricCard).join('')}
-                             </div>
-                        </div>
+                        ${createSingleBarChartCard('Ask a Doubt', openDoubtsData, totalDoubtsData)}
+                        ${createSingleBarChartCard('LMS Tickets', openTicketsData, totalTicketsData)}
                     </div>
                 `;
 
@@ -1520,14 +1533,21 @@
 
             const renderBatchReportsPage = (container, data) => {
                 if (!data) { showError(container, "Could not load Batch Reports data."); return; }
+                const getCellValue = (data, row, col) => {
+                    const val = (data && data[row] && data[row][col] != null) ? data[row][col] : '--';
+                    const valStr = String(val);
+                    if (valStr.includes('#REF!') || valStr.includes('#NAME?')) return '--';
+                    return val;
+                };
+
                 const generalData = [
-                    { 'Data Header': 'Total Enrolled Students', 'Value': data[0] ? data[0][1] : 'N/A' },
-                    { 'Data Header': 'Live Batches Count', 'Value': data[1] ? data[1][1] : 'N/A' }
+                    { 'Data Header': 'Total Enrolled Students', 'Value': getCellValue(data, 0, 1) },
+                    { 'Data Header': 'Live Batches Count', 'Value': getCellValue(data, 1, 1) }
                 ];
                 const performanceData = [
-                    { 'Data Header': 'Average Attendance %', 'Value': data[2] ? data[2][1] : 'N/A' },
-                    { 'Data Header': 'Average LPS', 'Value': data[3] ? data[3][1] : 'N/A' },
-                    { 'Data Header': 'Tests Completion %', 'Value': data[4] ? data[4][1] : 'N/A' }
+                    { 'Data Header': 'Average Attendance %', 'Value': getCellValue(data, 2, 1) },
+                    { 'Data Header': 'Average LPS', 'Value': getCellValue(data, 3, 1) },
+                    { 'Data Header': 'Tests Completion %', 'Value': getCellValue(data, 4, 1) }
                 ];
                 const createMetricCard = (metric, isPerformance = false) => {
                     const colorState = isPerformance ? getPerformanceColorState(metric['Data Header'], metric.Value) : 'neutral';
