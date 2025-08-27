@@ -567,27 +567,36 @@
             const headerGreeting = document.getElementById('header-greeting');
 
             // --- Data Fetching & Processing ---
-            async function fetchAllData(forceRefresh = false) {
-                if (Object.keys(dataCache).length > 0 && !forceRefresh) {
-                    console.log("Using cached data.");
-                    return dataCache;
-                }
-                console.log("Fetching new data from API...");
-                
-                try {
-                    const response = await fetch(API_URL);
-                    if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
-                    const data = await response.json();
-                    if (data.error) throw new Error(`API script returned an error: ${data.details || data.error}`);
-                    
-                    Object.keys(dataCache).forEach(key => delete dataCache[key]);
-                    Object.assign(dataCache, data);
-                    console.log("Data fetched and cached:", dataCache);
-                    return dataCache;
-                } catch (error) {
-                    console.error("Fatal Error: Could not fetch from Apps Script.", error);
-                    mainContent.innerHTML = `<div class="bg-red-900/50 border border-[var(--card-border)] text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto mt-8"><h3 class="font-bold text-lg mb-2">Connection Error</h3><p>${error.message}</p></div>`;
-                    return null;
+            async function fetchAllData(forceRefresh = false, isRetry = false) {
+                if (Object.keys(dataCache).length > 0 && !forceRefresh) {
+                    console.log("Using cached data.");
+                    return dataCache;
+                }
+                console.log(isRetry ? "Retrying data fetch from API..." : "Fetching new data from API...");
+                
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+                    const data = await response.json();
+                    if (data.error) throw new Error(`API script returned an error: ${data.details || data.error}`);
+                    
+                    // This block checks if the specific 'batch_information' data is missing or incomplete.
+                    // If it is, and this is the first attempt to fetch, it waits 3 seconds and tries again.
+                    const isBatchInfoInvalid = !data.batch_information || data.batch_information.length === 0;
+                    if (isBatchInfoInvalid && !isRetry) {
+                        console.warn("Batch information appears incomplete. Retrying fetch in 3 seconds to allow IMPORTRANGE to update.");
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        return fetchAllData(forceRefresh, true); // Call again with the retry flag set to true
+                    }
+
+                    Object.keys(dataCache).forEach(key => delete dataCache[key]);
+                    Object.assign(dataCache, data);
+                    console.log("Data fetched and cached:", dataCache);
+                    return dataCache;
+                } catch (error) {
+                    console.error("Fatal Error: Could not fetch from Apps Script.", error);
+                    mainContent.innerHTML = `<div class="bg-red-900/50 border border-[var(--card-border)] text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto mt-8"><h3 class="font-bold text-lg mb-2">Connection Error</h3><p>${error.message}</p></div>`;
+                    return null;
                 }
             }
 
