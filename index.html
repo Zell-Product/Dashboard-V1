@@ -1907,7 +1907,8 @@
                 pageContents.forEach(content => content.classList.add('hidden'));
                 const dailySection = document.getElementById('daily-section');
                 dailySection.classList.remove('hidden');
-                setPageHeader('LMS Web & App Metrics', SHEET_URLS['daily-section']);
+                const title = window.innerWidth < 768 ? 'LMS Metrics' : 'LMS Web & App Metrics';
+                setPageHeader(title, SHEET_URLS['daily-section']);
                 updateFooterText('daily-section');
                 
                 const dailyMetricsData = dataCache.daily_metrics;
