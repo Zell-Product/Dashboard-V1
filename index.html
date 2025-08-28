@@ -54,7 +54,7 @@
             /* Graphite Theme */
             --bg-color: #e5e5ea;
             --text-color: #1c1c1e;
-            --text-muted-color: #8d8d92;
+            --text-muted-color: #3a3a3c;
             --card-bg: rgba(242, 242, 247, 0.7);
             --card-border: rgba(0, 0, 0, 0.08);
             --card-hover-bg: rgba(255, 255, 255, 0.8);
@@ -74,7 +74,7 @@
             --medium-tint: rgba(255, 159, 10, 0.25);
             --bad-tint: rgba(255, 69, 58, 0.25);
             --bar-track-bg: rgba(0, 0, 0, 0.06);
-            --pie-border-color: #e5e5ea;
+            --pie-border-color: rgba(0, 0, 0, 0.1); /* Glassy Silver border */
         }
 
         body {
@@ -180,19 +180,22 @@
         .metric-card[data-color-state="good"], 
         .sub-box[data-color-state="good"],
         .qrf-scorecard[data-color-state="good"],
-        .rating-scale-card[data-color-state="good"] { 
+        .rating-scale-card[data-color-state="good"],
+        .scorecard[data-state="good"] { 
             background-color: var(--good-tint); 
         }
         .metric-card[data-color-state="medium"],
         .sub-box[data-color-state="medium"],
         .qrf-scorecard[data-color-state="medium"],
-        .rating-scale-card[data-color-state="medium"] { 
+        .rating-scale-card[data-color-state="medium"],
+        .scorecard[data-state="medium"] { 
             background-color: var(--medium-tint); 
         }
         .metric-card[data-color-state="bad"],
         .sub-box[data-color-state="bad"],
         .qrf-scorecard[data-color-state="bad"],
-        .rating-scale-card[data-color-state="bad"] { 
+        .rating-scale-card[data-color-state="bad"],
+        .scorecard[data-state="bad"] { 
             background-color: var(--bad-tint); 
         }
         
@@ -358,6 +361,17 @@
         }
         body:not(.light-mode) .report-tile:hover {
             border-color: rgba(255,255,255,0.2);
+        }
+        
+        /* --- Support Scorecard --- */
+        .scorecard {
+            background-color: var(--sub-box-bg);
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .scorecard:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
 
@@ -688,6 +702,38 @@
             };
 
             // --- NEW UI Component Generators ---
+            const createSupportScorecard = (title, openData, totalData) => {
+                const openValue = openData.value;
+                let state = 'medium';
+                let iconClass = 'fa-minus';
+                let colorClass = 'text-amber-600';
+
+                if (openValue >= 10) { // Bad state
+                    state = 'bad';
+                    iconClass = 'fa-arrow-up';
+                    colorClass = 'text-red-600';
+                } else if (openValue < 5) { // Good state
+                    state = 'good';
+                    iconClass = 'fa-arrow-down';
+                    colorClass = 'text-green-600';
+                }
+
+                return `
+                    <div class="scorecard rounded-3xl p-6 flex flex-col text-center" data-state="${state}">
+                        <h3 class="font-semibold text-lg" style="color: var(--text-color);">${title}</h3>
+                        <div class="flex-grow flex items-center justify-center py-4">
+                            <div class="flex items-end gap-3">
+                                <p class="text-6xl font-bold tracking-tight" style="color: var(--text-color);">${openValue}</p>
+                                <div class="text-3xl ${colorClass} mb-1">
+                                    <i class="fas ${iconClass}"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm font-medium" style="color: var(--text-muted-color);">${totalData.label}: ${new Intl.NumberFormat('en-US').format(totalData.value)}</p>
+                    </div>
+                `;
+            };
+
             const createBarChartCard = (title, data) => {
                 const numberFormatter = new Intl.NumberFormat('en-US');
                 const values = data.map(d => d.value);
@@ -708,34 +754,6 @@
                         <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">${title}</h3>
                         <div class="space-y-3 mt-auto">
                             ${rowsHtml}
-                        </div>
-                    </div>
-                `;
-            };
-            
-            const createSingleBarChartCard = (title, openData, totalData) => {
-                const numberFormatter = new Intl.NumberFormat('en-US');
-                const openValue = openData.value;
-                
-                let colorState = 'good';
-                if (openValue >= 10) colorState = 'bad';
-                else if (openValue >= 5) colorState = 'medium';
-
-                return `
-                    <div class="sub-box bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full" data-color-state="${colorState}">
-                        <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">${title}</h3>
-                        <div class="space-y-3 mt-auto">
-                            <div class="bar-chart-row p-1 rounded-lg">
-                                <div class="bar-chart-label">${openData.label}</div>
-                                <div class="bar-chart-bar-container">
-                                    <div class="bar-chart-bar ${colorState}" style="--target-width: ${openValue > 0 ? (openValue / (openValue + 5)) * 100 : 0}%;"></div>
-                                </div>
-                                <div class="bar-chart-value">${numberFormatter.format(openValue)}</div>
-                            </div>
-                            <div class="text-center pt-2">
-                                <span class="text-sm text-[var(--text-muted-color)]">${totalData.label}: </span>
-                                <span class="font-semibold text-[var(--text-color)]">${numberFormatter.format(totalData.value)}</span>
-                            </div>
                         </div>
                     </div>
                 `;
@@ -811,17 +829,20 @@
                     { label: 'Android', value: parseNumeric(getCellValue(dailyMetrics, 6, 2)) },
                     { label: 'iOS', value: parseNumeric(getCellValue(dailyMetrics, 6, 3)) }
                 ];
+                
+                const userAnalyticsContent = createBarChartCard('Daily Active Users (DAU)', dauData) + createBarChartCard('Monthly Active Users (MAU)', mauData);
 
                 const openDoubtsData = { label: 'Open', value: parseNumeric(getCellValue(supportInfo, 1, 7)) };
                 const totalDoubtsData = { label: 'Total Doubts', value: parseNumeric(getCellValue(supportInfo, 0, 7)) };
                 const openTicketsData = { label: 'Open', value: parseNumeric(getCellValue(supportInfo, 3, 7)) };
                 const totalTicketsData = { label: 'Total Tickets', value: parseNumeric(getCellValue(supportInfo, 2, 7)) };
 
-                const userAnalyticsContent = createBarChartCard('Daily Active Users (DAU)', dauData) + createBarChartCard('Monthly Active Users (MAU)', mauData);
                 const supportContent = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        ${createSingleBarChartCard('Ask a Doubt', openDoubtsData, totalDoubtsData)}
-                        ${createSingleBarChartCard('LMS Tickets', openTicketsData, totalTicketsData)}
+                    <div class="flex justify-center">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-3xl">
+                            ${createSupportScorecard('Open Doubts', openDoubtsData, totalDoubtsData)}
+                            ${createSupportScorecard('Open Support Tickets', openTicketsData, totalTicketsData)}
+                        </div>
                     </div>
                 `;
 
@@ -1323,14 +1344,21 @@
                 const textColor = isLightMode ? '#1d1d1f' : '#f5f5f7';
                 const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
                 const tickColor = isLightMode ? '#515154' : '#a1a1a6';
-                const pieBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--pie-border-color').trim();
+                
                 const renderPieChart = (canvasId, data, total) => {
                     const ctx = document.getElementById(canvasId).getContext('2d');
+                    const pieBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--pie-border-color').trim();
                     return new Chart(ctx, {
                         type: 'doughnut',
                         data: {
                             labels: ['Draft', 'Approved'],
-                            datasets: [{ data: data, backgroundColor: ['#ef4444', '#22c55e'], borderColor: pieBorderColor, borderWidth: 4, hoverBorderWidth: 4 }]
+                            datasets: [{ 
+                                data: data, 
+                                backgroundColor: ['#ef4444', '#22c55e'], 
+                                borderColor: pieBorderColor, 
+                                borderWidth: 3, 
+                                hoverBorderColor: pieBorderColor
+                            }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false, cutout: '70%',
@@ -1358,9 +1386,8 @@
                                 const subFontSize = (height / 280).toFixed(2);
                                 ctx.font = `${subFontSize}em ${bodyFont}`;
                                 const subTextX = Math.round((width - ctx.measureText(subText).width) / 2);
-                                const subTextY = height / 1.7;
                                 ctx.fillStyle = tickColor;
-                                ctx.fillText(subText, subTextX, subTextY);
+                                ctx.fillText(subText, subTextX, height / 1.7);
                                 ctx.save();
                             }
                         }]
