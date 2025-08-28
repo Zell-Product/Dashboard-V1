@@ -47,12 +47,13 @@
             --medium-tint: rgba(245, 158, 11, 0.15);
             --bad-tint: rgba(239, 68, 68, 0.15);
             --bar-track-bg: rgba(55, 55, 57, 0.8);
+            --pie-border-color: #000000;
         }
 
         body.light-mode {
             /* Redesigned Light Mode - iOS Inspired Glassmorphism */
-            --bg-color: #f0f2f5;
-            --text-color: #1d1d1f;
+            --bg-color: #f0f2f5; /* Softer off-white */
+            --text-color: #1d1d1f; /* Soft black */
             --text-muted-color: #5A5A5F;
             --card-bg: rgba(255, 255, 255, 0.7);
             --card-border: rgba(0, 0, 0, 0.05);
@@ -63,7 +64,7 @@
             --icon-color: #333;
             --nav-text-color: #555555;
             --nav-text-hover: #000000;
-            --nav-active-bg: #ffffff;
+            --nav-active-bg: #ffffff; /* Base for glassy effect */
             --nav-active-text: #000000;
             --sub-box-bg: rgba(239, 240, 242, 0.7);
             --footer-bg: transparent;
@@ -73,6 +74,7 @@
             --medium-tint: rgba(255, 159, 10, 0.25);
             --bad-tint: rgba(255, 69, 58, 0.25);
             --bar-track-bg: rgba(0, 0, 0, 0.06);
+            --pie-border-color: #f0f2f5; /* Seamless border */
         }
 
         body {
@@ -127,13 +129,16 @@
             background-color: rgba(255, 255, 255, 0.05);
         }
         body.light-mode .nav-item:hover { background-color: rgba(0, 0, 0, 0.04); }
+        
+        /* Glassy iOS Active State */
         .nav-item.active {
-            background-color: var(--nav-active-bg);
             color: var(--nav-active-text);
+            background-color: var(--nav-active-bg);
         }
         body.light-mode .nav-item.active {
-             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-             background-image: linear-gradient(to bottom, rgba(0,0,0,0.01), rgba(0,0,0,0.05));
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 1px 2px rgba(255,255,255,0.7);
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
+            border: 1px solid rgba(0,0,0,0.08);
         }
         body:not(.light-mode) .nav-item.active {
              box-shadow: 0 4px 15px rgba(0,0,0,0.25);
@@ -151,12 +156,12 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
         }
 
-        .sub-box:hover, .small-metric-card:hover, .report-button:hover {
+        .sub-box:hover, .small-metric-card:hover {
             transform: translateY(-4px) scale(1.03);
             box-shadow: var(--card-hover-shadow);
         }
-        body.light-mode .sub-box:hover, body.light-mode .small-metric-card:hover, body.light-mode .report-button:hover { border-color: rgba(255, 255, 255, 1); }
-        body:not(.light-mode) .sub-box:hover, body:not(.light-mode) .small-metric-card:hover, body:not(.light-mode) .report-button:hover { border-color: rgba(255, 255, 255, 0.2); }
+        body.light-mode .sub-box:hover, body.light-mode .small-metric-card:hover { border-color: rgba(0, 0, 0, 0.1); }
+        body:not(.light-mode) .sub-box:hover, body:not(.light-mode) .small-metric-card:hover { border-color: rgba(255, 255, 255, 0.2); }
         
         .metric-card.no-hover-pop:hover, .sub-box.no-hover-pop:hover {
             transform: none;
@@ -190,8 +195,6 @@
         .rating-scale-card[data-color-state="bad"] { 
             background-color: var(--bad-tint); 
         }
-
-        .report-button { border-radius: 1.5rem; }
         
         .qrf-scorecard, .rating-scale-card { transition: all 0.3s ease; }
         .qrf-scorecard .value, .rating-scale-card .value { transition: transform 0.3s ease; }
@@ -214,6 +217,7 @@
             transform: scale(1.1);
         }
         
+        /* Timeline Toggle Glassy Redesign */
         .timeline-toggle {
             transition: all 0.2s ease-in-out;
         }
@@ -222,12 +226,18 @@
             transform: scale(1);
         }
         .timeline-toggle .timeline-btn.active {
-            background-color: var(--text-color);
-            color: var(--bg-color);
             transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        body.light-mode .timeline-toggle .timeline-btn.active {
+            background-color: var(--nav-active-bg);
+            color: var(--nav-active-text);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 1px 2px rgba(255,255,255,0.7);
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
+            border: 1px solid rgba(0,0,0,0.08);
         }
         body:not(.light-mode) .timeline-toggle .timeline-btn.active {
+            background-color: var(--text-color);
+            color: var(--bg-color);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         .timeline-toggle .timeline-btn:not(.active):hover {
@@ -237,6 +247,35 @@
         body.light-mode .timeline-toggle .timeline-btn:not(.active):hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
+
+        /* Open Sheet Button Animation */
+        #open-sheet-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #open-sheet-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            background-color: #109c59;
+            color: white;
+            border-color: #109c59;
+        }
+        body:not(.light-mode) #open-sheet-button:hover {
+             box-shadow: 0 8px 20px rgba(16, 156, 89, 0.3);
+        }
+        #open-sheet-button:hover span {
+            color: white !important;
+        }
+        #open-sheet-button:hover i {
+            color: white !important;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.7; transform: scale(1); }
+        }
+
+
         #page-footer {
             background-color: var(--footer-bg);
             color: var(--text-muted-color);
@@ -254,184 +293,88 @@
             pointer-events: auto;
         }
 
-        /* New Bar Chart Styles */
-        .bar-chart-row {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem; /* 12px */
-            width: 100%;
-            border-radius: 0.5rem; /* 8px */
-        }
-        .bar-chart-label {
-            flex-shrink: 0;
-            width: 5rem; /* 80px */
-            text-align: right;
-            font-size: 0.875rem; /* 14px */
-            color: var(--text-muted-color);
-        }
-        .bar-chart-bar-container {
-            flex-grow: 1;
-            background-color: var(--bar-track-bg);
-            border-radius: 9999px;
-            height: 1.75rem; /* 28px */
-            position: relative;
-            overflow: hidden;
-        }
-        .bar-chart-bar {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            border-radius: 9999px;
-            background-color: var(--text-muted-color);
-            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.2s ease-in-out, background-color 0.3s ease;
-            width: 0; /* Start with 0 width for animation */
-        }
-        .bar-chart-bar.animate-in {
-            width: var(--target-width);
-        }
+        /* Bar Chart Styles */
+        .bar-chart-row { display: flex; align-items: center; gap: 0.75rem; width: 100%; border-radius: 0.5rem; }
+        .bar-chart-label { flex-shrink: 0; width: 5rem; text-align: right; font-size: 0.875rem; color: var(--text-muted-color); }
+        .bar-chart-bar-container { flex-grow: 1; background-color: var(--bar-track-bg); border-radius: 9999px; height: 1.75rem; position: relative; overflow: hidden; }
+        .bar-chart-bar { position: absolute; left: 0; top: 0; height: 100%; border-radius: 9999px; background-color: var(--text-muted-color); transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease; width: 0; }
+        .bar-chart-bar.animate-in { width: var(--target-width); }
         .bar-chart-bar.good { background-color: #34c759; }
         .bar-chart-bar.medium { background-color: #ff9500; }
         .bar-chart-bar.bad { background-color: #ff3b30; }
-
-        .bar-chart-value {
-            font-weight: 600;
-            color: var(--text-color);
-            width: 4rem; /* 64px */
-            text-align: left;
-        }
+        .bar-chart-value { font-weight: 600; color: var(--text-color); width: 4rem; text-align: left; }
         
-        /* New Rating Scale Styles */
-        .rating-scale-container {
-            width: 100%;
-        }
-        .rating-scale-track {
-            height: 0.75rem; /* 12px */
-            background-color: var(--sub-box-bg);
-            border-radius: 9999px;
-            overflow: hidden;
-            position: relative;
-        }
-        .rating-scale-fill {
-            height: 100%;
-            border-radius: 9999px;
-            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-            width: 0; /* Start with 0 width for animation */
-        }
-        .rating-scale-fill.animate-in {
-            width: var(--target-width);
-        }
+        /* Rating Scale Styles */
+        .rating-scale-container { width: 100%; }
+        .rating-scale-track { height: 0.75rem; background-color: var(--sub-box-bg); border-radius: 9999px; overflow: hidden; position: relative; }
+        .rating-scale-fill { height: 100%; border-radius: 9999px; transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1); width: 0; }
+        .rating-scale-fill.animate-in { width: var(--target-width); }
         .rating-scale-fill.good { background: linear-gradient(90deg, #34c759, #30d158); }
         .rating-scale-fill.medium { background: linear-gradient(90deg, #ff9500, #ff9f0a); }
         .rating-scale-fill.bad { background: linear-gradient(90deg, #ff3b30, #ff453a); }
 
-        
-        /* --- Passcode Screen Styles --- */
-        #passcode-overlay {
+        /* --- Report Tiles Redesign (Apple TV Inspired) --- */
+        .report-tile {
+            transform-style: preserve-3d;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
             backdrop-filter: blur(20px);
-            transition: opacity 0.5s ease-in-out;
         }
-        #passcode-container {
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-        .passcode-dot {
-            width: 1rem;
-            height: 1rem;
-            border-radius: 9999px;
-            border: 2px solid var(--text-muted-color);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .passcode-dot.filled {
-            background-color: var(--text-color);
-            border-color: var(--text-color);
-            transform: scale(1.1);
-        }
-        .passcode-dot.success {
-            background-color: #22c55e;
-            border-color: #22c55e;
-            animation: pulse 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #passcode-dots.shake {
-            animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
-        }
-        @keyframes shake {
-            10%, 90% { transform: translateX(-1px); }
-            20%, 80% { transform: translateX(2px); }
-            30%, 50%, 70% { transform: translateX(-4px); }
-            40%, 60% { transform: translateX(4px); }
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1.1); }
-            50% { transform: scale(1.3); }
-        }
-        .passcode-keypad-btn {
-            background-color: rgba(128, 128, 128, 0.2);
+        .report-tile-bg-icon {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             color: var(--text-color);
-            transition: all 0.2s ease-in-out;
-            border: none;
-            touch-action: manipulation; /* Prevents double-tap zoom */
         }
-        .passcode-keypad-btn:active {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: scale(0.95);
+        .report-tile:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-        body.light-mode .passcode-keypad-btn {
-            background-color: rgba(0, 0, 0, 0.1);
+        body:not(.light-mode) .report-tile:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-        body.light-mode .passcode-keypad-btn:active {
-            background-color: rgba(0, 0, 0, 0.2);
+        body.light-mode .report-tile {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
         }
+        body.light-mode .report-tile:hover {
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        .report-tile:hover .report-tile-bg-icon {
+            transform: translateY(-10px) scale(1.15);
+            opacity: 0.2;
+        }
+
+        /* --- Passcode Screen Styles --- */
+        #passcode-overlay { backdrop-filter: blur(20px); transition: opacity 0.5s ease-in-out; }
+        #passcode-container { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        .passcode-dot { width: 1rem; height: 1rem; border-radius: 9999px; border: 2px solid var(--text-muted-color); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .passcode-dot.filled { background-color: var(--text-color); border-color: var(--text-color); transform: scale(1.1); }
+        .passcode-dot.success { background-color: #22c55e; border-color: #22c55e; animation: pulse 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #passcode-dots.shake { animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1.1); } 50% { transform: scale(1.3); } }
+        .passcode-keypad-btn { background-color: rgba(128, 128, 128, 0.2); color: var(--text-color); transition: all 0.2s ease-in-out; border: none; touch-action: manipulation; }
+        .passcode-keypad-btn:active { background-color: rgba(255, 255, 255, 0.3); transform: scale(0.95); }
+        body.light-mode .passcode-keypad-btn { background-color: rgba(0, 0, 0, 0.1); }
+        body.light-mode .passcode-keypad-btn:active { background-color: rgba(0, 0, 0, 0.2); }
+
         @media (max-width: 768px) {
-            #passcode-overlay {
-                justify-content: flex-end;
-                padding-bottom: 5vh;
-            }
-            .header-container {
-                min-height: 3.5rem; /* 56px */
-            }
-            #main-header {
-                justify-content: space-between;
-                gap: 0.5rem;
-            }
-            #page-header {
-                gap: 0.5rem; /* 8px */
-                justify-content: space-between;
-            }
-            #page-header-center-content {
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-                width: auto;
-                max-width: calc(100% - 8rem); /* Adjusted for no refresh button */
-            }
-            #page-header-title {
-                font-size: 1rem; /* text-base */
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            #navigation-bar { 
-                width: 100%; 
-            }
-            .nav-item { 
-                padding: 0.75rem 0.5rem; /* Increased horizontal padding */
-                font-size: 0.8rem; 
-                flex-grow: 1; 
-                text-align: center; 
-            }
-            #theme-toggle, #main-header-refresh-button { 
-                width: 2.75rem; /* 44px */
-                height: 2.75rem; /* 44px */
-                flex-shrink: 0;
-            }
-            #theme-toggle > i {
-                font-size: 1rem;
-            }
+            #passcode-overlay { justify-content: flex-end; padding-bottom: 5vh; }
+            .header-container { min-height: 3.5rem; }
+            #main-header, #page-header { justify-content: space-between; gap: 0.5rem; }
+            #page-header-center-content { position: absolute; left: 50%; transform: translateX(-50%); width: auto; max-width: calc(100% - 8rem); }
+            #page-header-title { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            #navigation-bar { width: 100%; }
+            .nav-item { padding: 0.75rem 0.5rem; font-size: 0.8rem; flex-grow: 1; text-align: center; }
+            #theme-toggle, #main-header-refresh-button { width: 2.75rem; height: 2.75rem; flex-shrink: 0; }
+            #theme-toggle > i { font-size: 1rem; }
             .page-content { padding-top: 1rem; }
             .card-grid { flex-direction: column; }
             .sub-box .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; }
             .card-grid .flex-grow { min-width: 0; }
             #header-greeting { display: none; }
+            .report-tile { height: 10rem; padding: 1rem; }
+            .report-tile h3 { font-size: 1.1rem; }
+            .report-tile-bg-icon { font-size: 5rem; }
         }
     </style>
 </head>
@@ -494,12 +437,12 @@
 
                 <div class="flex-shrink-0 mx-2 md:mx-4">
                      <nav id="navigation-bar" class="bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full p-2 flex justify-center items-center gap-1">
-                        <button data-tab="overview" class="nav-item">Overview</button>
-                        <button data-tab="reports" class="nav-item">Reports</button>
-                        <button id="theme-toggle-desktop" class="hidden md:flex px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
-                            <i class="fas fa-sun"></i>
-                        </button>
-                    </nav>
+                         <button data-tab="overview" class="nav-item">Overview</button>
+                         <button data-tab="reports" class="nav-item">Reports</button>
+                         <button id="theme-toggle-desktop" class="hidden md:flex px-4 py-3 rounded-full text-lg transition-all duration-300 text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)]">
+                             <i class="fas fa-sun"></i>
+                         </button>
+                     </nav>
                 </div>
 
                 <div class="flex-1 flex justify-end items-center gap-2">
@@ -523,7 +466,7 @@
                     <button id="header-refresh-button" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10 hidden">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <a id="open-sheet-button" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] hover:text-[var(--nav-text-hover)] w-12 h-12 md:h-12 md:w-auto md:px-5 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white/10">
+                    <a id="open-sheet-button" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--card-bg)] border border-[var(--header-border)] text-[var(--nav-text-color)] w-12 h-12 md:h-12 md:w-auto md:px-5 rounded-full flex items-center justify-center">
                         <span class="mr-2 hidden md:inline">Open Sheet</span>
                         <i class="fas fa-external-link-alt"></i>
                     </a>
@@ -909,13 +852,13 @@
                                 <h3 class="text-xl font-bold text-center text-[var(--text-color)] opacity-90 mb-4">Performance Data</h3>
                                 <div class="flex flex-wrap justify-center gap-4 sm:grid sm:grid-cols-3">
                                      <div class="w-[calc(50%-0.5rem)] sm:w-auto">
-                                        ${createBatchMetricCard(performanceMetrics[0])}
+                                         ${createBatchMetricCard(performanceMetrics[0])}
                                      </div>
                                      <div class="w-[calc(50%-0.5rem)] sm:w-auto">
-                                        ${createBatchMetricCard(performanceMetrics[1])}
+                                         ${createBatchMetricCard(performanceMetrics[1])}
                                      </div>
                                      <div class="w-full max-w-[180px] sm:max-w-none sm:w-auto mx-auto sm:mx-0">
-                                        ${createBatchMetricCard(performanceMetrics[2])}
+                                         ${createBatchMetricCard(performanceMetrics[2])}
                                      </div>
                                 </div>
                             </div>
@@ -1090,7 +1033,7 @@
                             borderWidth: isMobile ? 2 : 3,
                             pointRadius: isMobile ? 3 : 5,
                             pointHoverRadius: isMobile ? 6 : 8,
-                            tension: 0.4,
+                            tension: 0.1, // Reduced tension for flatter lines
                             fill: false,
                              segment: {
                                  borderColor: ctx => {
@@ -1188,7 +1131,7 @@
                 
                 container.innerHTML = `
                     <div class="space-y-8">
-                        <div id="acca-qrf-content" class="qrf-content-section space-y-12">
+                        <div id="acca-qrf-content" class="qrf-content-section space-y-8">
                             <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
                                 <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">ACCA Question Status</h2>
                                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
@@ -1214,107 +1157,107 @@
                                         <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
                                 </div>
-                                <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                    <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
-                                        <div class="flex items-center gap-2 md:gap-4">
-                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                            <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="acca">
-                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
-                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
-                                            </div>
+                            </div>
+                            <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                                <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
+                                    <div class="flex items-center gap-2 md:gap-4">
+                                        <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                                        <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="acca">
+                                            <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                            <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
+                                            <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                         </div>
-                                        <div class="flex items-center gap-2" id="acca-legend-toggle"></div>
                                     </div>
-                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
-                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                         <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
-                                     </div>
+                                    <div class="flex items-center gap-2" id="acca-legend-toggle"></div>
                                 </div>
-                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
-                                     <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">ACCA Questions Split</h2>
-                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                         <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
-                                             <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
-                                             <div class="flex flex-wrap justify-around items-center gap-4">
-                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectiveCount}</div>
-                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
-                                                 </div>
-                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                     <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectivePercent}</div>
-                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
-                                                 </div>
-                                             </div>
-                                         </div>
-                                         <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
-                                             <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
-                                             <div class="flex flex-wrap justify-around items-center gap-4">
-                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                      <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectiveCount}</div>
-                                                      <div class="text-sm text-[var(--text-muted-color)]">Count</div>
-                                                  </div>
-                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                      <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectivePercent}</div>
-                                                      <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
-                                                  </div>
-                                             </div>
-                                         </div>
-                                     </div>
-                                     <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] mt-8 flex justify-center items-center gap-6">
-                                         <h3 class="text-xl sm:text-2xl font-bold">Total Questions</h3>
-                                         <div class="text-4xl sm:text-5xl font-bold">${accaData.summary.totalQuestions}</div>
-                                     </div>
+                                <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="accaLineChartCanvas"></canvas></div>
+                                 <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                     <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
                                  </div>
                             </div>
-                        </div>
-                        <div id="cfa-qrf-content" class="qrf-content-section space-y-12 hidden">
-                             <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
-                                 <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">CFA Question Status</h2>
-                                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                                     <div class="lg:col-span-1 relative h-60 md:h-72"><canvas id="cfaPieChartCanvas"></canvas></div>
-                                     <div class="flex flex-col justify-center space-y-4">
-                                         <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
-                                             <div class="flex items-center gap-3">
-                                                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                                                 <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
+                            <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
+                                 <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">ACCA Questions Split</h2>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                     <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
+                                         <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
+                                         <div class="flex flex-row justify-around items-center gap-4">
+                                             <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                 <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectiveCount}</div>
+                                                 <div class="text-sm text-[var(--text-muted-color)]">Count</div>
                                              </div>
-                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaDraft.toLocaleString()}</span>
-                                         </div>
-                                         <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
-                                             <div class="flex items-center gap-3">
-                                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                                 <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
+                                             <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                 <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectivePercent}</div>
+                                                 <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
                                              </div>
-                                             <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaApproved.toLocaleString()}</span>
                                          </div>
                                      </div>
-                                     <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.summary.completion)}">
-                                         <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.summary.completion))} tracking-tighter">${cfaData.summary.completion || 'N/A'}</div>
-                                         <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
+                                     <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
+                                         <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
+                                         <div class="flex flex-row justify-around items-center gap-4">
+                                              <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                  <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectiveCount}</div>
+                                                  <div class="text-sm text-[var(--text-muted-color)]">Count</div>
+                                              </div>
+                                              <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
+                                                  <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectivePercent}</div>
+                                                  <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
+                                              </div>
+                                         </div>
                                      </div>
                                  </div>
-                                 <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl">
-                                     <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
-                                         <div class="flex items-center gap-2 md:gap-4">
-                                             <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                             <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="cfa">
-                                                 <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                                 <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
-                                                 <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
-                                             </div>
-                                         </div>
-                                         <div class="flex items-center gap-2" id="cfa-legend-toggle"></div>
-                                     </div>
-                                     <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
-                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                         <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
-                                     </div>
+                                 <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] mt-8 flex justify-center items-center gap-6">
+                                     <h3 class="text-xl sm:text-2xl font-bold">Total Questions</h3>
+                                     <div class="text-4xl sm:text-5xl font-bold">${accaData.summary.totalQuestions}</div>
                                  </div>
                              </div>
                         </div>
-                        <div id="overall-qrf-content" class="qrf-content-section space-y-12 hidden">
-                            <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
+                        <div id="cfa-qrf-content" class="qrf-content-section space-y-8 hidden">
+                              <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
+                                  <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">CFA Question Status</h2>
+                                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                                      <div class="lg:col-span-1 relative h-60 md:h-72"><canvas id="cfaPieChartCanvas"></canvas></div>
+                                      <div class="flex flex-col justify-center space-y-4">
+                                          <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
+                                              <div class="flex items-center gap-3">
+                                                  <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                                  <span class="text-lg font-medium text-[var(--text-muted-color)]">Draft</span>
+                                              </div>
+                                              <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaDraft.toLocaleString()}</span>
+                                          </div>
+                                          <div class="pie-legend-item flex items-center justify-between bg-[var(--sub-box-bg)] p-4 rounded-2xl">
+                                              <div class="flex items-center gap-3">
+                                                  <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                                  <span class="text-lg font-medium text-[var(--text-muted-color)]">Approved</span>
+                                              </div>
+                                              <span class="text-2xl font-semibold text-[var(--text-color)]">${cfaApproved.toLocaleString()}</span>
+                                          </div>
+                                      </div>
+                                      <div class="qrf-scorecard text-center p-6 bg-[var(--sub-box-bg)] rounded-3xl border border-[var(--card-border)]" data-color-state="${getCompletionColorState(cfaData.summary.completion)}">
+                                          <div class="value text-5xl sm:text-7xl font-bold ${getPerformanceColorClass(getCompletionColorState(cfaData.summary.completion))} tracking-tighter">${cfaData.summary.completion || 'N/A'}</div>
+                                          <div class="text-lg text-[var(--text-muted-color)] mt-1">Completion</div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl">
+                                  <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
+                                      <div class="flex items-center gap-2 md:gap-4">
+                                          <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                                          <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="cfa">
+                                              <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                              <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
+                                              <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
+                                          </div>
+                                      </div>
+                                      <div class="flex items-center gap-2" id="cfa-legend-toggle"></div>
+                                  </div>
+                                  <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
+                                  <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                      <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
+                                  </div>
+                              </div>
+                        </div>
+                        <div id="overall-qrf-content" class="qrf-content-section space-y-8 hidden">
+                            <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
                                 <div class="border-b border-[var(--card-border)] pb-4 mb-6 md:mb-8">
                                     <h3 class="text-2xl md:text-3xl font-bold text-center text-[var(--text-color)]">Overall</h3>
                                 </div>
@@ -1338,22 +1281,22 @@
                                         <div class="text-xl text-[var(--text-muted-color)] mt-1">Completion</div>
                                     </div>
                                 </div>
-                                <div class="bg-[var(--sub-box-bg)] p-6 border border-[var(--card-border)] rounded-2xl mt-8">
-                                    <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
-                                        <div class="flex items-center gap-2 md:gap-4">
-                                            <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                            <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="overall">
-                                                <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
-                                                <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
-                                                <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
-                                            </div>
+                            </div>
+                            <div class="metric-card no-hover-pop bg-[var(--card-bg)] backdrop-blur-xl p-6 border border-[var(--card-border)] rounded-2xl mt-8">
+                                <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
+                                    <div class="flex items-center gap-2 md:gap-4">
+                                        <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
+                                        <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="overall">
+                                            <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
+                                            <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
+                                            <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
                                         </div>
-                                        <div class="flex items-center gap-2" id="overall-legend-toggle"></div>
                                     </div>
-                                    <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="overallLineChartCanvas"></canvas></div>
-                                     <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
-                                         <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
-                                     </div>
+                                    <div class="flex items-center gap-2" id="overall-legend-toggle"></div>
+                                </div>
+                                <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="overallLineChartCanvas"></canvas></div>
+                                <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
+                                    <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
                                 </div>
                             </div>
                         </div>
@@ -1364,13 +1307,14 @@
                 const textColor = isLightMode ? '#1d1d1f' : '#f5f5f7';
                 const gridColor = isLightMode ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
                 const tickColor = isLightMode ? '#515154' : '#a1a1a6';
+                const pieBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--pie-border-color').trim();
                 const renderPieChart = (canvasId, data, total) => {
                     const ctx = document.getElementById(canvasId).getContext('2d');
                     return new Chart(ctx, {
                         type: 'doughnut',
                         data: {
                             labels: ['Draft', 'Approved'],
-                            datasets: [{ data: data, backgroundColor: ['#ef4444', '#22c55e'], borderColor: 'var(--card-bg)', borderWidth: 2, hoverBorderWidth: 4 }]
+                            datasets: [{ data: data, backgroundColor: ['#ef4444', '#22c55e'], borderColor: pieBorderColor, borderWidth: 4, hoverBorderWidth: 4 }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false, cutout: '70%',
@@ -1841,7 +1785,30 @@
                     { title: 'Ask a Doubt + LMS Tickets', icon: 'fas fa-headset', id: 'show-ask-a-doubt-btn' },
                     { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', id: 'show-batch-reports-btn' },
                 ];
-                container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${reports.map(report => {const commonClasses = "report-button group relative bg-[var(--card-bg)] backdrop-blur-md p-8 border border-[var(--card-border)] text-[var(--text-color)] text-center flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--card-hover-bg)] hover:border-white/20 overflow-hidden h-48";const contentHtml = `<div class="relative z-10 report-content flex flex-col items-center justify-center"><i class="${report.icon} text-4xl mb-4 text-[var(--icon-color)] transition-transform duration-300"></i><span class="text-lg font-semibold">${report.title}</span></div><i class="${report.icon} absolute -bottom-8 -right-8 text-9xl text-black/5 transition-all duration-500 group-hover:text-black/10 group-hover:scale-125 group-hover:rotate-[-10deg]"></i>`; if (report.link) { return `<a href="${report.link}" target="_blank" rel="noopener noreferrer" class="${commonClasses}">${contentHtml}</a>`;} else { return `<button id="${report.id}" class="${commonClasses}">${contentHtml}</button>`;}}).join('')}</div>`;
+                container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">${reports.map(report => `
+                    <button id="${report.id}" class="report-tile relative rounded-3xl p-6 flex flex-col justify-end text-left h-48 overflow-hidden">
+                        <i class="${report.icon} report-tile-bg-icon absolute -top-4 -right-4 text-9xl opacity-10"></i>
+                        <h3 class="text-lg font-bold text-[var(--text-color)] z-10">${report.title}</h3>
+                    </button>
+                `).join('')}</div>`;
+                
+                const tiles = container.querySelectorAll('.report-tile');
+                tiles.forEach(tile => {
+                    tile.addEventListener('mousemove', (e) => {
+                        const rect = tile.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        const rotateX = (y - centerY) / 10;
+                        const rotateY = (centerX - x) / 10;
+                        
+                        tile.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                    });
+                    tile.addEventListener('mouseleave', () => {
+                        tile.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                    });
+                });
             };
 
             // --- Navigation & UI Flow ---
@@ -2136,12 +2103,12 @@
                 const mainTabId = activeTabButton ? activeTabButton.dataset.tab : null;
                 if (mainTabId === 'reports') {
                      switch(activeSection.id) {
-                        case 'batch-reports-section': showBatchReportsPage(); break;
-                        case 'daily-section': showDailyMetrics(); break;
-                        case 'course-checks-section': showCourseChecksPage(); break;
-                        case 'question-repo-section': showQuestionRepo(); break;
-                        case 'ask-a-doubt-section': showAskADoubtPage(); break;
-                    }
+                         case 'batch-reports-section': showBatchReportsPage(); break;
+                         case 'daily-section': showDailyMetrics(); break;
+                         case 'course-checks-section': showCourseChecksPage(); break;
+                         case 'question-repo-section': showQuestionRepo(); break;
+                         case 'ask-a-doubt-section': showAskADoubtPage(); break;
+                     }
                 }
             };
 
