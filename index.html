@@ -46,6 +46,7 @@
             --good-tint: rgba(34, 197, 94, 0.15);
             --medium-tint: rgba(245, 158, 11, 0.15);
             --bad-tint: rgba(239, 68, 68, 0.15);
+            --bar-track-bg: rgba(55, 55, 57, 0.8);
         }
 
         body.light-mode {
@@ -71,6 +72,7 @@
             --good-tint: rgba(52, 199, 89, 0.12);
             --medium-tint: rgba(255, 159, 10, 0.12);
             --bad-tint: rgba(255, 69, 58, 0.12);
+            --bar-track-bg: rgba(0, 0, 0, 0.06);
         }
 
         body {
@@ -152,7 +154,6 @@
         }
 
         .metric-card:hover {
-            background-color: var(--card-hover-bg);
             transform: translateY(-4px) scale(1.03);
             box-shadow: var(--card-hover-shadow);
         }
@@ -162,17 +163,32 @@
         .metric-value { transition: transform 0.3s ease; }
         .metric-card:hover .metric-value { transform: scale(1.1); }
         
-        .metric-card[data-color-state="good"], .sub-box[data-color-state="good"] { background-color: var(--good-tint); }
-        .metric-card[data-color-state="medium"], .sub-box[data-color-state="medium"] { background-color: var(--medium-tint); }
-        .metric-card[data-color-state="bad"], .sub-box[data-color-state="bad"] { background-color: var(--bad-tint); }
+        .metric-card[data-color-state="good"], 
+        .sub-box[data-color-state="good"],
+        .qrf-scorecard[data-color-state="good"],
+        .rating-scale-card[data-color-state="good"] { 
+            background-color: var(--good-tint); 
+        }
+        .metric-card[data-color-state="medium"],
+        .sub-box[data-color-state="medium"],
+        .qrf-scorecard[data-color-state="medium"],
+        .rating-scale-card[data-color-state="medium"] { 
+            background-color: var(--medium-tint); 
+        }
+        .metric-card[data-color-state="bad"],
+        .sub-box[data-color-state="bad"],
+        .qrf-scorecard[data-color-state="bad"],
+        .rating-scale-card[data-color-state="bad"] { 
+            background-color: var(--bad-tint); 
+        }
 
         .report-button { border-radius: 1.5rem; }
         
-        .qrf-scorecard { transition: all 0.3s ease; }
-        .qrf-scorecard .value { transition: transform 0.3s ease; }
-        .qrf-scorecard:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        body:not(.light-mode) .qrf-scorecard:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .qrf-scorecard:hover .value { transform: scale(1.05); }
+        .qrf-scorecard, .rating-scale-card { transition: all 0.3s ease; }
+        .qrf-scorecard .value, .rating-scale-card .value { transition: transform 0.3s ease; }
+        .qrf-scorecard:hover, .rating-scale-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        body:not(.light-mode) .qrf-scorecard:hover, body:not(.light-mode) .rating-scale-card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .qrf-scorecard:hover .value, .rating-scale-card:hover .value { transform: scale(1.05); }
         .pie-legend-item { transition: all 0.2s ease-in-out; }
         .pie-legend-item:hover {
             transform: scale(1.05);
@@ -235,7 +251,6 @@
             gap: 0.75rem; /* 12px */
             width: 100%;
             border-radius: 0.5rem; /* 8px */
-            transition: background-color 0.2s ease-in-out;
         }
         .bar-chart-label {
             flex-shrink: 0;
@@ -246,7 +261,7 @@
         }
         .bar-chart-bar-container {
             flex-grow: 1;
-            background-color: var(--sub-box-bg);
+            background-color: var(--bar-track-bg);
             border-radius: 9999px;
             height: 1.75rem; /* 28px */
             position: relative;
@@ -756,12 +771,17 @@
             const createRatingScaleCard = (title, icon, rating, totalRatings) => {
                 const ratingValue = parseFloat(rating) || 0;
                 const totalRatingsValue = parseInt(String(totalRatings).replace(/,/g, ''), 10) || 0;
+                
+                let colorState = 'bad';
+                if (ratingValue >= 4.0) colorState = 'good';
+                else if (ratingValue >= 3.5) colorState = 'medium';
+
                 let ratingColorClass = 'bad';
                 if (ratingValue >= 4.0) ratingColorClass = 'good';
                 else if (ratingValue >= 3.5) ratingColorClass = 'medium';
 
                 return `
-                    <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4">
+                    <div class="rating-scale-card bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] space-y-4" data-color-state="${colorState}">
                         <h4 class="text-lg font-semibold text-center text-[var(--text-muted-color)] flex items-center justify-center gap-2"><i class="${icon}"></i>${title}</h4>
                         <div class="flex items-center gap-4">
                             <span class="font-bold text-2xl text-[var(--text-color)]">${ratingValue.toFixed(1)}</span>
