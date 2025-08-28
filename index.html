@@ -162,9 +162,9 @@
         .metric-value { transition: transform 0.3s ease; }
         .metric-card:hover .metric-value { transform: scale(1.1); }
         
-        .metric-card[data-color-state="good"]:hover { background-color: var(--good-hover-tint); }
-        .metric-card[data-color-state="medium"]:hover { background-color: var(--medium-hover-tint); }
-        .metric-card[data-color-state="bad"]:hover { background-color: var(--bad-hover-tint); }
+        .metric-card[data-color-state="good"]:hover, .sub-box[data-color-state="good"]:hover { background-color: var(--good-hover-tint); }
+        .metric-card[data-color-state="medium"]:hover, .sub-box[data-color-state="medium"]:hover { background-color: var(--medium-hover-tint); }
+        .metric-card[data-color-state="bad"]:hover, .sub-box[data-color-state="bad"]:hover { background-color: var(--bad-hover-tint); }
         .report-button { border-radius: 1.5rem; }
         
         .qrf-scorecard { transition: all 0.3s ease; }
@@ -239,6 +239,7 @@
             border-radius: 0.5rem; /* 8px */
             transition: background-color 0.2s ease-in-out;
         }
+        /* Default hover for non-colored bars */
         .bar-chart-row:hover {
             background-color: rgba(120, 120, 128, 0.12);
         }
@@ -381,7 +382,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 width: auto;
-                max-width: calc(100% - 10rem);
+                max-width: calc(100% - 8rem); /* Adjusted for no refresh button */
             }
             #page-header-title {
                 font-size: 1rem; /* text-base */
@@ -568,7 +569,6 @@
 
             // --- Data Fetching & Processing ---
             async function fetchAllData(forceRefresh = false) {
-                // If we have data in the cache and we are not forcing a refresh, return the cached data.
                 if (Object.keys(dataCache).length > 0 && !forceRefresh) {
                     console.log("Using cached data.");
                     return dataCache;
@@ -576,9 +576,8 @@
                 console.log("Fetching new data from API...");
 
                 const MAX_RETRIES = 3;
-                const INITIAL_RETRY_DELAY = 2000; // 2 seconds
+                const INITIAL_RETRY_DELAY = 2000;
 
-                // Loop for retry mechanism
                 for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
                     try {
                         const response = await fetch(API_URL);
@@ -587,42 +586,36 @@
                         const data = await response.json();
                         if (data.error) throw new Error(`API script returned an error: ${data.details || data.error}`);
 
-                        // **FIX:** More robust check for the problematic 'batch_information' data.
-                        // This checks if the data exists and if a key metric inside it is valid.
-                        // It looks for common Google Sheets errors like #REF! or empty values that indicate IMPORTRANGE hasn't finished.
                         const batchInfoData = data.batch_information;
                         const keyMetricValue = (batchInfoData && batchInfoData[0] && batchInfoData[0][1] != null) ? String(batchInfoData[0][1]) : '';
-                        const isBatchInfoInvalid = keyMetricValue === '' || keyMetricValue.includes('#REF!') || keyMetricValue.includes('#NAME?');
+                        const isBatchInfoInvalid = !batchInfoData || batchInfoData.length === 0 || keyMetricValue === '' || keyMetricValue.includes('#REF!') || keyMetricValue.includes('#NAME?');
 
                         if (isBatchInfoInvalid) {
-                            // If the data is invalid and we still have retries left, wait and try again.
                             if (attempt < MAX_RETRIES) {
-                                const delay = INITIAL_RETRY_DELAY * attempt; // Increase delay for each retry
+                                const delay = INITIAL_RETRY_DELAY * attempt;
                                 console.warn(`Batch information is invalid (Attempt ${attempt}/${MAX_RETRIES}). Retrying in ${delay / 1000}s...`);
                                 await new Promise(resolve => setTimeout(resolve, delay));
-                                continue; // Jumps to the next iteration of the for loop
+                                continue;
                             } else {
-                                // If it's the last attempt and data is still invalid, throw an error.
-                                throw new Error('Batch information failed to load after multiple retries. The source sheet might be slow or contain errors.');
+                                console.warn('Batch information failed to load after multiple retries. The section will show an error message.');
+                                data.batch_information = null;
                             }
                         }
                         
-                        // If data is valid, clear the old cache, store the new data, and return it.
                         Object.keys(dataCache).forEach(key => delete dataCache[key]);
                         Object.assign(dataCache, data);
                         console.log("Data fetched and cached:", dataCache);
-                        return dataCache; // Success! Exit the function.
+                        return dataCache;
 
                     } catch (error) {
                         console.error(`Fetch attempt ${attempt} failed:`, error);
-                        // If this was the last attempt, show the error to the user.
                         if (attempt === MAX_RETRIES) {
                             mainContent.innerHTML = `<div class="bg-red-900/50 border border-[var(--card-border)] text-red-200 px-6 py-4 rounded-xl text-center max-w-2xl mx-auto mt-8"><h3 class="font-bold text-lg mb-2">Data Loading Error</h3><p>${error.message}</p></div>`;
                             return null;
                         }
                     }
                 }
-                return null; // Fallback in case loop finishes unexpectedly
+                return null;
             }
 
             function parseAsObject(dataArray, keyColumn = 0, valueColumn = 1) {
@@ -744,18 +737,19 @@
             const createSingleBarChartCard = (title, openData, totalData) => {
                 const numberFormatter = new Intl.NumberFormat('en-US');
                 const openValue = openData.value;
-                let barColorClass = 'good';
-                if (openValue >= 10) barColorClass = 'bad';
-                else if (openValue >= 5) barColorClass = 'medium';
+                
+                let colorState = 'good';
+                if (openValue >= 10) colorState = 'bad';
+                else if (openValue >= 5) colorState = 'medium';
 
                 return `
-                    <div class="sub-box bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full">
+                    <div class="sub-box bg-[var(--sub-box-bg)] p-4 md:p-6 rounded-2xl border border-[var(--card-border)] flex flex-col h-full transition-colors duration-300" data-color-state="${colorState}">
                         <h3 class="text-lg md:text-xl font-bold text-[var(--text-color)] opacity-90 mb-4 text-center">${title}</h3>
                         <div class="space-y-3 mt-auto">
                             <div class="bar-chart-row p-1 rounded-lg">
                                 <div class="bar-chart-label">${openData.label}</div>
                                 <div class="bar-chart-bar-container">
-                                    <div class="bar-chart-bar ${barColorClass}" style="--target-width: ${openValue > 0 ? (openValue / (openValue + 5)) * 100 : 0}%;"></div>
+                                    <div class="bar-chart-bar ${colorState}" style="--target-width: ${openValue > 0 ? (openValue / (openValue + 5)) * 100 : 0}%;"></div>
                                 </div>
                                 <div class="bar-chart-value">${numberFormatter.format(openValue)}</div>
                             </div>
@@ -794,7 +788,7 @@
 
             // --- Page Rendering Functions ---
             const renderOverviewPage = (container, allData) => {
-                if (!allData || !allData.daily_metrics || !allData.batch_information || !allData.aad_lms_tickets) {
+                if (!allData || !allData.daily_metrics || !allData.aad_lms_tickets) {
                     showError(container, "Could not load all necessary data for the overview. Please try refreshing or check the individual reports.");
                     return;
                 }
@@ -814,13 +808,13 @@
                     return parseInt(String(val).replace(/,/g, ''), 10) || 0;
                 }
                 
-                const batchInfo = {
+                const batchInfo = batchInfoData ? {
                     'Total enrolled students': getCellValue(batchInfoData, 0, 1),
                     'Live batches count': getCellValue(batchInfoData, 1, 1),
                     'Average Attendance %': getCellValue(batchInfoData, 2, 1),
                     'Average LPS': getCellValue(batchInfoData, 3, 1),
                     'Test Completion %': getCellValue(batchInfoData, 4, 1)
-                };
+                } : null;
 
                 const dauData = [
                     { label: 'Web', value: parseNumeric(getCellValue(dailyMetrics, 5, 1)) },
@@ -848,6 +842,15 @@
                 `;
 
                 const batchInfoContent = () => {
+                    if (!batchInfo) {
+                        return `
+                            <div class="sub-box bg-amber-900/30 text-amber-200 p-6 border border-amber-500/30 rounded-2xl text-center">
+                                <h3 class="text-xl font-bold mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>Data Unavailable</h3>
+                                <p>The batch information could not be loaded. This may be due to the source sheet updating. Please try refreshing the dashboard in a moment.</p>
+                            </div>
+                        `;
+                    }
+
                     const generalMetrics = [
                         { 'Data Header': 'Total Enrolled Students', 'Value': batchInfo['Total enrolled students'], isPerformance: false },
                         { 'Data Header': 'Live Batches Count', 'Value': batchInfo['Live batches count'], isPerformance: false }
@@ -1903,11 +1906,13 @@
                     mainHeader.classList.add('hidden');
                     
                     const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden'));
-                    if (activeSection && activeSection.id !== 'reports-section') {
+                    
+                    if (activeSection && activeSection.id !== 'reports-section' && activeSection.id !== 'question-repo-section') {
                         headerRefreshButton.classList.remove('hidden');
                     } else {
                         headerRefreshButton.classList.add('hidden');
                     }
+
                     if (sheetUrl) {
                         openSheetButton.href = sheetUrl;
                         openSheetButton.classList.remove('hidden');
