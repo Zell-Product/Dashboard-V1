@@ -39,7 +39,7 @@
             --nav-text-hover: #ffffff;
             --nav-active-bg: rgba(255, 255, 255, 0.1);
             --nav-active-text: #ffffff;
-            --sub-box-bg: rgba(0,0,0,0.2);
+            --sub-box-bg: rgba(29, 29, 31, 0.5);
             --footer-bg: #1d1d1f;
             --chart-grid-color: rgba(255, 255, 255, 0.1);
             --chart-tick-color: #a1a1a6;
@@ -69,9 +69,9 @@
             --footer-bg: transparent;
             --chart-grid-color: rgba(0, 0, 0, 0.08);
             --chart-tick-color: #86868b;
-            --good-tint: rgba(52, 199, 89, 0.12);
-            --medium-tint: rgba(255, 159, 10, 0.12);
-            --bad-tint: rgba(255, 69, 58, 0.12);
+            --good-tint: rgba(52, 199, 89, 0.18);
+            --medium-tint: rgba(255, 159, 10, 0.18);
+            --bad-tint: rgba(255, 69, 58, 0.18);
             --bar-track-bg: rgba(0, 0, 0, 0.06);
         }
 
@@ -137,31 +137,33 @@
         }
         body.light-mode .nav-item.active {
              box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+             background-image: linear-gradient(to bottom, rgba(0,0,0,0.01), rgba(0,0,0,0.05));
         }
         body:not(.light-mode) .nav-item.active {
              box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+             background-image: linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
         }
 
-        .metric-card { 
+        .metric-card, .sub-box { 
             border-radius: 1.5rem; 
             transition: all 0.3s ease; 
             border: 1px solid var(--card-border); 
             background-color: var(--card-bg); 
             backdrop-filter: blur(20px); 
         }
-        body.light-mode .metric-card {
+        body.light-mode .metric-card, body.light-mode .sub-box {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
         }
 
-        .metric-card:hover {
+        .metric-card:hover, .sub-box:hover {
             transform: translateY(-4px) scale(1.03);
             box-shadow: var(--card-hover-shadow);
         }
-        body.light-mode .metric-card:hover { border-color: rgba(255, 255, 255, 1); }
-        body:not(.light-mode) .metric-card:hover { border-color: rgba(255, 255, 255, 0.2); }
+        body.light-mode .metric-card:hover, body.light-mode .sub-box:hover { border-color: rgba(255, 255, 255, 1); }
+        body:not(.light-mode) .metric-card:hover, body:not(.light-mode) .sub-box:hover { border-color: rgba(255, 255, 255, 0.2); }
 
         .metric-value { transition: transform 0.3s ease; }
-        .metric-card:hover .metric-value { transform: scale(1.1); }
+        .metric-card:hover .metric-value, .sub-box:hover .metric-value { transform: scale(1.1); }
         
         .metric-card[data-color-state="good"], 
         .sub-box[data-color-state="good"],
@@ -372,6 +374,10 @@
             background-color: rgba(0, 0, 0, 0.2);
         }
         @media (max-width: 768px) {
+            #passcode-overlay {
+                justify-content: flex-end;
+                padding-bottom: 5vh;
+            }
             .header-container {
                 min-height: 3.5rem; /* 56px */
             }
@@ -1204,7 +1210,7 @@
                                     <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
                                         <div class="flex items-center gap-2 md:gap-4">
                                             <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                            <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="acca">
+                                            <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="acca">
                                                 <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                 <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                 <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1222,7 +1228,7 @@
                                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                          <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
                                              <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
-                                             <div class="flex justify-around items-center gap-4">
+                                             <div class="flex flex-wrap justify-around items-center gap-4">
                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
                                                      <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.nonSubjectiveCount}</div>
                                                      <div class="text-sm text-[var(--text-muted-color)]">Count</div>
@@ -1235,7 +1241,7 @@
                                          </div>
                                          <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
                                              <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
-                                             <div class="flex justify-around items-center gap-4">
+                                             <div class="flex flex-wrap justify-around items-center gap-4">
                                                   <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
                                                       <div class="value text-3xl sm:text-4xl font-bold">${accaData.summary.subjectiveCount}</div>
                                                       <div class="text-sm text-[var(--text-muted-color)]">Count</div>
@@ -1284,7 +1290,7 @@
                                      <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
                                          <div class="flex items-center gap-2 md:gap-4">
                                              <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                             <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="cfa">
+                                             <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="cfa">
                                                  <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                  <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                  <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1295,41 +1301,6 @@
                                      <div class="min-h-[300px] sm:min-h-[350px]"><canvas id="cfaLineChartCanvas"></canvas></div>
                                      <div class="mt-4 p-4 bg-[var(--sub-box-bg)] rounded-2xl text-center text-sm text-[var(--text-muted-color)] md:hidden">
                                          <i class="fas fa-info-circle mr-2"></i>For the best experience, please view on a desktop.
-                                     </div>
-                                 </div>
-                                 <div class="bg-[var(--card-bg)] backdrop-blur-xl p-6 md:p-8 border border-[var(--card-border)] rounded-3xl space-y-8">
-                                     <h2 class="text-2xl md:text-3xl font-bold text-[var(--text-color)] text-center">CFA Questions Split</h2>
-                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                         <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
-                                             <h3 class="text-xl font-bold text-center mb-4">Non-Subjective Questions</h3>
-                                             <div class="flex justify-around items-center gap-4">
-                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                     <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.nonSubjectiveCount}</div>
-                                                     <div class="text-sm text-[var(--text-muted-color)]">Count</div>
-                                                 </div>
-                                                 <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                     <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.nonSubjectivePercent}</div>
-                                                     <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
-                                                 </div>
-                                             </div>
-                                         </div>
-                                         <div class="split-box bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)]">
-                                             <h3 class="text-xl font-bold text-center mb-4">Subjective Questions</h3>
-                                             <div class="flex justify-around items-center gap-4">
-                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                      <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.subjectiveCount}</div>
-                                                      <div class="text-sm text-[var(--text-muted-color)]">Count</div>
-                                                  </div>
-                                                  <div class="qrf-scorecard bg-[var(--sub-box-bg)] p-4 rounded-xl flex-1 text-center border border-[var(--card-border)]">
-                                                      <div class="value text-3xl sm:text-4xl font-bold">${cfaData.summary.subjectivePercent}</div>
-                                                      <div class="text-sm text-[var(--text-muted-color)]">Percentage</div>
-                                                  </div>
-                                             </div>
-                                         </div>
-                                     </div>
-                                     <div class="bg-[var(--sub-box-bg)] p-6 rounded-2xl border border-[var(--card-border)] mt-8 flex justify-center items-center gap-6">
-                                         <h3 class="text-xl sm:text-2xl font-bold">Total Questions</h3>
-                                         <div class="text-4xl sm:text-5xl font-bold">${cfaData.summary.totalQuestions}</div>
                                      </div>
                                  </div>
                              </div>
@@ -1363,7 +1334,7 @@
                                     <div class="flex flex-wrap items-center justify-between gap-y-4 gap-x-6 mb-6">
                                         <div class="flex items-center gap-2 md:gap-4">
                                             <h4 class="text-sm font-semibold text-[var(--text-muted-color)]">Trend:</h4>
-                                            <div class="timeline-toggle bg-black/20 rounded-full p-1 flex gap-1" data-chart-type="overall">
+                                            <div class="timeline-toggle bg-[var(--sub-box-bg)] rounded-full p-1 flex gap-1" data-chart-type="overall">
                                                 <button data-days="7" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">7 Days</button>
                                                 <button data-days="14" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full active">14 Days</button>
                                                 <button data-days="30" class="timeline-btn px-3 py-1.5 text-sm font-semibold rounded-full">30 Days</button>
@@ -1995,9 +1966,9 @@
                 qrfNav.id = 'qrf-navigation-bar-sticky';
                 qrfNav.className = 'flex justify-center items-center gap-1';
                 qrfNav.innerHTML = `
-                    <button data-qrf-tab="acca" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">ACCA</button>
-                    <button data-qrf-tab="cfa" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">CFA</button>
-                    <button data-qrf-tab="overall" class="qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">Overall</button>
+                    <button data-qrf-tab="acca" class="nav-item qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">ACCA</button>
+                    <button data-qrf-tab="cfa" class="nav-item qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">CFA</button>
+                    <button data-qrf-tab="overall" class="nav-item qrf-nav-item px-3 md:px-6 py-2 text-sm md:text-base font-semibold rounded-full transition-colors duration-300">Overall</button>
                 `;
                 pageHeaderCenterContent.innerHTML = '';
                 pageHeaderCenterContent.className = 'bg-[var(--header-bg)] backdrop-blur-lg border border-[var(--header-border)] rounded-full flex items-center justify-center p-2';
@@ -2009,9 +1980,9 @@
                     if (activeContent) activeContent.classList.remove('hidden');
                     
                     qrfNavItems.forEach(item => {
-                        item.classList.remove('bg-[var(--nav-active-bg)]', 'text-[var(--nav-active-text)]');
+                        item.classList.remove('active');
                         if(item.dataset.qrfTab === tabId) {
-                           item.classList.add('bg-[var(--nav-active-bg)]', 'text-[var(--nav-active-text)]');
+                           item.classList.add('active');
                         }
                     });
                 };
