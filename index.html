@@ -31,7 +31,7 @@
             --card-bg: rgba(29, 29, 31, 0.7);
             --card-border: rgba(255, 255, 255, 0.1);
             --card-hover-bg: rgba(40, 40, 42, 0.8);
-            --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            --card-hover-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
             --header-bg: rgba(29, 29, 31, 0.7);
             --header-border: rgba(255, 255, 255, 0.1);
             --icon-color: #ffffff;
@@ -51,30 +51,30 @@
         }
 
         body.light-mode {
-            /* Redesigned Light Mode - iOS Inspired Glassmorphism */
-            --bg-color: #f0f2f5; /* Softer off-white */
-            --text-color: #1d1d1f; /* Soft black */
-            --text-muted-color: #5A5A5F;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(0, 0, 0, 0.05);
-            --card-hover-bg: rgba(255, 255, 255, 0.95);
-            --card-hover-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-            --header-bg: rgba(247, 247, 248, 0.8);
-            --header-border: rgba(0, 0, 0, 0.08);
-            --icon-color: #333;
+            /* Graphite Theme */
+            --bg-color: #e5e5ea;
+            --text-color: #1c1c1e;
+            --text-muted-color: #8d8d92;
+            --card-bg: rgba(242, 242, 247, 0.7);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --card-hover-bg: rgba(255, 255, 255, 0.8);
+            --card-hover-shadow: 0 20px 40px -10px rgba(0,0,0,0.2);
+            --header-bg: rgba(235, 235, 240, 0.75);
+            --header-border: rgba(0, 0, 0, 0.09);
+            --icon-color: #1c1c1e;
             --nav-text-color: #555555;
             --nav-text-hover: #000000;
-            --nav-active-bg: #ffffff; /* Base for glassy effect */
+            --nav-active-bg: #ffffff;
             --nav-active-text: #000000;
-            --sub-box-bg: rgba(239, 240, 242, 0.7);
+            --sub-box-bg: rgba(229, 229, 234, 0.75);
             --footer-bg: transparent;
             --chart-grid-color: rgba(0, 0, 0, 0.08);
-            --chart-tick-color: #86868b;
+            --chart-tick-color: #8d8d92;
             --good-tint: rgba(48, 209, 88, 0.25);
             --medium-tint: rgba(255, 159, 10, 0.25);
             --bad-tint: rgba(255, 69, 58, 0.25);
             --bar-track-bg: rgba(0, 0, 0, 0.06);
-            --pie-border-color: #f0f2f5; /* Seamless border */
+            --pie-border-color: #e5e5ea;
         }
 
         body {
@@ -313,35 +313,53 @@
         .rating-scale-fill.medium { background: linear-gradient(90deg, #ff9500, #ff9f0a); }
         .rating-scale-fill.bad { background: linear-gradient(90deg, #ff3b30, #ff453a); }
 
-        /* --- Report Tiles Redesign (Apple TV Inspired) --- */
+        /* --- Final Report Tile Design --- */
         .report-tile {
-            transform-style: preserve-3d;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
-        }
-        .report-tile-bg-icon {
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            color: var(--text-color);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         .report-tile:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(-8px) scale(1.05);
+            background: var(--card-hover-bg);
+            box-shadow: var(--card-hover-shadow);
+        }
+        .report-tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0) 60%
+            );
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+            opacity: 0.6;
+        }
+        body:not(.light-mode) .report-tile::before {
+            opacity: 0.3;
+        }
+        .report-tile:hover::before {
+            transform: translateX(100%);
+        }
+        .report-tile-icon {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--icon-color);
+        }
+        .report-tile:hover .report-tile-icon {
+            transform: scale(1.1);
         }
         body:not(.light-mode) .report-tile:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255,255,255,0.2);
         }
-        body.light-mode .report-tile {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
-        }
-        body.light-mode .report-tile:hover {
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-        .report-tile:hover .report-tile-bg-icon {
-            transform: translateY(-10px) scale(1.15);
-            opacity: 0.2;
-        }
+
 
         /* --- Passcode Screen Styles --- */
         #passcode-overlay { backdrop-filter: blur(20px); transition: opacity 0.5s ease-in-out; }
@@ -372,9 +390,7 @@
             .sub-box .card-grid.force-row { flex-direction: row; flex-wrap: nowrap; }
             .card-grid .flex-grow { min-width: 0; }
             #header-greeting { display: none; }
-            .report-tile { height: 10rem; padding: 1rem; }
             .report-tile h3 { font-size: 1.1rem; }
-            .report-tile-bg-icon { font-size: 5rem; }
         }
     </style>
 </head>
@@ -1785,30 +1801,14 @@
                     { title: 'Ask a Doubt + LMS Tickets', icon: 'fas fa-headset', id: 'show-ask-a-doubt-btn' },
                     { title: 'Weekly Batch Reports', icon: 'fas fa-chart-pie', id: 'show-batch-reports-btn' },
                 ];
-                container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">${reports.map(report => `
-                    <button id="${report.id}" class="report-tile relative rounded-3xl p-6 flex flex-col justify-end text-left h-48 overflow-hidden">
-                        <i class="${report.icon} report-tile-bg-icon absolute -top-4 -right-4 text-9xl opacity-10"></i>
-                        <h3 class="text-lg font-bold text-[var(--text-color)] z-10">${report.title}</h3>
+                container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${reports.map(report => `
+                    <button id="${report.id}" class="report-tile rounded-3xl p-6 flex flex-col items-center justify-center text-center aspect-[4/3]">
+                        <div class="report-tile-icon text-6xl mb-4">
+                            <i class="${report.icon}"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-[var(--text-color)]">${report.title}</h3>
                     </button>
                 `).join('')}</div>`;
-                
-                const tiles = container.querySelectorAll('.report-tile');
-                tiles.forEach(tile => {
-                    tile.addEventListener('mousemove', (e) => {
-                        const rect = tile.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        const centerX = rect.width / 2;
-                        const centerY = rect.height / 2;
-                        const rotateX = (y - centerY) / 10;
-                        const rotateY = (centerX - x) / 10;
-                        
-                        tile.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-                    });
-                    tile.addEventListener('mouseleave', () => {
-                        tile.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-                    });
-                });
             };
 
             // --- Navigation & UI Flow ---
