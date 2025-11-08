@@ -881,7 +881,12 @@
         </div>
         
         <!-- Theme Toggle -->
-        <div class="absolute right-0 top-1/2 -translate-y-1/2">
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2"> <!-- MODIFIED: Added flex wrapper -->
+             <!-- NEW: Open Sheet Button -->
+             <a href="https://docs.google.com/spreadsheets/d/1WmEth7sgYjN1h0CbhHwkmUTVGzyAH0P9OpG1_5T0IsQ/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="header-btn" title="Open Google Sheet">
+                <i class="fas fa-external-link-alt"></i>
+             </a>
+             <!-- Existing Theme Toggle -->
              <button class="header-btn" id="themeToggleBtn" title="Toggle Theme">
                 <i class="fa-solid fa-sun"></i>
              </button>
@@ -1112,6 +1117,13 @@
     </div>
   </main>
   
+  <!-- NEW: Footer for Batch Detail Page -->
+  <footer id="page-footer" class="text-center text-sm text-[var(--text-muted-color)] py-8 px-4 transition-all duration-500 opacity-0 -translate-y-4">
+    <div id="footer-content" class="max-w-2xl mx-auto">
+        <!-- JS will insert content here -->
+    </div>
+  </footer>
+
   <div id="toast-notification" class="toast">Dashboard has been updated with the latest data.</div>
 
   <script>
@@ -1146,6 +1158,7 @@
     // --- DOM Elements ---
     let loader, themeToggleBtn, themeIcon, headerBackButton, pageHeaderTitle, errorContainer, skeletonLoader, headerBackLink;
     let overallSection, batchDetailSection, batchNavWrapper, mainContentEl, overallNavWrapper; // FIX: Added mainContentEl, overallNavWrapper
+    let pageFooter, footerContent; // <<< NEW
 
     document.addEventListener("DOMContentLoaded", () => {
         // Assign DOM Elements
@@ -1168,6 +1181,9 @@
         // This listener is ONLY for the JS-powered "Back" button on the batch detail page
         headerBackButton.addEventListener("click", () => showPage('overall-section'));
         setupOverallNav(); // NEW
+        
+        pageFooter = document.getElementById("page-footer"); // <<< NEW
+        footerContent = document.getElementById("footer-content"); // <<< NEW
     });
     
     // --- Page Navigation ---
@@ -1180,6 +1196,7 @@
             batchNavWrapper.classList.add('hidden'); // FIX: Hide sub-nav
             overallNavWrapper.classList.remove('hidden'); // NEW: Show overall nav
             pageHeaderTitle.textContent = "ACCA Feedback";
+            updateFooter('overall-section'); // MODIFIED: No tabId needed
         } else {
             overallSection.classList.add('hidden');
             batchDetailSection.classList.remove('hidden');
@@ -1187,6 +1204,8 @@
             headerBackLink.classList.add('hidden'); // Hide the <a> link
             batchNavWrapper.classList.remove('hidden'); // FIX: Show sub-nav
             overallNavWrapper.classList.add('hidden'); // NEW: Hide overall nav
+            // MODIFIED: Pass the default active tab ('overview') to hide footer initially
+            updateFooter('batch-detail-section', 'overview'); 
         }
         mainContentEl.scrollTop = 0;
     }
@@ -1863,6 +1882,7 @@
             navItems.forEach(item => {
                 item.classList.toggle('active', item.dataset.tab === tabId);
             });
+            updateFooter('batch-detail-section', tabId); // <<< NEW: Update footer on every tab switch
         };
 
         navItems.forEach(item => {
@@ -2376,6 +2396,24 @@
         if (rating >= 5) return 'medium';
         if (rating > 0) return 'bad';
         return 'neutral';
+    }
+
+    // NEW: Function to control the footer text
+    function updateFooter(pageId, tabId = '') { // MODIFIED: Accept tabId
+        let text = '';
+        // MODIFIED: Check for both page and specific tab
+        if (pageId === 'batch-detail-section' && tabId === 'concerning') {
+            text = '<b>"Concerning Feedback"</b> is flagged for entries with at least one rating below 6 and a written comment of 2 or more words, helping to identify specific areas for improvement.';
+        }
+        
+        if (text) {
+            footerContent.innerHTML = text;
+            pageFooter.classList.remove('opacity-0', '-translate-y-4');
+        } else {
+            pageFooter.classList.add('opacity-0', '-translate-y-4');
+            // Use a timeout to clear text after fade out
+            setTimeout(() => { footerContent.innerHTML = ''; }, 500);
+        }
     }
 
     function showToast() {
