@@ -537,7 +537,28 @@
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // ... existing code ...
+     document.addEventListener('DOMContentLoaded', () => {
+
+        // --- NEW: Session check logic ---
+        if (sessionStorage.getItem('dashboard-authenticated') === 'true') {
+            // 1. Hide passcode screen immediately
+            passcodeOverlay.style.opacity = '0';
+            passcodeOverlay.style.pointerEvents = 'none';
+
+            // 2. Check hash *before* calling initialLoad
+            const defaultTab = window.location.hash === '#show-reports' ? 'reports' : 'overview';
+            initialLoad(defaultTab); // Pass the correct tab
+
+            // 3. Clear the hash so a manual refresh goes to 'overview'
+            if (window.location.hash === '#show-reports') {
+                history.pushState("", document.title, window.location.pathname + window.location.search);
+            }
+        }
+        // --- End of new logic ---
+
+(Line 529)         // --- Configuration ---
+// ... existing code ...
             // --- Configuration ---
             const API_URL = "https://script.google.com/macros/s/AKfycbw3af1hFqZ-P9rxaWw4P7eUY47yHC1Iz6lWlHL3PkMRGDSGA3Kmoiy18v5aoaF3MBRjwg/exec";
             const CORRECT_PASSCODE = '2020';
@@ -976,7 +997,7 @@
             };
 
             const refreshData = async () => { const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden')); if (!activeSection) return; showLoading(activeSection); await fetchAllData(true); const mainTabId = document.querySelector('.nav-item.active')?.dataset.tab; if (mainTabId === 'overview' || activeSection.id === 'overview-section') { await switchTab('overview'); } else if (mainTabId === 'reports') { switch(activeSection.id) { case 'batch-reports-section': showBatchReportsPage(); break; case 'daily-section': showDailyMetrics(); break; case 'course-checks-section': showCourseChecksPage(); break; case 'question-repo-section': showQuestionRepo(); break; case 'ask-a-doubt-section': showAskADoubtPage(); break; case 'attendance-section': showAttendancePage(); break; default: showReportsList(); } } };
-            const initialLoad = async () => { loadingOverlay.style.opacity = '1'; loadingOverlay.style.pointerEvents = 'auto'; loadingOverlay.style.display = 'flex'; updateGreeting(); const minLoadTime = new Promise(r => setTimeout(r, 2000)), dataFetch = fetchAllData(); const [_, data] = await Promise.all([minLoadTime, dataFetch]); if(data){ header.classList.remove('hidden'); await switchTab('overview'); renderReportsPage(document.getElementById('reports-section')); updateFooterText('overview-section'); } loadingOverlay.style.opacity = '0'; setTimeout(() => { loadingOverlay.style.pointerEvents = 'none'; loadingOverlay.style.display = 'none'; }, 500); };
+            const initialLoad = async (defaultTab = 'overview') => { loadingOverlay.style.opacity = '1'; loadingOverlay.style.pointerEvents = 'auto'; loadingOverlay.style.display = 'flex'; updateGreeting(); const minLoadTime = new Promise(r => setTimeout(r, 2000)), dataFetch = fetchAllData(); const [_, data] = await Promise.all([minLoadTime, dataFetch]); if(data){ header.classList.remove('hidden'); await switchTab(defaultTab); renderReportsPage(document.getElementById('reports-section')); updateFooterText(defaultTab); } loadingOverlay.style.opacity = '0'; setTimeout(() => { loadingOverlay.style.pointerEvents = 'none'; loadingOverlay.style.display = 'none'; }, 500); };
             navButtons.forEach(b => { if (b.dataset.tab) b.addEventListener('click', () => switchTab(b.dataset.tab)); });
             const handleThemeToggle = () => { document.body.classList.toggle('light-mode'); const activeSection = Array.from(pageContents).find(s => !s.classList.contains('hidden')); if (!activeSection) return; const mainTabId = document.querySelector('.nav-item.active')?.dataset.tab; if (mainTabId === 'reports') { switch(activeSection.id) { case 'batch-reports-section': showBatchReportsPage(); break; case 'daily-section': showDailyMetrics(); break; case 'course-checks-section': showCourseChecksPage(); break; case 'question-repo-section': showQuestionRepo(); break; case 'ask-a-doubt-section': showAskADoubtPage(); break; case 'attendance-section': showAttendancePage(); break; } } };
             themeToggleDesktop.addEventListener('click', handleThemeToggle); themeToggleMobile.addEventListener('click', handleThemeToggle);
@@ -986,7 +1007,11 @@
             headerRefreshButton.addEventListener('click', handleRefreshClick); mainHeaderRefreshButton.addEventListener('click', handleRefreshClick);
             mainContent.addEventListener('scroll', () => { const { scrollTop, scrollHeight, clientHeight } = mainContent; document.getElementById('page-footer').classList.toggle('visible', scrollHeight - scrollTop <= clientHeight + 50); if (headerGreeting) headerGreeting.style.opacity = (scrollTop > 20) ? '0' : '1'; });
             let currentPasscode = ''; const updatePasscodeDots = () => { passcodeDots.querySelectorAll('.passcode-dot').forEach((dot, i) => { dot.classList.toggle('filled', i < currentPasscode.length); dot.classList.remove('success'); }); };
-            const handlePasscodeEntry = (key) => { if (key === 'backspace') currentPasscode = currentPasscode.slice(0, -1); else if (currentPasscode.length < 4) currentPasscode += key; updatePasscodeDots(); if (currentPasscode.length === 4) { if (currentPasscode === CORRECT_PASSCODE) { passcodeDots.querySelectorAll('.passcode-dot').forEach(d => d.classList.add('success')); setTimeout(() => { passcodeContainer.style.opacity = '0'; passcodeContainer.style.transform = 'scale(0.9)'; }, 100); setTimeout(() => { passcodeOverlay.style.opacity = '0'; passcodeOverlay.style.pointerEvents = 'none'; initialLoad(); }, 400); } else { passcodeDots.classList.add('shake'); passcodeError.textContent = 'Incorrect Passcode'; setTimeout(() => { passcodeDots.classList.remove('shake'); passcodeError.textContent = ''; currentPasscode = ''; updatePasscodeDots(); }, 800); } } };
+            const handlePasscodeEntry = (key) => { if (key === 'backspace') currentPasscode = currentPasscode.slice(0, -1); else if (currentPasscode.length < 4) currentPasscode += key; updatePasscodeDots(); if (currentPasscode.length === 4) { // ... existing code ...
+(Line 943)             if (currentPasscode === CORRECT_PASSCODE) {
+(Line 944)                 sessionStorage.setItem('dashboard-authenticated', 'true'); // <<< NEW LINE
+(Line 945)                 passcodeDots.querySelectorAll('.passcode-dot').forEach(d => d.classList.add('success'));
+// ... existing code ... { passcodeDots.querySelectorAll('.passcode-dot').forEach(d => d.classList.add('success')); setTimeout(() => { passcodeContainer.style.opacity = '0'; passcodeContainer.style.transform = 'scale(0.9)'; }, 100); setTimeout(() => { passcodeOverlay.style.opacity = '0'; passcodeOverlay.style.pointerEvents = 'none'; initialLoad('overview');; }, 400); } else { passcodeDots.classList.add('shake'); passcodeError.textContent = 'Incorrect Passcode'; setTimeout(() => { passcodeDots.classList.remove('shake'); passcodeError.textContent = ''; currentPasscode = ''; updatePasscodeDots(); }, 800); } } };
             passcodeKeypad.addEventListener('click', e => { const key = e.target.closest('.passcode-keypad-btn')?.dataset.key; if (key) handlePasscodeEntry(key); });
             document.addEventListener('keydown', e => { if (passcodeOverlay.style.pointerEvents !== 'none') { if (e.key >= '0' && e.key <= '9') handlePasscodeEntry(e.key); else if (e.key === 'Backspace') handlePasscodeEntry('backspace'); } });
         });
