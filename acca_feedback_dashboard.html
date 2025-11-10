@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <title>ACCA Feedback Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-   <link rel="icon" href="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/favicon%20BW.png" type="image/png">
   
   <!-- Chart.js (Our new library) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -513,10 +511,10 @@
     }
     
     .chart{
-        height:350px;
+        height:300px; /* MODIFIED: Reduced from 350px to make graphs more visible */
     }
     .chart-tall {
-        height: 400px;
+        height: 350px; /* MODIFIED: Reduced from 400px */
     }
     
     .table-header-flex {
@@ -1007,12 +1005,23 @@
             <div class="card" id="rankings-card">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                      <h2 class="text-xl font-bold text-[var(--text-color)] opacity-90">Batch Rankings</h2>
-                     <div class="toggle-switch">
-                         <button id="rank-toggle-lowest" class="toggle-switch-btn active">Lowest 5</button>
-                         <button id="rank-toggle-best" class="toggle-switch-btn">Best 5</button>
-                         <div id="rank-toggle-bg" class="toggle-switch-bg"></div>
+                     <!-- MODIFIED: Wrapper for toggles -->
+                     <div class="flex flex-col sm:flex-row gap-3">
+                         <!-- Toggle 1: Filter -->
+                         <div class="toggle-switch">
+                             <button id="rank-filter-all" class="toggle-switch-btn active">All Batches</button>
+                             <button id="rank-filter-adjusted" class="toggle-switch-btn">Adjusted (30+)</button>
+                             <div id="rank-filter-bg" class="toggle-switch-bg"></div>
+                         </div>
+                         <!-- Toggle 2: Sort -->
+                         <div class="toggle-switch">
+                             <button id="rank-toggle-lowest" class="toggle-switch-btn active">Lowest 5</button>
+                             <button id="rank-toggle-best" class="toggle-switch-btn">Best 5</button>
+                             <div id="rank-toggle-bg" class="toggle-switch-bg"></div>
+                         </div>
                      </div>
                 </div>
+                <!-- *** REMOVED STATIC <p> TAG *** -->
                 <div class="space-y-3" id="ranked-batches-list">
                     <!-- Apple TV ranked list will be injected here -->
                 </div>
@@ -1177,6 +1186,7 @@
     let batchTableSort = { column: 'overallAvg', order: 'asc' };
     let feedbackTableSort = { column: 'Date', order: 'desc' }; // NEW: Sort state for detail table
     let currentRankMode = 'lowest';
+    let currentRankFilter = 'all'; // *** NEW: State for rank filter ***
     let currentFeedbackFilter = 'all'; // NEW: State for detail page table
 
     // --- DOM Elements ---
@@ -1558,7 +1568,7 @@
         renderBatchActivityCharts();
         
         // 6. Render Top 5 Lowest/Best Batches
-        setupRankToggle();
+        setupRankToggles(); // *** RENAMED FUNCTION CALL ***
         renderRankedList(currentRankMode);
         
         // 7. Render All Batches Table
@@ -1746,13 +1756,30 @@
         listContainer.innerHTML = '';
         currentRankMode = mode;
         
-        const sortedList = [...BATCH_LIST_CACHE].sort((a, b) => {
+        // *** MODIFIED: Filter logic now checks currentRankFilter state ***
+        let eligibleBatches;
+        if (currentRankFilter === 'adjusted') {
+            eligibleBatches = BATCH_LIST_CACHE.filter(batch => batch.totalFeedbacks >= 30);
+        } else {
+            eligibleBatches = [...BATCH_LIST_CACHE];
+        }
+        
+        const sortedList = [...eligibleBatches].sort((a, b) => {
             return mode === 'lowest' ? a.score - b.score : b.score - a.score;
         });
         
         const scoreClass = mode === 'lowest' ? 'score-bad' : 'score-good';
         const scoreLabel = mode === 'lowest' ? `% &lt; 7` : `Avg. Rating`;
 
+        // *** MODIFIED: Handle case where no batches are eligible ***
+        if (eligibleBatches.length === 0) {
+            const message = (currentRankFilter === 'adjusted')
+                ? 'No batches found with 30 or more feedbacks to rank.'
+                : 'No batches found to rank.';
+            listContainer.innerHTML = `<p class="text-center text-[var(--text-muted-color)] py-4">${message}</p>`;
+            return; // Stop execution
+        }
+        
         sortedList.slice(0, 5).forEach((batch, index) => {
             const scoreValue = mode === 'lowest' ? fmt(batch.pctLow * 100, 1) + '%' : fmt(batch.overallAvg, 2);
             // NEW: Added context for total feedbacks
@@ -1772,34 +1799,63 @@
         });
     }
 
-    function setupRankToggle() {
+    // *** RENAMED: setupRankToggles (plural) ***
+    function setupRankToggles() {
+        // --- Toggle 1: Sort (Lowest/Best) ---
         const lowestBtn = document.getElementById('rank-toggle-lowest');
         const bestBtn = document.getElementById('rank-toggle-best');
-        const bg = document.getElementById('rank-toggle-bg');
+        const sortBg = document.getElementById('rank-toggle-bg');
         
-        const setToggle = (mode) => {
+        const setSortToggle = (mode) => {
             if (mode === 'lowest') {
                 lowestBtn.classList.add('active');
                 bestBtn.classList.remove('active');
-                bg.style.transform = 'translateX(0%)';
-                bg.style.width = lowestBtn.offsetWidth + 'px';
+                sortBg.style.transform = 'translateX(0%)';
+                sortBg.style.width = lowestBtn.offsetWidth + 'px';
             } else {
                 lowestBtn.classList.remove('active');
                 bestBtn.classList.add('active');
-                bg.style.transform = `translateX(${lowestBtn.offsetWidth + 4}px)`; // 4px is gap
-                bg.style.width = bestBtn.offsetWidth + 'px';
+                sortBg.style.transform = `translateX(${lowestBtn.offsetWidth + 4}px)`; // 4px is gap
+                sortBg.style.width = bestBtn.offsetWidth + 'px';
             }
             currentRankMode = mode;
             renderRankedList(mode);
         }
         
-        lowestBtn.addEventListener('click', () => setToggle('lowest'));
-        bestBtn.addEventListener('click', () => setToggle('best'));
+        lowestBtn.addEventListener('click', () => setSortToggle('lowest'));
+        bestBtn.addEventListener('click', () => setSortToggle('best'));
         
-        // Use timeout to ensure offsetWidth is correct
+        // --- Toggle 2: Filter (All/Adjusted) ---
+        const allBtn = document.getElementById('rank-filter-all');
+        const adjustedBtn = document.getElementById('rank-filter-adjusted');
+        const filterBg = document.getElementById('rank-filter-bg');
+
+        const setFilterToggle = (mode) => {
+            if (mode === 'all') {
+                allBtn.classList.add('active');
+                adjustedBtn.classList.remove('active');
+                filterBg.style.transform = 'translateX(0%)';
+                filterBg.style.width = allBtn.offsetWidth + 'px';
+            } else {
+                allBtn.classList.remove('active');
+                adjustedBtn.classList.add('active');
+                filterBg.style.transform = `translateX(${allBtn.offsetWidth + 4}px)`; // 4px is gap
+                filterBg.style.width = adjustedBtn.offsetWidth + 'px';
+            }
+            currentRankFilter = mode;
+            renderRankedList(currentRankMode); // Re-render list with new filter
+        }
+
+        allBtn.addEventListener('click', () => setFilterToggle('all'));
+        adjustedBtn.addEventListener('click', () => setFilterToggle('adjusted'));
+
+        // Use timeout to ensure offsetWidth is correct for both toggles
         setTimeout(() => {
             if (lowestBtn && lowestBtn.offsetWidth > 0) { // Add check
-                 bg.style.width = lowestBtn.offsetWidth + 'px';
+                 sortBg.style.width = lowestBtn.offsetWidth + 'px';
+            }
+            if (allBtn && allBtn.offsetWidth > 0) { // Add check
+                 filterBg.style.width = allBtn.offsetWidth + 'px';
             }
         }, 100);
     }
@@ -2466,10 +2522,19 @@
                                     if (label) label += ': ';
                                     let val = context.parsed.y;
                                     if (val !== null) {
-                                        // Use 'toFixed(1)' for avg rating, but not for others
-                                        // *** FIX: Use toLowerCase() to correctly find "avg" ***
-                                        let decimals = context.dataset.label.toLowerCase().includes('avg') ? 1 : (context.dataset.label.includes('%') ? 1 : 0);
+                                        // *** FIX: More robust decimal place logic ***
+                                        
+                                        let decimals = 0; // Default (for counts)
+                                        
+                                        if (context.dataset.label.toLowerCase().includes('avg')) {
+                                            decimals = 2; // 2 decimal places for "Average Rating"
+                                        } else if (context.dataset.label.includes('%')) {
+                                            decimals = 1; // 1 decimal place for percentages
+                                        }
+
                                         label += val.toFixed(decimals);
+                                        // *** END OF FIX ***
+
                                         if (context.dataset.label.includes('%')) label += '%';
                                     }
                                     return label;
