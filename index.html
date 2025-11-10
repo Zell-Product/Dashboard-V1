@@ -425,7 +425,7 @@
 </head>
 <body class="h-screen flex flex-col">
     <!-- Passcode Screen -->
-    <div id="passcode-overlay" class="fixed inset-0 bg-[var(--bg-color)]/80 flex flex-col items-center justify-center z-[101]">
+   <div id="passcode-overlay" class="fixed inset-0 bg-[var(--bg-color)]/80 flex flex-col items-center justify-center z-[101]" style="opacity: 0; pointer-events: none;">
         <div id="passcode-container" class="flex flex-col items-center">
             <div class="text-center">
                 <h2 class="text-2xl font-semibold text-[var(--text-color)] mb-2">Zell Product Dashboard</h2>
@@ -1062,15 +1062,20 @@
         passcodeKeypad.addEventListener('click', e => { const key = e.target.closest('.passcode-keypad-btn')?.dataset.key; if (key) handlePasscodeEntry(key); });
         document.addEventListener('keydown', e => { if (passcodeOverlay.style.pointerEvents !== 'none' && document.getElementById('passcode-overlay').style.opacity !== '0') { if (e.key >= '0' && e.key <= '9') handlePasscodeEntry(e.key); else if (e.key === 'Backspace') handlePasscodeEntry('backspace'); } });
 
-        // --- NEW: Final part of the session logic ---
+      // --- NEW: Final part of the session logic ---
         // This runs *after* all functions are defined
         if (sessionStorage.getItem('dashboard-authenticated') === 'true') {
+            // Already authenticated, skip passcode (it's hidden by default)
             const defaultTab = window.location.hash === '#show-reports' ? 'reports' : 'overview';
             initialLoad(defaultTab); // Call initialLoad now
             
             if (window.location.hash === '#show-reports') {
                 history.pushState("", document.title, window.location.pathname + window.location.search);
             }
+        } else {
+            // Not authenticated, so we must *show* the overlay
+            passcodeOverlay.style.opacity = '1';
+            passcodeOverlay.style.pointerEvents = 'auto';
         }
     });
     </script>
