@@ -5,7 +5,7 @@
   <title>ACCA Feedback Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-   <link rel="icon" href="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/favicon%20BW.png" type="image/png">
+  <link rel="icon" href="https://raw.githubusercontent.com/YashShah20F/Dashboard-V3/main/favicon%20BW.png" type="image/png">
   
   <!-- Chart.js (Our new library) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -944,8 +944,8 @@
 
   <!-- Using main dashboard's layout classes -->
   <!-- FIX: Removed inline style="padding-top:20px;" -->
-  <!-- MODIFIED: Reduced max-width from 7xl to 6xl -->
-  <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-6xl mx-auto px-4 md:px-8 pb-8 main-content relative">
+  <!-- MODIFIED: Reduced max-width from 7xl to 6xl AND removed pb-8 -->
+  <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-6xl mx-auto px-4 md:px-8 main-content relative">
     <div id="errorContainer"></div>
 
     <!-- Skeleton loader -->
@@ -1177,7 +1177,8 @@
   </main>
   
   <!-- NEW: Footer for Batch Detail Page -->
-  <footer id="page-footer" class="text-center text-sm text-[var(--text-muted-color)] py-8 px-4 transition-all duration-500 opacity-0 -translate-y-4">
+  <!-- MODIFIED: Removed py-8 -->
+  <footer id="page-footer" class="text-center text-sm text-[var(--text-muted-color)] px-4 transition-all duration-500 opacity-0 -translate-y-4">
     <div id="footer-content" class="max-w-2xl mx-auto">
         <!-- JS will insert content here -->
     </div>
@@ -2651,22 +2652,14 @@
         if (text) {
             footerContent.innerHTML = text;
             pageFooter.classList.remove('opacity-0', '-translate-y-4');
+            pageFooter.classList.add('py-8'); // *** ADD PADDING ***
+            mainContentEl.classList.add('pb-8'); // *** ADD PADDING TO MAIN CONTENT ***
         } else {
             pageFooter.classList.add('opacity-0', '-translate-y-4');
+            pageFooter.classList.remove('py-8'); // *** REMOVE PADDING ***
+            mainContentEl.classList.remove('pb-8'); // *** REMOVE PADDING FROM MAIN CONTENT ***
+            
             // Use a timeout to clear text after fade out
             setTimeout(() => { footerContent.innerHTML = ''; }, 500);
         }
     }
-
-    function showToast() {
-        const toast = document.getElementById("toast-notification");
-        if (toast) {
-            toast.classList.add("show");
-            setTimeout(() => {
-                toast.classList.remove("show");
-            }, 4000);
-        }
-    }
-  </script>
-</body>
-</html>
