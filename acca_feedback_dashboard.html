@@ -104,28 +104,6 @@
         transition: background-color 0.5s ease, color 0.5s ease;
     }
     
-    /* === NEW: Custom Scrollbar Styles === */
-    /* This styles the scrollbar for WebKit browsers (Chrome, Safari, Edge) */
-    .main-content::-webkit-scrollbar {
-        width: 12px;
-    }
-    
-    .main-content::-webkit-scrollbar-track {
-        background: var(--bg-color); /* Match the main background */
-        border-radius: 10px;
-    }
-    
-    .main-content::-webkit-scrollbar-thumb {
-        background-color: var(--sub-box-bg); /* Use the sub-box color */
-        border-radius: 10px;
-        border: 3px solid var(--bg-color); /* Creates padding around thumb */
-    }
-    
-    .main-content::-webkit-scrollbar-thumb:hover {
-        background-color: var(--text-muted-color); /* Brighter on hover */
-    }
-    /* === END: Custom Scrollbar Styles === */
-    
     .header-container {
         min-height: 3.5rem;
     }
@@ -533,10 +511,10 @@
     }
     
     .chart{
-        height:300px; /* MODIFIED: Reduced from 350px to make graphs more visible */
+        height:350px;
     }
     .chart-tall {
-        height: 350px; /* MODIFIED: Reduced from 400px */
+        height: 400px;
     }
     
     .table-header-flex {
@@ -874,8 +852,7 @@
   
   <!-- New Header Structure -->
   <header class="w-full z-50 p-2 md:p-4 flex-shrink-0">
-    <!-- MODIFIED: Reduced max-width from 7xl to 6xl -->
-    <div class="w-full max-w-6xl mx-auto flex items-center justify-between relative header-container">
+    <div class="w-full max-w-7xl mx-auto flex items-center justify-between relative header-container">
         
         <!-- 
             *** THIS IS THE CHANGE YOU REQUESTED ***
@@ -942,8 +919,7 @@
 
   <!-- Using main dashboard's layout classes -->
   <!-- FIX: Removed inline style="padding-top:20px;" -->
-  <!-- MODIFIED: Reduced max-width from 7xl to 6xl AND removed pb-8 -->
-  <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-6xl mx-auto px-4 md:px-8 main-content relative">
+  <main id="main-content" class="flex-grow overflow-y-auto w-full max-w-7xl mx-auto px-4 md:px-8 pb-8 main-content relative">
     <div id="errorContainer"></div>
 
     <!-- Skeleton loader -->
@@ -1029,23 +1005,12 @@
             <div class="card" id="rankings-card">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                      <h2 class="text-xl font-bold text-[var(--text-color)] opacity-90">Batch Rankings</h2>
-                     <!-- MODIFIED: Wrapper for toggles -->
-                     <div class="flex flex-col sm:flex-row gap-3">
-                         <!-- Toggle 1: Filter -->
-                         <div class="toggle-switch">
-                             <button id="rank-filter-all" class="toggle-switch-btn active">All Batches</button>
-                             <button id="rank-filter-adjusted" class="toggle-switch-btn">Adjusted (30+)</button>
-                             <div id="rank-filter-bg" class="toggle-switch-bg"></div>
-                         </div>
-                         <!-- Toggle 2: Sort -->
-                         <div class="toggle-switch">
-                             <button id="rank-toggle-lowest" class="toggle-switch-btn active">Lowest 5</button>
-                             <button id="rank-toggle-best" class="toggle-switch-btn">Best 5</button>
-                             <div id="rank-toggle-bg" class="toggle-switch-bg"></div>
-                         </div>
+                     <div class="toggle-switch">
+                         <button id="rank-toggle-lowest" class="toggle-switch-btn active">Lowest 5</button>
+                         <button id="rank-toggle-best" class="toggle-switch-btn">Best 5</button>
+                         <div id="rank-toggle-bg" class="toggle-switch-bg"></div>
                      </div>
                 </div>
-                <!-- *** REMOVED STATIC <p> TAG *** -->
                 <div class="space-y-3" id="ranked-batches-list">
                     <!-- Apple TV ranked list will be injected here -->
                 </div>
@@ -1175,8 +1140,7 @@
   </main>
   
   <!-- NEW: Footer for Batch Detail Page -->
-  <!-- MODIFIED: Removed py-8 -->
-  <footer id="page-footer" class="text-center text-sm text-[var(--text-muted-color)] px-4 transition-all duration-500 opacity-0 -translate-y-4">
+  <footer id="page-footer" class="text-center text-sm text-[var(--text-muted-color)] py-8 px-4 transition-all duration-500 opacity-0 -translate-y-4">
     <div id="footer-content" class="max-w-2xl mx-auto">
         <!-- JS will insert content here -->
     </div>
@@ -1211,7 +1175,6 @@
     let batchTableSort = { column: 'overallAvg', order: 'asc' };
     let feedbackTableSort = { column: 'Date', order: 'desc' }; // NEW: Sort state for detail table
     let currentRankMode = 'lowest';
-    let currentRankFilter = 'all'; // *** NEW: State for rank filter ***
     let currentFeedbackFilter = 'all'; // NEW: State for detail page table
 
     // --- DOM Elements ---
@@ -1593,7 +1556,7 @@
         renderBatchActivityCharts();
         
         // 6. Render Top 5 Lowest/Best Batches
-        setupRankToggles(); // *** RENAMED FUNCTION CALL ***
+        setupRankToggle();
         renderRankedList(currentRankMode);
         
         // 7. Render All Batches Table
@@ -1781,30 +1744,13 @@
         listContainer.innerHTML = '';
         currentRankMode = mode;
         
-        // *** MODIFIED: Filter logic now checks currentRankFilter state ***
-        let eligibleBatches;
-        if (currentRankFilter === 'adjusted') {
-            eligibleBatches = BATCH_LIST_CACHE.filter(batch => batch.totalFeedbacks >= 30);
-        } else {
-            eligibleBatches = [...BATCH_LIST_CACHE];
-        }
-        
-        const sortedList = [...eligibleBatches].sort((a, b) => {
+        const sortedList = [...BATCH_LIST_CACHE].sort((a, b) => {
             return mode === 'lowest' ? a.score - b.score : b.score - a.score;
         });
         
         const scoreClass = mode === 'lowest' ? 'score-bad' : 'score-good';
         const scoreLabel = mode === 'lowest' ? `% &lt; 7` : `Avg. Rating`;
 
-        // *** MODIFIED: Handle case where no batches are eligible ***
-        if (eligibleBatches.length === 0) {
-            const message = (currentRankFilter === 'adjusted')
-                ? 'No batches found with 30 or more feedbacks to rank.'
-                : 'No batches found to rank.';
-            listContainer.innerHTML = `<p class="text-center text-[var(--text-muted-color)] py-4">${message}</p>`;
-            return; // Stop execution
-        }
-        
         sortedList.slice(0, 5).forEach((batch, index) => {
             const scoreValue = mode === 'lowest' ? fmt(batch.pctLow * 100, 1) + '%' : fmt(batch.overallAvg, 2);
             // NEW: Added context for total feedbacks
@@ -1824,63 +1770,34 @@
         });
     }
 
-    // *** RENAMED: setupRankToggles (plural) ***
-    function setupRankToggles() {
-        // --- Toggle 1: Sort (Lowest/Best) ---
+    function setupRankToggle() {
         const lowestBtn = document.getElementById('rank-toggle-lowest');
         const bestBtn = document.getElementById('rank-toggle-best');
-        const sortBg = document.getElementById('rank-toggle-bg');
+        const bg = document.getElementById('rank-toggle-bg');
         
-        const setSortToggle = (mode) => {
+        const setToggle = (mode) => {
             if (mode === 'lowest') {
                 lowestBtn.classList.add('active');
                 bestBtn.classList.remove('active');
-                sortBg.style.transform = 'translateX(0%)';
-                sortBg.style.width = lowestBtn.offsetWidth + 'px';
+                bg.style.transform = 'translateX(0%)';
+                bg.style.width = lowestBtn.offsetWidth + 'px';
             } else {
                 lowestBtn.classList.remove('active');
                 bestBtn.classList.add('active');
-                sortBg.style.transform = `translateX(${lowestBtn.offsetWidth + 4}px)`; // 4px is gap
-                sortBg.style.width = bestBtn.offsetWidth + 'px';
+                bg.style.transform = `translateX(${lowestBtn.offsetWidth + 4}px)`; // 4px is gap
+                bg.style.width = bestBtn.offsetWidth + 'px';
             }
             currentRankMode = mode;
             renderRankedList(mode);
         }
         
-        lowestBtn.addEventListener('click', () => setSortToggle('lowest'));
-        bestBtn.addEventListener('click', () => setSortToggle('best'));
+        lowestBtn.addEventListener('click', () => setToggle('lowest'));
+        bestBtn.addEventListener('click', () => setToggle('best'));
         
-        // --- Toggle 2: Filter (All/Adjusted) ---
-        const allBtn = document.getElementById('rank-filter-all');
-        const adjustedBtn = document.getElementById('rank-filter-adjusted');
-        const filterBg = document.getElementById('rank-filter-bg');
-
-        const setFilterToggle = (mode) => {
-            if (mode === 'all') {
-                allBtn.classList.add('active');
-                adjustedBtn.classList.remove('active');
-                filterBg.style.transform = 'translateX(0%)';
-                filterBg.style.width = allBtn.offsetWidth + 'px';
-            } else {
-                allBtn.classList.remove('active');
-                adjustedBtn.classList.add('active');
-                filterBg.style.transform = `translateX(${allBtn.offsetWidth + 4}px)`; // 4px is gap
-                filterBg.style.width = adjustedBtn.offsetWidth + 'px';
-            }
-            currentRankFilter = mode;
-            renderRankedList(currentRankMode); // Re-render list with new filter
-        }
-
-        allBtn.addEventListener('click', () => setFilterToggle('all'));
-        adjustedBtn.addEventListener('click', () => setFilterToggle('adjusted'));
-
-        // Use timeout to ensure offsetWidth is correct for both toggles
+        // Use timeout to ensure offsetWidth is correct
         setTimeout(() => {
             if (lowestBtn && lowestBtn.offsetWidth > 0) { // Add check
-                 sortBg.style.width = lowestBtn.offsetWidth + 'px';
-            }
-            if (allBtn && allBtn.offsetWidth > 0) { // Add check
-                 filterBg.style.width = allBtn.offsetWidth + 'px';
+                 bg.style.width = lowestBtn.offsetWidth + 'px';
             }
         }, 100);
     }
@@ -2547,19 +2464,10 @@
                                     if (label) label += ': ';
                                     let val = context.parsed.y;
                                     if (val !== null) {
-                                        // *** FIX: More robust decimal place logic ***
-                                        
-                                        let decimals = 0; // Default (for counts)
-                                        
-                                        if (context.dataset.label.toLowerCase().includes('avg')) {
-                                            decimals = 2; // 2 decimal places for "Average Rating"
-                                        } else if (context.dataset.label.includes('%')) {
-                                            decimals = 1; // 1 decimal place for percentages
-                                        }
-
+                                        // Use 'toFixed(1)' for avg rating, but not for others
+                                        // *** FIX: Use toLowerCase() to correctly find "avg" ***
+                                        let decimals = context.dataset.label.toLowerCase().includes('avg') ? 1 : (context.dataset.label.includes('%') ? 1 : 0);
                                         label += val.toFixed(decimals);
-                                        // *** END OF FIX ***
-
                                         if (context.dataset.label.includes('%')) label += '%';
                                     }
                                     return label;
@@ -2650,14 +2558,22 @@
         if (text) {
             footerContent.innerHTML = text;
             pageFooter.classList.remove('opacity-0', '-translate-y-4');
-            pageFooter.classList.add('py-8'); // *** ADD PADDING ***
-            mainContentEl.classList.add('pb-8'); // *** ADD PADDING TO MAIN CONTENT ***
         } else {
             pageFooter.classList.add('opacity-0', '-translate-y-4');
-            pageFooter.classList.remove('py-8'); // *** REMOVE PADDING ***
-            mainContentEl.classList.remove('pb-8'); // *** REMOVE PADDING FROM MAIN CONTENT ***
-            
             // Use a timeout to clear text after fade out
             setTimeout(() => { footerContent.innerHTML = ''; }, 500);
         }
     }
+
+    function showToast() {
+        const toast = document.getElementById("toast-notification");
+        if (toast) {
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 4000);
+        }
+    }
+  </script>
+</body>
+</html>
